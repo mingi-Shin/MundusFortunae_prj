@@ -1,0 +1,6 @@
+@charset "UTF-8";
+
+/* 헤더 공통 스타일 */
+.al-navbar { box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+/* 모바일에서 dropdown 아이템이 겹치지 않도록 여백 */
+.al-user-dropdown .dropdown-menu { min-width: 12rem; }

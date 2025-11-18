@@ -1,0 +1,109 @@
+<xmlns:sec="http://www.thymeleaf.org/extra/spring-security">
+
+<link rel="stylesheet" th:href="@{/header/css/header.css}" />
+
+<div class="header" th:fragment="header">
+	<nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top al-navbar">
+	  <div class="container-fluid">
+	    <!-- Brand -->
+	    <a class="navbar-brand fw-bold" th:href="@{/}">MundusFortunae</a>
+	    
+	    <!-- 이미지 주입 방법 -->
+	    <!-- <img th:src="@{/images/logo.png}" alt="문두스 포르투나이 로고" /> -->
+	
+	    <!-- Toggler -->
+	    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#alNavbar"
+	            aria-controls="alNavbar" aria-expanded="false" aria-label="Toggle navigation">
+	      <span class="navbar-toggler-icon"></span>
+	    </button>
+	
+	    <!-- Collapsible content -->
+	    <div class="collapse navbar-collapse" id="alNavbar">
+	      <!-- Left: Nav menus -->
+	      <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 60vh;">
+	        <li class="nav-item">
+	          <a class="nav-link" th:href="@{/}">Home</a>
+	        </li>
+	
+	        <li class="nav-item">
+	          <a class="nav-link" th:href="@{/about}">소개</a>
+	        </li>
+	
+	        <!-- 학습하기 -->
+	        <li class="nav-item dropdown">
+	          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">학습하기</a>
+	          <ul class="dropdown-menu">
+	            <li><a class="dropdown-item" th:href="@{#}">게임참여</a></li>
+	            <div class="admin-header-option" sec:authorize="hasRole('ROLE_ADMIN')">
+		            <li><hr class="dropdown-divider"></li>
+		            <li><a class="dropdown-item" th:href="@{/admin/socketChat}">관리자: WebSocket</a></li>
+		            <li><a class="dropdown-item" th:href="@{/admin/aiCoach}">관리자: AI-Chat</a></li>
+	            </div>
+	          </ul>
+	        </li>
+	
+	        <!-- 커뮤니티 -->
+	        <li class="nav-item dropdown">
+	          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">커뮤니티</a>
+	          <ul class="dropdown-menu">
+	            <li>
+	              <a class="dropdown-item d-flex align-items-center justify-content-between" th:href="@{/board/notices}">
+	                공지사항 <span class="badge bg-secondary ms-2">1</span>
+	              </a>
+	            </li>
+	            <li><hr class="dropdown-divider"></li>
+	            <li><a class="dropdown-item" th:href="@{/board/dailyQuizzes}">데일리 퀴즈</a></li>
+	            <li><hr class="dropdown-divider"></li>
+	            <li>
+	              <a class="dropdown-item d-flex align-items-center justify-content-between" th:href="@{/board/communities}">
+	                자유게시판 <span class="badge bg-secondary ms-2">5</span>
+	              </a>
+	            </li>
+	          </ul>
+	        </li>
+	
+	        <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+	      </ul>
+	
+	      <!-- Middle/Right: Search (모바일에선 줄바꿈되어 아래로 내려감) -->
+	      <form class="d-flex mb-2 mb-lg-0" role="search" th:action="@{/api/boards/search}" method="get">
+	        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="q">
+	        <button class="btn btn-outline-success" type="submit">Search</button>
+	      </form>
+	
+	      <!-- Right: Auth area -->
+	      <div class="ms-lg-2 mt-2 mt-lg-0 al-user-dropdown">
+	        <!-- 비로그인 상태 -->
+	        <div sec:authorize="isAnonymous()">
+	          <a class="btn btn-outline-secondary w-100" th:href="@{/login}">로그인</a>
+	        </div>
+	
+	        <!-- 로그인 상태 -->
+	        <div sec:authorize="isAuthenticated()">
+	        	
+	          <div class="dropdown">
+	            <a class="btn btn-outline-secondary dropdown-toggle w-100" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+	            	<span th:text="${#authentication.principal.username}"></span>
+	            </a>
+	            <ul class="dropdown-menu dropdown-menu-end">
+	              <li class="dropdown-item text-muted small mb-1">
+	                <i class="bi bi-person-circle me-1"></i>
+	                <!-- #authentication == SecurityContextHolder.getContext().getAuthentication() -->
+	                <span th:text=${#authentication.principal.authorities}></span>
+	              </li>
+	              <li><hr class="dropdown-divider"></li>
+	              <li><a class="dropdown-item" th:href="@{/user/mypage}">마이페이지</a></li>
+	              <li><hr class="dropdown-divider"></li>
+	              <li>
+	                <button class="dropdown-item text-danger" id="al-logout-btn" type="button">
+	                  <i class="bi bi-box-arrow-right me-1"></i> 로그아웃
+	                </button>
+	              </li>
+	            </ul>
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+	</nav>
+</div>
