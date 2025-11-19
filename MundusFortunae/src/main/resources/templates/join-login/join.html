@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title th:text="${title} ?: 'Template'"></title>
+
+	<!-- 공통 CSS -->
+  <th:block th:replace="~{fragments/external :: bootstrap_cdn_block}"></th:block>
+  <link rel="stylesheet" th:href="@{/header-footer/css/header.css}" />
+  <link rel="stylesheet" th:href="@{/header-footer/css/footer.css}" />
+  <link rel="stylesheet" th:href="@{/home/css/home.css}">
+	
+	<link rel="stylesheet" th:href="@{/join-login/css/join.css}">
+	
+	<script th:src="@{/join-login/js/join.js}"></script>
+	
+</head>
+<body>
+	<!-- 공통 헤더 -->
+	<div th:replace="~{fragments/header :: header}"></div>
+
+	<div class="d-flex justify-content-center main-content">
+		<div class="card p-4 mt-5">
+			<main>
+				<h4 class="text-center mb-4">회원가입</h4>	
+				
+				<form th:action="@{/join}" method="post">
+		
+			    <!-- 아이디 -->
+			    <div class="input-group flex-column form-section">
+			   		<label for="user-id " class="form-label">아이디</label>
+			   		<div class="d-flex">
+				      <input type="text" class="form-control" name="username" id="user-id" placeholder="4~15자 이내(알파벳 소문자, 숫자)" >
+				      <button type="button" class="btn btn-outline-secondary chk-dupl-btn" id="id-dupl-btn">중복확인</button>
+			   		</div>
+			    	<div class="ms-1 small text-danger alert-danger" id="id-alert-msg" style="display: none"><i class="bi bi-exclamation-circle me-1"></i>아이디는 최소 4자 이상, 최대 15자 이하의 알파벳 소문자, 숫자 조합으로 입력해주세요.</div>
+			    </div>
+			
+			    <!-- 비밀번호 -->
+			    <div class="input-group flex-column form-section">
+			    	<label for="user-password " class="form-label">비밀번호 </label>
+			    	<div class="d-flex">
+				      <input type="password" class="form-control" name="password" id="user-password" placeholder="6~15자 이내(알파벳 대소문자, 숫자, 특수문자 조합)">
+			    	</div >
+			    	<div class="alert-danger" id="pwd-alert-msg" style="display: none">
+				    	<div class="ms-1 small text-danger" ><i class="bi bi-exclamation-circle me-1"></i>비밀번호는 최소 6자 이상, 15자리 이하로 입력하세요.</div>
+				    	<div class="ms-1 small text-danger" ><i class="bi bi-exclamation-circle me-1"></i>알파벳, 숫자, 특수문자를 조합한 비밀번호를 입력하세요.</div>
+			    	</div>
+			    </div>
+			
+			    <!-- 이메일 -->
+			    <div class="input-group flex-column form-section">
+			    	<label for="user-email " class="form-label">이메일 </label>
+			    	<div class="d-flex">
+				      <input type="input" class="form-control" name="email" id="user-email" placeholder="example@domain.com">
+				      <button type="button" class="btn btn-outline-secondary chk-dupl-btn" id="email-dupl-btn">중복확인</button>
+	<!--			      <button type="button" class="btn btn-outline-secondary" id="email-send-btn">인증코드 전송</button>-->
+			    	</div>
+			    	<div class="ms-1 small text-danger alert-danger" id="email-alert-msg" style="display: none"><i class="bi bi-exclamation-circle me-1"></i>유효한 이메일 주소를 입력해주세요.</div>
+			    </div>
+	<!--		
+			     인증번호 
+			    <div class="input-group flex-column form-section">
+			    	<label for="email-code " class="form-label">인증번호</label>
+			      <div class="d-flex">
+				      <input type="text" class="form-control" id="email-code" placeholder="인증번호 입력">
+				      <button type="button" class="btn btn-outline-success" id="email-confirm-btn">확인</button>
+			      </div>
+			    </div>
+	-->
+			    <!-- 닉네임 -->
+			    <div class="input-group flex-column form-section">
+			    	<label for="nickname " class="form-label">닉네임</label>
+			    	<div class="d-flex">
+				      <input type="text" class="form-control" name="nickname" id="nickname" placeholder="2~8자 이내(알파벳 대소문자, 한글, 숫자)">
+				      <button type="button" class="btn btn-outline-secondary chk-dupl-btn" id="nickname-dupl-btn">중복확인</button>
+			    	</div>
+			    	<div class="ms-1 small text-danger alert-danger" id="nickname-alert-msg" style="display: none"><i class="bi bi-exclamation-circle me-1"></i>닉네임은 최소 2자 이상, 8자 이하의 영문, 한글, 숫자만 입력 가능합니다.</div>
+	
+			    </div>
+			
+			    <!-- 이메일 구독 옵션 -->
+			    <div class="mt-5">
+			    	<div class="d-flex justify-content-between mt-1 w-100">	
+			    		<div>
+			    			이메일 수신 동의 
+			    		</div>
+					    <div class="form-check form-switch">
+							  <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault" name="emailSubscribed">
+							</div>
+			    	</div>
+			    	<small class="text-muted">이메일 및 카카오톡을 통한 광고성 정보 수신에 동의합니다. <br>(학습 알림, 퀴즈 업데이트, 이벤트 소식 등 포함)</small>
+			    </div>
+			    
+			    <!-- 약관동의 -->
+			    <div class="mt-5">
+			    	<div>약관동의</div>
+			    	<div class="d-flex flex-column mt-3"> <!-- 전체  -->
+			    	
+			    		<div class="form-check mt-2 mb-2"> <!-- 전체 -->
+			    			<input class="form-check-input checkbox-input" type="checkbox" id="agreeAll">
+			    			<label class="form-check-label" for="agreeAll">
+			    				<span class="fw-bold">전체동의</span>
+			    				<small class="text-muted">전체동의를 선택하시면 아래의 모든 약관에 동의하게 됩니다.</small>
+			    			</label>
+			    		</div>
+			    		
+			    		<hr class="flex-grow-1 border-top border-secondary opacity-40">
+			    		
+			    		<div class="my-3">
+			    			<div>
+			    				<input class="form-check-input me-1 checkbox-input" type="checkbox" id="agreeTotalService">
+			    					<label class="form-check-label" for="agreeTotalService"><span>통합 서비스 이용약관</span></label> 
+			    					<a target="_blank" th:href="@{/legal/terms}" class="">보기</a>
+			    			</div>
+			    			<div class="mt-1">
+			    				<input class="form-check-input me-1 checkbox-input" type="checkbox" id="privacPolicy">
+			    					<label class="form-check-label" for="privacPolicy"><span>개인정보 처리방침</span></label> 
+			    					<a target="_blank" th:href="@{/legal/privacy}" class="">보기</a>
+			    			</div>
+			    		
+			    			<div></div>
+			    		</div>
+			    	</div>
+			    </div>
+			
+			    <!-- 버튼 -->
+			    <div class="mt-3">
+			      <button type="button" class="btn btn-primary w-100" id="join-btn" disabled>회원가입</button>
+			    </div>
+	    	</form>
+
+			</main>
+		</div><!--card-->
+	</div><!--main-content-->
+  
+  <footer class="footer-content bg-light py-4 mt-5">
+    <div class="container text-center text-muted">
+      <p>&copy; 2024 MundusFortunae. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
+
+<!-- 
+주요 부트스트랩 클래스 정리:
+
+1. 레이아웃
+- d-flex: flexbox 레이아웃 사용
+- justify-content-between: 양쪽 끝 정렬
+- justify-content-center: 가운데 정렬
+- justify-content-around: 약간 중앙 균등 정렬
+- justify-content-evenly: 전체적 균등 정렬
+- justify-content-start: 왼쪽 정렬
+- justify-content-end: 오른쪽 정렬
+- align-items-center: 세로 중앙 정렬
+- align-items-start: 세로 시작점 정렬
+- flex-grow-1: 남은 공간 모두 차지
+
+2. 간격
+- p-3: 패딩 (padding) 적용
+- py-3: 위아래 패딩
+- mb-2: 아래 마진 (margin-bottom)
+- mb-4: 아래 마진 (더 큰 값)
+- my-5: 위아래 마진
+
+3. 테두리 및 모양
+- border-bottom: 아래 테두리
+- rounded: 둥근 모서리
+- shadow-sm: 작은 그림자 효과
+
+4. 텍스트
+- fw-bold: 글씨 굵게
+- text-muted: 회색 텍스트
+- text-end: 오른쪽 정렬
+- text-dark: 어두운 글씨색
+- small: 작은 글씨
+
+5. 색상
+- bg-primary: 파란색 배경
+- bg-warning: 노란색 배경
+- notice-bg: 회색 배경 (커스텀)
+
+6. 컴포넌트
+- badge: 배지 스타일
+- card: 카드 컨테이너
+- card-body: 카드 내용
+- pagination: 페이지네이션
+- page-item: 페이지 항목
+- page-link: 페이지 링크
+- input-group: 입력 필드 그룹
+- form-control: 입력 필드
+- btn: 버튼
+- btn-outline-secondary: 회색 테두리 버튼
+
+7. 상태
+- active: 활성화 상태
+- disabled: 비활성화 상태
+- hover: 마우스 오버 효과 (CSS)
+-->
+
+<!-- 
+=====================================================
+  Thymeleaf 자주 사용하는 문법 정리
+=====================================================
+
+1. 변수 표현식
+   - ${변수명} : 일반 변수 출력
+   - ${user.name} : 객체 속성 접근
+   - ${list[0]} : 리스트 인덱스 접근
+   - ${map['key']} : 맵 값 접근
+
+2. 선택 변수 표현식
+   - *{property} : 선택된 객체의 속성
+   예) <div th:object="${user}">
+         <span th:text="*{name}"></span>
+       </div>
+
+3. URL 표현식
+   - @{/path} : 컨텍스트 경로 자동 추가
+   - @{/user/{id}(id=${user.id})} : 경로 변수
+   - @{/search(q=${query},page=${page})} : 쿼리 파라미터
+
+4. 메시지 표현식
+   - #{message.key} : properties 파일의 메시지
+
+5. 조건문
+   - th:if="${condition}" : 조건이 true일 때 렌더링
+   - th:unless="${condition}" : 조건이 false일 때 렌더링
+   - th:switch="${value}" / th:case="값" : switch 문
+
+6. 반복문
+   - th:each="item : ${list}" : 리스트 반복
+   - th:each="item, stat : ${list}" : 상태 변수 포함
+     * stat.index : 0부터 시작하는 인덱스
+     * stat.count : 1부터 시작하는 카운트
+     * stat.size : 전체 크기
+     * stat.first : 첫 번째 여부
+     * stat.last : 마지막 여부
+     * stat.odd / stat.even : 홀수/짝수 여부
+
+7. 속성 설정
+   - th:text="${value}" : 텍스트 설정 (HTML 이스케이프)
+   - th:utext="${value}" : HTML 태그 포함 텍스트
+   - th:href="@{/path}" : href 속성 설정
+   - th:src="@{/images/logo.png}" : src 속성 설정
+   - th:value="${value}" : value 속성 설정
+   - th:attr="data-id=${id}, data-name=${name}" : 여러 속성 설정
+
+8. 클래스 및 스타일
+   - th:class="${condition} ? 'active' : ''" : 조건부 클래스
+   - th:classappend="${condition} ? 'active'" : 클래스 추가
+   - th:style="'color:' + ${color}" : 인라인 스타일
+
+9. Fragment (조각)
+   - th:fragment="이름" : 조각 정의
+   - th:replace="~{파일명 :: 조각명}" : 조각으로 대체
+   - th:insert="~{파일명 :: 조각명}" : 조각 삽입
+   - th:block : 실제 태그 없이 Thymeleaf 명령만 사용
+
+10. 유틸리티 객체
+    - #temporals : 날짜/시간 포맷팅
+      ${#temporals.format(date, 'yyyy-MM-dd')}
+    - #strings : 문자열 처리
+      ${#strings.isEmpty(str)}
+      ${#strings.substring(str, 0, 10)}
+    - #numbers : 숫자 포맷팅
+      ${#numbers.formatDecimal(num, 1, 2)}
+    - #lists : 리스트 처리
+      ${#lists.size(list)}
+      ${#lists.isEmpty(list)}
+    - #arrays : 배열 처리
+    - #maps : 맵 처리
+
+11. 조건 연산자
+    - ${condition} ? 'yes' : 'no' : 삼항 연산자
+    - ${value} ?: 'default' : Elvis 연산자 (null이면 기본값)
+
+12. Spring Security 통합
+    - sec:authorize="isAuthenticated()" : 인증 여부
+    - sec:authorize="hasRole('ADMIN')" : 권한 확인
+    - ${#authentication.principal.username} : 사용자명
+    - ${#authentication.principal.authorities} : 권한 목록
+
+13. Form 관련
+    - th:object="${formObject}" : 폼 객체 바인딩
+    - th:field="*{속성명}" : 입력 필드 바인딩 (id, name, value 자동 설정)
+    - th:errors="*{속성명}" : 유효성 검사 오류 표시
+
+14. 인라인 표현식
+    - [[${변수}]] : 텍스트 인라인
+    - [(${변수})] : 속성 인라인
+    - /*[[${변수}]]*/ : JavaScript 인라인
+
+15. 주석
+    - <!-- 일반 HTML 주석 (렌더링됨) -->
+    - <!--/* Thymeleaf 주석 (렌더링 안됨) */-->
+<!-- 
+예제:
+<div th:if="${not #lists.isEmpty(postList)}">
+  <ul>
+    <li th:each="post, stat : ${postList}" 
+        th:class="${stat.odd} ? 'odd' : 'even'">
+      <a th:href="@{/post/{id}(id=${post.id})}" 
+         th:text="${post.title}">제목</a>
+      <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}"></span>
+    </li>
+  </ul>
+</div>
+
+-->

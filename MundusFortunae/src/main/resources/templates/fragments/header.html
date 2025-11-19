@@ -1,15 +1,12 @@
-<xmlns:sec="http://www.thymeleaf.org/extra/spring-security">
-
-<link rel="stylesheet" th:href="@{/header/css/header.css}" />
-
-<div class="header" th:fragment="header">
+<header class="site-header" th:fragment="header">
 	<nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top al-navbar">
-	  <div class="container-fluid">
+		<!-- container-fluid : 부모의 가로폭을 100%로 꽉 채워라, 모바일이든 컴퓨터든 -->
+	  <div class="container-fluid"> 
 	    <!-- Brand -->
-	    <a class="navbar-brand fw-bold" th:href="@{/}">MundusFortunae</a>
-	    
-	    <!-- 이미지 주입 방법 -->
-	    <!-- <img th:src="@{/images/logo.png}" alt="문두스 포르투나이 로고" /> -->
+	    <a class="navbar-brand fw-bold" th:href="@{/}">
+		    <img alt="로고" th:src="@{/common_imgs/mundus_fortunae_logo.webp}" style="width: 100%; max-width:50px; height: auto;">
+		    MundusFortunae
+	    </a>
 	
 	    <!-- Toggler -->
 	    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#alNavbar"
@@ -21,9 +18,6 @@
 	    <div class="collapse navbar-collapse" id="alNavbar">
 	      <!-- Left: Nav menus -->
 	      <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 60vh;">
-	        <li class="nav-item">
-	          <a class="nav-link" th:href="@{/}">Home</a>
-	        </li>
 	
 	        <li class="nav-item">
 	          <a class="nav-link" th:href="@{/about}">소개</a>
@@ -31,9 +25,9 @@
 	
 	        <!-- 학습하기 -->
 	        <li class="nav-item dropdown">
-	          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">학습하기</a>
+	          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">게임참여</a>
 	          <ul class="dropdown-menu">
-	            <li><a class="dropdown-item" th:href="@{#}">게임참여</a></li>
+	            <li><a class="dropdown-item" th:href="@{#}"> <span class="text-danger small"> [mini] </span>운명의 주사위</a></li>
 	            <div class="admin-header-option" sec:authorize="hasRole('ROLE_ADMIN')">
 		            <li><hr class="dropdown-divider"></li>
 		            <li><a class="dropdown-item" th:href="@{/admin/socketChat}">관리자: WebSocket</a></li>
@@ -89,8 +83,7 @@
 	              <li class="dropdown-item text-muted small mb-1">
 	                <i class="bi bi-person-circle me-1"></i>
 	                <!-- #authentication == SecurityContextHolder.getContext().getAuthentication() -->
-	                <span th:text=${#authentication.principal.authorities}></span>
-	              </li>
+									<span th:text="${#authentication.principal.authorities.size() == 0} ? '로컬운영자' : ${#authentication.principal.authorities}"></span>
 	              <li><hr class="dropdown-divider"></li>
 	              <li><a class="dropdown-item" th:href="@{/user/mypage}">마이페이지</a></li>
 	              <li><hr class="dropdown-divider"></li>
@@ -106,4 +99,4 @@
 	    </div>
 	  </div>
 	</nav>
-</div>
+</header>

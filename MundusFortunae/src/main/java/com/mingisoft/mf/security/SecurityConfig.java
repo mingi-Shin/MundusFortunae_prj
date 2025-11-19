@@ -1,0 +1,83 @@
+package com.mingisoft.mf.security;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity(debug=true) //개발중 디버깅 
+public class SecurityConfig {
+
+  
+  @Bean
+  public BCryptPasswordEncoder bCryptPasswordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
+  
+  @Bean
+  public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+    //로그인 검증 설정 빌더의 객체 생성  
+    AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+    //객체를 커스터마이징 
+//    authenticationManagerBuilder
+      //아이디로 로그인 찾는 방법은 이거 써라 
+//      .userDetailsService(null)
+      //비밀번호 비교는 이 인코더를 써라 
+//      .passwordEncoder(bCryptPasswordEncoder());
+    
+    return authenticationManagerBuilder.build();
+    //자세한 설명 : https://hushed-scallop-89c.notion.site/SecurityConfig-2b0e2244683d800897d9d822727a6b0e
+  }
+  
+  
+  @Bean
+  public SecurityFilterChain customSecurityFilterChain(HttpSecurity http) 
+    throws Exception {
+    
+    // 시큐리티 6.x 최신버전 방법 : si에서는 너무 최신임
+    //MvcRequestMatcher.Builder mvcMatcherBuilder = new MvcRequestMatcher.Builder(introspector);
+    
+    // 시큐리티 5.x 버전 방법 : 레거시 코드에 어울림
+    //AntPathRequestMatcher.antMatcher
+    
+    //but 이제는 이런 “클래스 직접 생성해서 넘기는 방식” 대신,
+    // HttpSecurity DSL 안에 있는 requestMatchers(...) 메서드로 해결하라는 방향으로 가고 있어.
+    
+    http
+      .csrf(csrf -> csrf.disable()) //jwt를 SPA환경에서 쓰면 (header), CSRF토큰 사용할 필요 없음
+      .authorizeHttpRequests(auth -> auth
+        //극초반에는 모두 오픈하고 개발
+        .requestMatchers("/**").permitAll()
+        
+        /**
+         * hasRole은 내부적으로 ROLE_을 붙여서 비교한다. SecurityContextHolder에 ROLE_이 붙여 있어야 매치 가능 
+         */
+        // --  좁은 경로 → 넓은 경로 순서 -- 
+          // --- 정적 리소스
+          
+      )
+      .exceptionHandling(exception -> exception
+        // 비로그인 접근 시 → 로그인 페이지로
+        .authenticationEntryPoint((req, res, ex) -> res.sendRedirect(req.getContextPath() + "/login"))
+        // 로그인은 했지만 권한이 부족할 때
+        .accessDeniedHandler((req, res, ex) -> res.sendRedirect(req.getContextPath() + "/error/403"))
+      )
+      .httpBasic(basic -> basic.disable()) //HTTP Basic 인증필터 추가: 브라우저의 인증 팝업 창이나 API 클라이언트(Postman, curl 등)를 통해 인증이 가능
+      .formLogin(form -> form.disable())
+      .logout(logout -> logout.disable())
+      //아래는 JWT작업 
+      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); //세션사용안함, 
+      //jwt용 LoginFilter 생성
+    
+      //필터 등록 (Jwtfilter -> loginFilter)
+    
+    return  http.build();
+  }
+
+}

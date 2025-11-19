@@ -1,5 +1,13 @@
 @charset "UTF-8";
 
+.site-header {
+  max-width: 80%;
+  margin: 0 auto;   /* 가운데 정렬 */
+  background: #fff;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
 /* 헤더 공통 스타일 */
 .al-navbar { box-shadow: 0 4px 12px rgba(0,0,0,.06); }
 /* 모바일에서 dropdown 아이템이 겹치지 않도록 여백 */

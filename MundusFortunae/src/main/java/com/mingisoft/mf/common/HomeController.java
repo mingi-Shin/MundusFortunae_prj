@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
@@ -13,10 +14,18 @@ public class HomeController {
 
   Logger logger = LoggerFactory.getLogger(HomeController.class);
   
+  private final String title;
+  
+  public HomeController() {
+    this.title = "MundusFortunae - All That Destiny";
+  }
+  
   @GetMapping("/")
-  public String mainPage() { //@AuthenticationPrincipal CustomUser userInfo
+  public String mainPage(Model model) { //@AuthenticationPrincipal CustomUser userInfo
     
     logger.info("메인페이지 요청");
+    
+    model.addAttribute("title", title);
     
     /**
        if (userInfo != null) {
@@ -41,6 +50,39 @@ public class HomeController {
         model.addAttribute("noticeList", noticeList);
      */
     
-    return "mainPage";
+    return "index";
   }
+  
+  /**
+   * 로그인 폼 페이지 
+   */
+  @GetMapping("/login")
+  public String getLoginForm(Model model) {
+    
+    model.addAttribute("title", title);
+    return "join-login/login";
+  }
+  
+  /**
+   * 회원가입 폼 페이지 
+   */
+  @GetMapping("/join")
+  public String getJoinForm(Model model) {
+    model.addAttribute("title", title);
+    
+    return "join-login/join";
+  }
+  
+  /**
+   * 약관 페이지 
+   */
+  @GetMapping("/legal/privacy")
+  public String getPrivacyPage() {
+    return "join-login/privacy";
+  }
+  @GetMapping("/legal/terms")
+  public String getTermsPage() {
+    return "join-login/terms";
+  }
+  
 }
