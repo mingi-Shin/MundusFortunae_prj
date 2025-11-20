@@ -40,15 +40,6 @@ public class SecurityConfig {
   public SecurityFilterChain customSecurityFilterChain(HttpSecurity http) 
     throws Exception {
     
-    // 시큐리티 6.x 최신버전 방법 : si에서는 너무 최신임
-    //MvcRequestMatcher.Builder mvcMatcherBuilder = new MvcRequestMatcher.Builder(introspector);
-    
-    // 시큐리티 5.x 버전 방법 : 레거시 코드에 어울림
-    //AntPathRequestMatcher.antMatcher
-    
-    //but 이제는 이런 “클래스 직접 생성해서 넘기는 방식” 대신,
-    // HttpSecurity DSL 안에 있는 requestMatchers(...) 메서드로 해결하라는 방향으로 가고 있어.
-    
     http
       .csrf(csrf -> csrf.disable()) //jwt를 SPA환경에서 쓰면 (header), CSRF토큰 사용할 필요 없음
       .authorizeHttpRequests(auth -> auth
