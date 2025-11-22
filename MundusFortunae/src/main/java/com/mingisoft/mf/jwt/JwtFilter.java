@@ -71,7 +71,7 @@ public class JwtFilter extends OncePerRequestFilter {
         logger.warn("유효하지 않은 JWT 토큰입니다. token={}", accessToken, e);
         // 서명 위조, 포맷 깨짐 등 → 401 or 그냥 익명 사용자 취급
         cookieUtil.clearAccessTokenCookie(response); //잘못된 ACCESS_TOKEN 삭제, 무한루프 방지
-        response.sendRedirect(request.getContextPath() + "/login"); 
+        response.sendRedirect(request.getContextPath() + "/login?invalid=true"); 
         //response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         return;
       }

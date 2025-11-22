@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class HomeController {
@@ -58,10 +59,12 @@ public class HomeController {
    * 로그인 폼 페이지 
    */
   @GetMapping({"/login", "/login/{username}"})
-  public String getLoginForm(@PathVariable(required = false)  String username, Model model) {
+  public String getLoginForm(@PathVariable(required = false)  String username, @RequestParam(required = false) String invalid, Model model) {
     
     model.addAttribute("title", title);
     model.addAttribute("newJoin", username);
+    model.addAttribute("invalid", invalid);
+    
     return "join-login/login";
   }
   
