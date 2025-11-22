@@ -54,7 +54,7 @@ public class JwtUtil {
    * @param tokenType
    * @return
    */
-  public String generateJwtToken(String tokenType, Long userSeq, String role, String loginId, String nickname, Long expiredMs) {
+  public String generateJwtToken(String tokenType, Long userSeq, String role, String nickname, Long expiredMs) {
     
     try {
       long now = System.currentTimeMillis();

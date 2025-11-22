@@ -10,19 +10,15 @@
   <style>
     
   </style>
-  <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('커뮤니티 페이지 준비완료');
-      
-      // 좋아요 버튼 이벤트 예시
-      document.querySelectorAll('.like-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          // AJAX 요청 처리
-          console.log('좋아요 클릭:', this.dataset.postId);
-        });
-      });
-    });
-  </script>
+  
+	<script th:inline="javascript">
+	  const contextPath = /*[[@{/}]]*/ '';
+		
+	  document.addEventListener('DOMContentLoaded', () => {
+			
+		});
+	  
+	</script>	
 </head>
 <body>
 	<!-- 공통 헤더 -->

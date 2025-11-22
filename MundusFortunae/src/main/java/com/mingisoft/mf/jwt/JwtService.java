@@ -17,4 +17,16 @@ refresh 무효화, 블랙리스트 등록 등
 @Service
 public class JwtService {
 
+  private final JwtRepository jwtRepository;
+  
+  public JwtService(JwtRepository jwtRepository) {
+    this.jwtRepository = jwtRepository;
+  }
+  
+  //refresh 토큰 save
+  public boolean saveNewRefreshToken(JwtEntity jwtEntity) {
+   
+    return false;
+  }
+  
 }

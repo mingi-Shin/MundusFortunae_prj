@@ -58,7 +58,6 @@ function joinUser(){
 			
 			// 1) 성공 (201 + success=true)
 			if (res.ok && data && data.success) {
-			  alert(data.message ?? "회원가입이 완료되었습니다.");
 			  // loginId로 로그인 페이지 이동 예시
 			  location.href = contextPath + 'login/' + loginId;
 			  return;

@@ -9,9 +9,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Data
+@Setter
+@Getter
 @Table(name="users")
 public class UserEntity {
 
@@ -57,6 +60,6 @@ public class UserEntity {
   private boolean loginStatus = false;       // DEFAULT FALSE
 
   @Column(name = "role", length = 100, nullable = false)
-  private String role = "USER";              // DEFAULT 'USER'
+  private String role = "ROLE_USER";              // DEFAULT 'USER'
 
 }

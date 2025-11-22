@@ -1,5 +1,7 @@
 package com.mingisoft.mf.user;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long>{
@@ -7,6 +9,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>{
   public boolean existsByLoginId(String loginId);
   public boolean existsByEmail(String email);
   public boolean existsByNickname(String nickname);
+  
+  public Optional<UserEntity> findByLoginId(String loginId);
   
   
   

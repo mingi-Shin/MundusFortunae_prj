@@ -14,12 +14,15 @@
   <link rel="stylesheet" th:href="@{/header-footer/css/footer.css}" />
   <link rel="stylesheet" th:href="@{/home/css/home.css}">
 
-	<script type="text/javascript">
-	document.addEventListener('DOMContentLoaded', () => {
-		console.log('준비완료');
+	<script th:inline="javascript">
+	  const contextPath = /*[[@{/}]]*/ '';
 		
-	});
-	</script>
+	  document.addEventListener('DOMContentLoaded', () => {
+			console.log('로그인 페이지');
+			
+		});
+	  
+	</script>	
 </head>
 <body>
 	<!-- 공통 헤더 -->

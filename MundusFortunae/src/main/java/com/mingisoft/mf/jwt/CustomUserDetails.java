@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.mingisoft.mf.security.UserDetailsServiceImpl;
 import com.mingisoft.mf.user.UserDto;
 
 import lombok.AllArgsConstructor;
@@ -24,6 +27,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CustomUserDetails implements UserDetails {
   
+  private final Logger logger = LoggerFactory.getLogger(CustomUserDetails.class);
   private UserDto userDto;
   
   /**
@@ -32,7 +36,7 @@ public class CustomUserDetails implements UserDetails {
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-    authorities.add(new SimpleGrantedAuthority("ROLE_" + userDto.getRole().toString()));
+    authorities.add(new SimpleGrantedAuthority(userDto.getRole()));
     
     return authorities;
   }

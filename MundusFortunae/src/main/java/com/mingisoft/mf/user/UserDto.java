@@ -71,9 +71,7 @@ public class UserDto {
     entity.setPassword(dto.getPassword());
     entity.setNickname(dto.getNickname());
     entity.setEmail(dto.getEmail());
-    entity.setAccountStatus(dto.getAccountStatus());
     entity.setEmailSubscribed(dto.isEmailSubscribed());
-    entity.setLoginStatus(dto.isLoginStatus());
 
     // 아래 필드들은 DB 또는 비즈니스 로직이 관리하는 영역이라 DTO에서 그대로 받지 않음
     // entity.setCreatedAt(dto.getCreatedAt());

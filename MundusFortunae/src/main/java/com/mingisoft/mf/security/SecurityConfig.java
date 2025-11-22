@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -11,7 +12,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mingisoft.mf.jwt.CookieUtil;
+import com.mingisoft.mf.jwt.CustomLoginFilter;
 import com.mingisoft.mf.jwt.JwtFilter;
 import com.mingisoft.mf.jwt.JwtService;
 import com.mingisoft.mf.jwt.JwtUtil;
@@ -23,36 +26,47 @@ public class SecurityConfig {
   private final JwtUtil jwtUtil;
   private final JwtService jwtService;
   private final CookieUtil cookieUtil;
+  private final ObjectMapper objectMapper;
   
-  public SecurityConfig(JwtUtil jwtUtil, JwtService jwtService, CookieUtil cookieUtil) {
+  public SecurityConfig(JwtUtil jwtUtil, ObjectMapper objectMapper, JwtService jwtService, CookieUtil cookieUtil) {
     this.jwtUtil = jwtUtil;
     this.jwtService = jwtService;
     this.cookieUtil = cookieUtil;
+    this.objectMapper = objectMapper;
   }
   
   @Bean
   public BCryptPasswordEncoder bCryptPasswordEncoder() {
     return new BCryptPasswordEncoder();
   }
-  
+/**  
   @Bean
   public AuthenticationManager authManager(HttpSecurity http) throws Exception {
     //로그인 검증 설정 빌더의 객체 생성  
     AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
     //객체를 커스터마이징 
-//    authenticationManagerBuilder
+    authenticationManagerBuilder
       //아이디로 로그인 찾는 방법은 이거 써라 
-//      .userDetailsService(null)
+      .userDetailsService(null)
       //비밀번호 비교는 이 인코더를 써라 
-//      .passwordEncoder(bCryptPasswordEncoder());
+      .passwordEncoder(bCryptPasswordEncoder()); //DaoAuthenticationProvider가 내부적으로: passwordEncoder.matches(rawPassword, encodedPasswordFromDB) 수행
     
     return authenticationManagerBuilder.build();
     //자세한 설명 : https://hushed-scallop-89c.notion.site/SecurityConfig-2b0e2244683d800897d9d822727a6b0e
   }
+*/
   
+  /**스프링부트 3 + 시큐리티 6에서는
+   * AuthenticationManager는 직접 빌더로 만들지 말고,
+   * Spring이 미리 구성한 걸 AuthenticationConfiguration에서 꺼내쓴다. 안그럼 충돌오류나 
+   */
+  @Bean
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+      return config.getAuthenticationManager(); // 부트가 만든 전역 Manager 참조만 함
+  }
   
   @Bean
-  public SecurityFilterChain customSecurityFilterChain(HttpSecurity http) 
+  public SecurityFilterChain customSecurityFilterChain(HttpSecurity http, AuthenticationManager authManager) 
     throws Exception {
     
     http
@@ -79,10 +93,15 @@ public class SecurityConfig {
       .logout(logout -> logout.disable())
       //아래는 JWT작업 
       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); //세션사용안함, 
-      //jwt용 LoginFilter 생성
+    
+      //jwt용 LoginFilter 생성 및 연동 
+      CustomLoginFilter customLoginFilter = new CustomLoginFilter(jwtUtil, cookieUtil, jwtService, objectMapper);
+      customLoginFilter.setAuthenticationManager(authManager); // 부모 클래스 필드에 주입, 내부에서 get으로 꺼내씀 -> 정석 
+      customLoginFilter.setFilterProcessesUrl("/api/auth/login");
     
       //필터 등록 (Jwtfilter -> loginFilter)
       http
+        .addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterBefore(new JwtFilter(jwtService, jwtUtil, cookieUtil), UsernamePasswordAuthenticationFilter.class);
     
     return  http.build();

@@ -4,9 +4,13 @@
  * - 서버에서 refresh 쿠키 정리 및 DB 비활성화 처리
  * - 완료 후 토큰 삭제 & 홈으로 이동
  */
-const logoutUrl = /*[[@{/api/auth/logout}]]*/ "";
+document.addEventListener("DOMContentLoaded", () => {
+	const logoutUrl = contextPath + "api/auth/logout";
+	
+	wireLogout();
+});
 
-(function wireLogout(){
+function wireLogout(){
   const btn = document.getElementById('al-logout-btn');
   if(!btn) return;
   btn.addEventListener('click', async () => {
@@ -25,7 +29,7 @@ const logoutUrl = /*[[@{/api/auth/logout}]]*/ "";
     	alert('로그아웃 실패 : ', e);
     } finally {
       localStorage.removeItem('accessToken');
-      location.href='${contextPath}/';
+      location.href = contextPath;
     }
   });
-})();
+}
