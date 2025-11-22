@@ -1,0 +1,51 @@
+핵심 개념
+
+사용자의 인증(Authentication) 정보 = Principal(사용자정보) + Credentials(인증정보) + Authorities(권한)
+
+SecurityContextHolder는 “현재 요청을 처리하는 스레드(작업자)”에게
+잠깐 동안 “인증정보(로그인 정보)”를 들려주는 메모지 같은 존재예요.
+->
+스프링 시큐리티는 각 요청이 들어올 때마다
+요청을 맡은 스레드(직원)에게 “개인 메모지(ThreadLocal)” 를 하나 줍니다.
+여기에 SecurityContextHolder가 인증정보(Authentication)를 써놓고,
+요청이 끝나면 메모지를 찢어버립니다. 
+그래서 요청마다 독립적인 SecurityContext 가 생기고,
+다른 요청과 절대 섞이지 않아요
+
+(매 요청이 끝날 때, 다른 필터가 SecurityContextHolder.clearContext()를 실행해서 정보가 삭제됨!
+
+---------------------------------------------------------
+SrpingContextHolder는 Spring Security의 전역 컨테이너, 현재 요청(Thread)용 SecurityContext 컨테이너. 내부적으로 ThreadLocal을 이용해 요청마다 따로 관리.
+(구조 : SecuritycContextHolder 안에 SecurityContext 안에 Authentication 안에 Principal )
+
+세션 기반 로그인은 유저정보를 SecurityContext를 HttpSession에 저장함. 이때 세션키 이름이 SPRING_SECURITY_CONTEXT 
+	-> jsp에서 ${SPRING_SECURITY_CONTEXT.authentication.principal.username} 로 볼러옴 
+
+JWT방식은 ThreadLocal에만 저장되고, 세션(HttpSession)에는 저장하지 않음. 따라서 ${SPRING_SECURITY_CONTEXT} 불러와봤자 null 
+	-> 즉, SecurityContextHolder 자체를 가져오는 게 아니라, “세션에 저장된 SecurityContext”를 가져오는 것
+	
+----------------------------------------------------------
+스프링 시큐리티는 기본적으로 UsernamePasswordAuthenticationFilter를 필터 체인에 등록
+하지만 JWT, json 등을 쓰지못하는 한계 발생. 그래서 extends해서 새로운 loginFilter를 만들어주고, SecurityConfig에서 이를 대체 
+
+-------------------------------------------------------------
+[Client]
+   ↓ (username, password)
+[UsernamePasswordAuthenticationFilter]
+   → UsernamePasswordAuthenticationToken 생성
+   → AuthenticationManager.authenticate(token)
+       ↓
+       [DaoAuthenticationProvider]
+           → loadUserByUsername() 호출
+           → UserDetails 로드 및 계정 상태 확인
+           → passwordEncoder.matches() 비교
+           → 성공 시 Authentication 반환
+           → 실패 시 AuthenticationException 발생
+       ↑
+   ← 성공 Authentication / 예외 발생
+   ↓
+   [성공] successfulAuthentication()
+         → SecurityContextHolder에 저장
+   [실패] unsuccessfulAuthentication()
+         → 예외 유형별 메시지 처리
+

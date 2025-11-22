@@ -9,11 +9,26 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.mingisoft.mf.jwt.CookieUtil;
+import com.mingisoft.mf.jwt.JwtFilter;
+import com.mingisoft.mf.jwt.JwtService;
+import com.mingisoft.mf.jwt.JwtUtil;
 
 @Configuration
 @EnableWebSecurity(debug=true) //개발중 디버깅 
 public class SecurityConfig {
 
+  private final JwtUtil jwtUtil;
+  private final JwtService jwtService;
+  private final CookieUtil cookieUtil;
+  
+  public SecurityConfig(JwtUtil jwtUtil, JwtService jwtService, CookieUtil cookieUtil) {
+    this.jwtUtil = jwtUtil;
+    this.jwtService = jwtService;
+    this.cookieUtil = cookieUtil;
+  }
   
   @Bean
   public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -67,6 +82,8 @@ public class SecurityConfig {
       //jwt용 LoginFilter 생성
     
       //필터 등록 (Jwtfilter -> loginFilter)
+      http
+        .addFilterBefore(new JwtFilter(jwtService, jwtUtil, cookieUtil), UsernamePasswordAuthenticationFilter.class);
     
     return  http.build();
   }

@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 public class CustomUserDetails implements UserDetails {
   
   private UserDto userDto;
-
+  
   /**
    * 유저 권한 꺼내기 
    */
