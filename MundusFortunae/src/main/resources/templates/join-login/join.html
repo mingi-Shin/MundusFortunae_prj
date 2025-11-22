@@ -18,6 +18,12 @@
 	
 	<script th:src="@{/join-login/js/join.js}"></script>
 	
+	<!-- th:inline="javascript" 필수! .js에 적용 불가! -->
+	<script th:inline="javascript">
+	  const contextPath = /*[[@{/}]]*/ '';
+	  
+	</script>	
+	
 </head>
 <body>
 	<!-- 공통 헤더 -->

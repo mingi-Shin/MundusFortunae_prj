@@ -1,0 +1,66 @@
+package com.mingisoft.mf.jwt;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.mingisoft.mf.user.UserDto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ *  (CustomUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+ *  로 꺼내올수 있게된다. 
+ *  꺼내서 쓸 값들을 여기서 get메서드로 만들어주면 된다.
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CustomUserDetails implements UserDetails {
+  
+  private UserDto userDto;
+
+  /**
+   * 유저 권한 꺼내기 
+   */
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_" + userDto.getRole().toString()));
+    
+    return authorities;
+  }
+
+  /**
+   * 시큐리티가 PasswordEncoder.matches() 자동 호출하여 비교
+   */
+  @Override
+  public String getPassword() {
+    return userDto.getPassword();
+  }
+
+  @Override
+  public String getUsername() {
+    return userDto.getLoginId();
+  }
+  
+  public String getEmail() {
+    return userDto.getEmail();
+  }
+  
+  public String getNickname() {
+    return userDto.getNickname();
+  }
+  
+  public Long getUserSeq() {
+    return userDto.getUserSeq();
+  }
+
+  
+}

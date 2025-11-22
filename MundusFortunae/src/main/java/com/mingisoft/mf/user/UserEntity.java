@@ -53,7 +53,7 @@ public class UserEntity {
   @Column(name = "email_subscribed", nullable = false)
   private boolean emailSubscribed = false;   // DEFAULT FALSE
 
-  @Column(name = "login_status", nullable = false)
+  @Column(name = "login_status")
   private boolean loginStatus = false;       // DEFAULT FALSE
 
   @Column(name = "role", length = 100, nullable = false)

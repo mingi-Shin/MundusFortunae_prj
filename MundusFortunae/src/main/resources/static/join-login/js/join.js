@@ -7,7 +7,7 @@ const validationState = {
 
 document.addEventListener("DOMContentLoaded", function(){
 	
-	console.log("회원가입창준비");
+	console.log(contextPath);
 	
 	joinUser(); //회원가입
 	
@@ -28,7 +28,7 @@ function joinUser(){
 	joinBtn.addEventListener("click", async () => {
 
 		//일단 먼저 아이디, 비밀번호, 이메일, 닉네임 유효값 검사
-		const isAllValid = Object.values(validationState).every(v => v === true);
+		const isAllValid = Object.values(validationState).every(v => v === true); //.every()
 		if (isAllValid) {
 		  console.log("모든 값이 true입니다!");
 		} else {
@@ -44,25 +44,40 @@ function joinUser(){
 		
 		
 		try {
-			const response = await fetch("/api/join", {
+			const res = await fetch(contextPath + "api/join", {
 				method : "POST",
 				headers : {"Content-Type": "application/json"},
 				body : JSON.stringify({loginId, password, nickname, email, emailSubscribed})
 			});
 			
-			const result = await response.json();
+			// 201이든 409든, 서버에서 body를 항상 보내니까 그냥 파싱
+			const data = await res.json().catch(() => null);
+
+			console.log("res:", res);
+			console.log("data:", data);
 			
-			if(result.success){
-				location.href = "/login/" + nickname;
-			} else if(!response.ok) {
-				console.error("회원가입 실패 상태코드:", response.status);
-				alert("회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.");
-				return;
-				//가입실패 
+			// 1) 성공 (201 + success=true)
+			if (res.ok && data && data.success) {
+			  alert(data.message ?? "회원가입이 완료되었습니다.");
+			  // loginId로 로그인 페이지 이동 예시
+			  location.href = contextPath + 'login/' + loginId;
+			  return;
 			}
+
+			// 2) 중복 (409 CONFLICT)
+			if (res.status === 409) {
+			  const msg = data.message; //ApiResponse 객체 필드명 
+			  alert(msg);
+			  return;
+			}
+			
+			// 3) 그 외 서버 에러
+			console.error("회원가입 실패 상태코드:", res.status, data);
+			alert("회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.");
+
 		} catch (err){
-			console.log(err);
-			//서버오류
+			console.error("통신 오류:", err);
+			alert("서버와의 통신 중 오류가 발생했습니다.");
 		}
 	});
 }
@@ -77,12 +92,12 @@ function duplicateUserBy(){
 		duplicateUser('loginId', loginId);
 	});
 	document.getElementById('nickname-dupl-btn').addEventListener('click', function(){
-		const loginId = document.getElementById('nickname').value;
-		duplicateUser('nickname', loginId);
+		const nickName = document.getElementById('nickname').value;
+		duplicateUser('nickname', nickName);
 	});
 	document.getElementById('email-dupl-btn').addEventListener('click', function(){
-		const loginId = document.getElementById('user-email').value;
-		duplicateUser('email', loginId);
+		const email = document.getElementById('user-email').value;
+		duplicateUser('email', email);
 	});
 	
 	//-------이메일 중복검사는 input이벤트로 처리 + debounce ------
@@ -108,36 +123,44 @@ async function duplicateUser(field, value){ //async는 함수선언 앞에
 		return;
 	}
 	
-	//특정 단어 불가 필터 
+	//특정 단어 불가 필터 && .some(콜백함수) : 배열의 요소를 하나씩 꺼내서 콜백함수에 넣어보고 && keyword = forbiddenWords 배열의 각 요소를 순서대로 가리키는 매개변수
 	function hasForbiddenWord(value) {
-	  const forbiddenWords = ['관리자', 'admin', '운영자', 'system'];
-	  return forbiddenWords.some(word => 
-	    value.toLowerCase().includes(word.toLowerCase())
+	  const forbiddenWords = ['관리자', 'admin', '운영자', 'system', '매니저', 'manager'];
+	  return forbiddenWords.some(keyword =>  
+	    value.toLowerCase().includes(keyword.toLowerCase())
 	  );
 	}
 	if (hasForbiddenWord(value)) {
-	  alert('특정 단어가 포함된 값은 사용할 수 없습니다.');
+	  alert(value + '는 사용하실 수 없습니다.');
 	  return;
 	}
 	
 	//전송 요청 
 	try {
 		const params = new URLSearchParams({ checkField : field, checkValue : value}); //"JS 객체 → 안전한 URL 쿼리 문자열” 변환기
-		const url = '/api/join/userInfo?' + params.toString(); 
+		
+		const url = contextPath + 'api/join/userInfo?' + params.toString(); 
 		
 		const response = await fetch(url, {
 			method : "GET",
-									// -- GET에서는 필요 없음 --
+			// -- GET에서는 필요 없음 --
 			//headers : {"Content-Type" : "application/json"},
 			//body : JSON.stringify({ "checkField": field,  "checkValue" : value}) //JS객체 -> JSON문자열로 변환 
 		});	
 		
-		const result = await response.json();
+		if (!response.ok) { // 200~299 아니면 여기로
+		  const errorText = await response.text();
+		  console.error("중복체크 실패", response.status, errorText);
+		  alert("중복체크 중 오류 발생: " + response.status);
+		  return;
+		}
 		
-		if(result.isDuplicated){
+		const isDuplicated = await response.json();
+		
+		if(isDuplicated){
 			alert(value + "는 사용하실 수 없습니다.");
 		}
-		if(!result.isDuplicated){
+		if(!isDuplicated){
 			const conf = confirm(value + "는 사용가능합니다.\n사용하시겠습니까?");
 			if(conf){
 				if(field == 'loginId'){
@@ -177,6 +200,7 @@ function chkInputExeption(){
 				if(!/^[a-z0-9]{4,15}$/.test(e.target.value)){
 					document.getElementById('id-alert-msg').style.display = 'block';
 					document.getElementById('id-dupl-btn').disabled = true;
+					validationState.id = false;
 				} else {
 					document.getElementById('id-alert-msg').style.display = 'none';
 					document.getElementById('id-dupl-btn').disabled = false;
@@ -195,6 +219,7 @@ function chkInputExeption(){
 				if(!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/.test(e.target.value)){
 					document.getElementById('email-alert-msg').style.display = 'block';
 					document.getElementById('email-dupl-btn').disabled = true;
+					validationState.email = false;
 				} else {
 					document.getElementById('email-alert-msg').style.display = 'none';
 					document.getElementById('email-dupl-btn').disabled = false;

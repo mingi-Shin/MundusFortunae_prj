@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title th:text="${title} ?: 'Template'"></title>
+  <title th:text="${title} ?: 'error'"></title>
 
 	<!-- 공통 CSS -->
   <th:block th:replace="~{fragments/external :: bootstrap_cdn_block}"></th:block>
@@ -16,7 +16,7 @@
 
 	<script type="text/javascript">
 	document.addEventListener('DOMContentLoaded', () => {
-		console.log('로그인 페이지');
+		console.log('준비완료');
 		
 	});
 	</script>
@@ -28,76 +28,24 @@
 	<div class="d-flex justify-content-center main-content">
 		<div class="card p-4 mt-5">
 			<main>
-				
-				<div class="d-flex justify-content-center " th:if="${newJoin}">
-	  			<h5 th:text="|${newJoin} 님, 가입을 환영합니다.|"></h5>
-				</div>
-				
-	    	<!-- Logo 와 사이트 소개란 -->
-	    	<div class="d-flex flex-column mb-4">
-	      	<div class="d-flex justify-content-center align-items-center mb-2 ">
-	      		<!--
-	      			모바일 적용 css 
-	      			width: 100% → 부모 div 폭에 맞춰서 줄어듦
-							max-width: 500px → 데스크톱에서 500px 이상은 안 커짐
-							height: auto → 비율 유지
-						-->
-	      		<img alt="로고" th:src="@{/common_imgs/adventure_img.webp}" style="width:100%; max-width: 500px; height:auto; max-height: 300px;" >
-	      	</div>
-	    		<h2 class="mt-6 text-center font-bold">미지의 세계로 접속중.. </h2>
-	   		</div>
-	   		
-	   		<!-- 소셜 로그인 -->
-	      <div class="text-center">
-	        <div class="mb-2">소셜 계정으로 간편 로그인</div>
-	        <div class="d-flex justify-content-center gap-5 mb-3">
-	          <button class="btn btn-outline-success w-25 me-1 " onclick="alert('소셜로그인 구현중')">N</button>
-	          <button class="btn btn-outline-danger w-25 mx-1" onclick="alert('소셜로그인 구현중')">G</button>
-	        </div>
-      	</div>
-      	
- 	      <!-- 경계선 -->
-				<div class="position-relative my-4">
-				  <div class="d-flex align-items-center justify-content-center">
-				    <hr class="flex-grow-1 border-top border-secondary opacity-40">
-				    <span class="mx-3 text-muted bg-white px-2">
-				      Mundus Fortunae 아이디로 로그인
-				    </span>
-				    <hr class="flex-grow-1 border-top border-secondary opacity-40">
-				  </div>
-				</div>
-      	
- 	     	<!-- 로그인 폼 -->
-	      <form th:action="@{#}" method="post" id="login-form">
-	        <div class="mb-3"> 
-	          <input type="text" class="form-control" id="login-id" name="username" placeholder="아이디" required>
-	        </div>
-	        <div class="mb-3">
-	          <input type="password" class="form-control" id="login-pwd" name="password" placeholder="비밀번호" required>
-	          <div id="login-error" class="text-danger mt-1" style="display: none;"></div>
-	        </div>
-	        
-	        <div class="d-flex justify-content-between mb-3">
-	          <div class="form-check">
-	            <input type="checkbox" class="form-check-input" id="keep-login">
-	            <label class="form-check-label" for="keep-login">로그인 유지</label>
-	          </div>
-	          <div class="form-check">
-	            <input type="checkbox" class="form-check-input" id="save-id">
-	            <label class="form-check-label" for="save-id">아이디 저장</label>
-	          </div>
-	        </div>
-	        
-	        <button type="button" id="login-process-btn" class="btn btn-primary w-100 mb-3">로그인</button>
-	      </form>
-			
-	      <!-- 아이디/비번 찾기 & 회원가입 -->
-	      <div class="d-flex justify-content-center mb-3 gap-2">
-	        <a th:href="@{#}" onclick="alert('비밀번호 변경 기능 구현중')">계정찾기</a>
-	        <span>|</span>
-	        <a th:href="@{/join}" id="join-page" onclick="joinPage()">회원가입</a>
-	      </div>
-			
+		    <h2 class="text-danger fw-bold mb-3">
+		      <i class="bi bi-shield-lock-fill"></i> 접근이 제한되었습니다 [403]
+		    </h2>
+		    
+		    <p class="text-secondary mb-4" style="font-size: 1.1rem;">
+		      요청하신 페이지에 접근할 권한이 없습니다.<br>
+		      로그인 상태를 확인하거나, 관리자에게 문의해주세요.
+		    </p>
+		    
+		    <div class="d-flex justify-content-center gap-3">
+		      <button class="btn btn-outline-primary" onclick="location.href='${pageContext.request.contextPath}/'">
+		        <i class="bi bi-house-door"></i> 홈으로
+		      </button>
+		      
+		      <button class="btn btn-primary" onclick="location.href='${pageContext.request.contextPath}/login'">
+		        <i class="bi bi-box-arrow-in-right"></i> 로그인 페이지로
+		      </button>
+		    </div>
 			</main>
 		</div>
 	</div>

@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class HomeController {
@@ -56,10 +57,11 @@ public class HomeController {
   /**
    * 로그인 폼 페이지 
    */
-  @GetMapping("/login")
-  public String getLoginForm(Model model) {
+  @GetMapping({"/login", "/login/{username}"})
+  public String getLoginForm(@PathVariable(required = false)  String username, Model model) {
     
     model.addAttribute("title", title);
+    model.addAttribute("newJoin", username);
     return "join-login/login";
   }
   
