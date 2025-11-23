@@ -58,9 +58,8 @@ public class JwtUtil {
     
     try {
       long now = System.currentTimeMillis();
-      long expiresAt = now + expiredMs;
       
-      logger.info("JWT 토큰 생성 - type: {}, 생성시간: {}, 소멸시간: {}", tokenType, now, expiresAt);
+      logger.info("JWT 토큰 생성 - type: {}, 생성시간: {}, 소멸시간: {}", tokenType, now, expiredMs);
       
       return Jwts.builder()
           .subject(String.valueOf(userSeq)) //고유필드명 
@@ -68,9 +67,9 @@ public class JwtUtil {
           .claim("nickname", nickname)
           .claim("role", role)
           .claim("issuedAtEpoch", now)
-          .claim("expiresAtEpoch", expiresAt)
+          .claim("expiresAtEpoch", expiredMs)
           .issuedAt(new Date(now))
-          .expiration(new Date(expiresAt))
+          .expiration(new Date(expiredMs))
           .issuer("mundusFortunae-auth")
           .signWith(secretKey)
           .compact();

@@ -134,10 +134,13 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
       
       // 2) JWT 생성 + 응답
       long nowEpoch = System.currentTimeMillis();
-      String accessToken = jwtUtil.generateJwtToken("access", customUser.getUserSeq(), customUser.getAuthorities().toString(), customUser.getNickname(), nowEpoch + 10 * 60 * 1000L); //10분
-      String refreshToken = jwtUtil.generateJwtToken("refresh", customUser.getUserSeq(), customUser.getAuthorities().toString(), customUser.getNickname(), nowEpoch + 30 * 24 * 60 * 60 * 1000L); //30일
+      long accessExpiresAt = nowEpoch + 10 * 60 * 1000L; //10분 
+      long refreshExpiresAt = nowEpoch + 30 * 24 * 60 * 60 * 1000L; //30일
+      String accessToken = jwtUtil.generateJwtToken("access", customUser.getUserSeq(), customUser.getAuthorities().toString(), customUser.getNickname(), accessExpiresAt);
+      String refreshToken = jwtUtil.generateJwtToken("refresh", customUser.getUserSeq(), customUser.getAuthorities().toString(), customUser.getNickname(), refreshExpiresAt); 
       
       // 3) DB저장 
+      jwtService.insertNewRefreshToken(customUser.getUserSeq(), refreshToken);
       
       // 4) access -> 응답헤더, access&refresh -> 쿠키 == 하이브리드!!
       response.setHeader("Authorization", "Bearer " + accessToken);

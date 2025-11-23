@@ -5,7 +5,6 @@
  * - 완료 후 토큰 삭제 & 홈으로 이동
  */
 document.addEventListener("DOMContentLoaded", () => {
-	const logoutUrl = contextPath + "api/auth/logout";
 	
 	wireLogout();
 });
@@ -13,20 +12,30 @@ document.addEventListener("DOMContentLoaded", () => {
 function wireLogout(){
   const btn = document.getElementById('al-logout-btn');
   if(!btn) return;
+	
+	const logoutUrl = contextPath + "api/auth/logout";
+	
   btn.addEventListener('click', async () => {
     const token = localStorage.getItem('accessToken');
+		console.log(token);
+		
     try {
-      await fetch( logoutUrl, {
+     const response = await fetch( logoutUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': 'Bearer ' + token } : {}) 
-          // ...{} 전개 연산자 꼭 필요 
-          //토큰이 존재하면? 삼항연산자
+          'Authorization': 'Bearer ' + token
         }
       });
+			
+			const result = await response.json();
+			
+			if(result.success){
+				alert(result.data.data);
+			}
     } catch (e) {
-    	alert('로그아웃 실패 : ', e);
+    	alert('로그아웃 실패 : ' + (e.message || e));
+			//Failed to execute 'json' on 'Response': Unexpected end of JSON input
     } finally {
       localStorage.removeItem('accessToken');
       location.href = contextPath;

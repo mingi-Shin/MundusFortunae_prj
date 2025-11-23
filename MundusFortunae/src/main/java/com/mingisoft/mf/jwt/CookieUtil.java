@@ -44,14 +44,19 @@ public class CookieUtil {
   }
   
   /**
-   * 잘못된 쿠키 지워버리기 
+   * ACCESS, Refresh 쿠키 지워버리기 
    */
-  public void clearAccessTokenCookie(HttpServletResponse response) {
+  public void clearAllTokenCookie(HttpServletResponse response) {
     jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("ACCESS_TOKEN", "");
+    jakarta.servlet.http.Cookie cookie2 = new jakarta.servlet.http.Cookie("REFRESH_TOKEN", "");
     cookie.setPath("/");     // 저장할 때 썼던 path와 똑같이 맞추기
+    cookie2.setPath("/");     // 저장할 때 썼던 path와 똑같이 맞추기
     cookie.setMaxAge(0);     // 브라우저에서 즉시 삭제
+    cookie2.setMaxAge(0);     // 브라우저에서 즉시 삭제
     response.addCookie(cookie);
+    response.addCookie(cookie2);
   }
+  
   
   
 }

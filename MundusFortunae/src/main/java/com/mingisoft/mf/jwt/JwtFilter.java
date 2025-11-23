@@ -1,6 +1,7 @@
 package com.mingisoft.mf.jwt;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,17 @@ public class JwtFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     logger.info("---------- JwtFilter 통과 시작 --------------");
     
-    String accessToken = resolveAccessToken(request); // header or 쿠키에서 access 토큰 꺼내기 
+    /**
+     * 로그인 페이지, 회원가입, 정적 리소스 등 JWT 검사 안 함
+     */
+    String uri = request.getRequestURI();
+    if (uri.startsWith("/login") || uri.startsWith("/resources")) {
+        filterChain.doFilter(request, response);
+        return;
+    }
+    
+    //일단 header or 쿠키에서 access 토큰 꺼내기
+    String accessToken = resolveAccessToken(request);  
     
     if(accessToken != null) { 
       logger.info("accessToken 존재 : {}", accessToken);
@@ -47,35 +58,57 @@ public class JwtFilter extends OncePerRequestFilter {
       try {
         Claims claims = jwtUtil.validateToken(accessToken); // 서명, 만료, 포맷, issuer 검증
         
-        // a. Authentication 객체를 만들기 위해 jwt.claims에서 정보꺼내서 UserDetails 객체 생성 
-        //  dto 생성 -> UserDetails에 dto를 삽입 
-        UserDto userDto = new UserDto();
-        userDto.setUserSeq(Long.parseLong(claims.getSubject()));
-        userDto.setNickname(String.valueOf(claims.get("nickname")));
-        userDto.setRole(String.valueOf(claims.get("role")));
-        CustomUserDetails customeUserDetails = new CustomUserDetails(userDto);
-        
-        // b. Authentication객체를 setAuthentication 해주기 
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customeUserDetails, null, customeUserDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-        
+        //securityContextHolder 저장 
+        setAuthenticationFromClaims(claims);
         logger.info("현재 요청 스레드 보관 정보 : {}", SecurityContextHolder.getContext().getAuthentication());
         
         filterChain.doFilter(request, response);
         
       } catch (ExpiredJwtException e) {
-        logger.warn("만료된 JWT 토큰입니다. token={}", accessToken, e);
-        // REFRESH_TOKEN 쿠키 검증 후, 새 access 발급 + 쿠키 갱신 
+        logger.warn("만료된 access 토큰입니다. token={}", accessToken, e);
+        
+        try {
+          //1. refresh 토큰 검증
+          Map<String, Object> mapRes = jwtService.isValidRefreshToken(request); //검증통과시 userSeq, refreshToken 값 반환하여 재활용 
+          
+          //2. 검증통과 -> access, refresh 쿠키, 헤더 재발급
+          Long userSeq = Long.valueOf(String.valueOf(mapRes.get("userSeq")));
+          Map<String, Object> newTokenRes = jwtService.tokenNcookieResend(userSeq, response);
+          
+          //3. refresh토큰 DB 갱신 
+          String oldRefreshToken = (String) mapRes.get("refreshToken");
+          String newRefreshToken = (String) newTokenRes.get("newRefresh");
+          jwtService.deleteOldRefreshToken(oldRefreshToken); // (구)refresh 객체 N으로 업데이트 
+          jwtService.insertNewRefreshToken(userSeq, newRefreshToken); //(신)refresh 등록 
+          
+          //4. 새 토큰 기준으로 인증 세팅
+          Object claimsObj = mapRes.get("claims");
+          if(!(claimsObj instanceof Claims claims)) { //자바 16이상의 패턴 매칭 활용 
+            throw new IllegalStateException("claims 타입이 Claims가 아닙니다: " + claimsObj);
+          }
+          // 여기서부터 claims는 이미 Claims 타입으로 확정
+          setAuthenticationFromClaims(claims);
+          
+          //5. 원래 요청 계속 진행 (로그아웃 컨트롤러로 보냄)
+          filterChain.doFilter(request, response);
+          
+          return;
+          
+        } catch (JwtException ex) {
+          // refresh까지 만료 or 위조 → 완전 로그아웃 상태
+          logger.warn("refresh 토큰도 유효하지 않습니다. 다시 로그인 필요", ex);
+          cookieUtil.clearAllTokenCookie(response);
+          response.sendRedirect(request.getContextPath() + "/login?invalid=true"); //세션값 만료, 재로그인 안내 
+          return;
+        }
         
       } catch (JwtException e) {
-        logger.warn("유효하지 않은 JWT 토큰입니다. token={}", accessToken, e);
-        // 서명 위조, 포맷 깨짐 등 → 401 or 그냥 익명 사용자 취급
-        cookieUtil.clearAccessTokenCookie(response); //잘못된 ACCESS_TOKEN 삭제, 무한루프 방지
-        response.sendRedirect(request.getContextPath() + "/login?invalid=true"); 
-        //response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        // access 자체가 서명 위조, 포맷 깨짐 등
+        logger.warn("유효하지 않은 access 토큰입니다. token={}", accessToken, e);
+        cookieUtil.clearAllTokenCookie(response);
+        response.sendRedirect(request.getContextPath() + "/login?invalid=true");
         return;
       }
-      
       
     } else {
       // Authorization 헤더도 없고 쿠키도 없을 때
@@ -108,6 +141,26 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     return null; // 토큰 없음
-}
+  }
+  
+  /**
+   * ---------------------------- SecurityContextHolder 초기화 -----------------------------------
+   */
+  private void setAuthenticationFromClaims(Claims claims) {
+    
+    // a. Authentication 객체를 만들기 위해서, jwt.claims에서 정보꺼내서 UserDetails 객체 생성 
+    //  dto 생성 -> UserDetails에 dto를 삽입 
+    UserDto userDto = new UserDto();
+    userDto.setUserSeq(Long.parseLong(claims.getSubject()));
+    userDto.setNickname(String.valueOf(claims.get("nickname")));
+    userDto.setRole(String.valueOf(claims.get("role")));
+    
+    CustomUserDetails customeUserDetails = new CustomUserDetails(userDto);
+    
+    // b. Authentication객체를 setAuthentication 해주기 
+    Authentication authToken = new UsernamePasswordAuthenticationToken(customeUserDetails, null, customeUserDetails.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(authToken);
+    
+  }
 
 }
