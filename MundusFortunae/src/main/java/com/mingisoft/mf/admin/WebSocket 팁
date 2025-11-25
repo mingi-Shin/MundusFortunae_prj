@@ -1,0 +1,8 @@
+ 	1.	한 유저가 브라우저 탭에서 ws://localhost:8080/chat에 접속한다.
+	2.	서버에서 afterConnectionEstablished(WebSocketSession session)이 호출된다.
+	3.	우리는 이 session을 sessions 리스트에 넣는다.
+	4.	누가 메시지를 보내면:
+	•	handleTextMessage(WebSocketSession session, TextMessage message)가 호출된다.
+	•	sessions 리스트를 돌면서 sendMessage 해서 브로드캐스트한다.
+	
+	
