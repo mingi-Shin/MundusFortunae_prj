@@ -15,7 +15,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mingisoft.mf.api.ApiResponse;
+import com.mingisoft.mf.api.ErrorResponse;
 import com.mingisoft.mf.exception.DuplicateUserException;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class UserController {
@@ -33,7 +36,7 @@ public class UserController {
    */
   @PostMapping("/api/join")
   @ResponseBody
-  public ResponseEntity<ApiResponse<?>> joinUser(@RequestBody UserDto userDto){
+  public ResponseEntity<?> joinUser(@RequestBody UserDto userDto, HttpServletRequest request){
     logger.info("회원가입 요청 유저 정보 : {}", userDto);
     
     try {
@@ -41,15 +44,16 @@ public class UserController {
       //Map.of 는 실무에서 잦은 실수가 발생해서 잘안씀 
       return ResponseEntity
           .status(HttpStatus.CREATED) // 201
-          .body(ApiResponse.success("회원가입 성공", user));
+          .body(ApiResponse.created(user));
       
     } catch (DuplicateUserException e) {
-      //e.printStackTrace()  대신 logger 쓰기 
-      logger.warn("회원가입 중복 오류 : {}", e.getMessage(), e);
-      //중복 예외에 쓰이는 CONFLICT 409 코드, 400으로 대체 가능 
+      logger.warn("회원가입 중복 에러 : {}", e.getMessage(), e);
+      
+      ErrorResponse body = new ErrorResponse().of(HttpStatus.CONFLICT, e.getMessage(), request.getRequestURI());
+      logger.debug("에러 path : {}", " / 발생시간" , body.getPath(), body.getTimestamp());
       return ResponseEntity
           .status(HttpStatus.CONFLICT) //409
-          .body(ApiResponse.error(e.getMessage()));
+          .body(body);
     }
   }
   
@@ -69,7 +73,9 @@ public class UserController {
       return ResponseEntity.ok(isDuplicated);
     } catch (Exception e) {
       logger.warn("중복체크 통신 오류 : {}", e.getMessage(), e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+      return ResponseEntity
+              .status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .build();
     }
   }
   

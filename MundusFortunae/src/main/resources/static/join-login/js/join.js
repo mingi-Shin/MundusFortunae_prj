@@ -51,13 +51,13 @@ function joinUser(){
 			});
 			
 			// 201이든 409든, 서버에서 body를 항상 보내니까 그냥 파싱
-			const data = await res.json().catch(() => null);
+			const result = await res.json().catch(() => null);
 
 			console.log("res:", res);
-			console.log("data:", data);
+			console.log("result:", result);
 			
-			// 1) 성공 (201 + success=true)
-			if (res.ok && data && data.success) {
+			//res.ok => 200, 201, 204, 206… 이런 모든 2xx에 대해 true
+			if (res.ok && result.data) {
 			  // loginId로 로그인 페이지 이동 예시
 			  location.href = contextPath + 'login/' + loginId;
 			  return;
@@ -65,13 +65,13 @@ function joinUser(){
 
 			// 2) 중복 (409 CONFLICT)
 			if (res.status === 409) {
-			  const msg = data.message; //ApiResponse 객체 필드명 
+			  const msg = result.message; //ErrorResponse 객체 필드명 
 			  alert(msg);
 			  return;
 			}
 			
 			// 3) 그 외 서버 에러
-			console.error("회원가입 실패 상태코드:", res.status, data);
+			console.error("회원가입 실패 상태코드:", res.status, result);
 			alert("회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.");
 
 		} catch (err){

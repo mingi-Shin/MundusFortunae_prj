@@ -30,8 +30,13 @@ function wireLogout(){
 			
 			const result = await response.json();
 			
-			if(result.success){
-				alert(result.data.data);
+			if(!response.ok){
+				alert(result.message || '에러가 발생했습니다.');
+				return;
+			}
+			
+			if(response.ok){
+				alert(result.message + "\n응답코드 : " + result.statusCode);
 			}
     } catch (e) {
     	alert('로그아웃 실패 : ' + (e.message || e));

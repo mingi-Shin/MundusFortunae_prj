@@ -106,6 +106,6 @@ public class HomeController {
     
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(ApiResponse.success("로그아웃 처리되었습니다.", body));
+        .body(ApiResponse.of(HttpStatus.OK, "로그아웃 처리되었습니다.", body));
   }
 }

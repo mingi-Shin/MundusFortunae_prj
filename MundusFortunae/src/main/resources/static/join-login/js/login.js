@@ -34,9 +34,14 @@ function loginProcess() {
 		  errorDiv.style.display='block';
 		  return;
 	  }
-	  
+		
+		//n초동안 로그인 중..
+		loginProcessing();
+		await new Promise(resolve => setTimeout(resolve, 4200)); //4초 기다리기 
+		
 	  // 로그인 api요청 
 	  try {
+			
 		  const response = await fetch( contextPath + "api/auth/login", {
 			  method : "POST",
 			  headers : {"Content-Type" : "application/json"},
@@ -82,4 +87,28 @@ function getSavedId(){
 		document.getElementById("login-id").value = userId;
 		document.querySelector('#save-id').checked = true;
 	} 
+}
+
+/**
+ * 3초동안 접속중.. 텍스트 띄우는 함수 
+ */
+function loginProcessing(){
+const errorDiv = document.getElementById("login-error");
+	
+ const messages = [
+	"잠시만 기다려주세요. 문을 여는중.",
+	"잠시만 기다려주세요. 문을 여는중..",
+	"잠시만 기다려주세요. 문을 여는중...",
+	"모험가의 신원을 조회중.",
+	"모험가의 신원을 조회중..",
+	"모험가의 신원을 조회중...",
+ ];
+ 
+ messages.forEach((msg, index) => {
+	setTimeout(() => {
+		errorDiv.textContent = msg;
+		errorDiv.style.display = 'block';
+	}, index * 500); //0.5초 간격
+ });
+	
 }

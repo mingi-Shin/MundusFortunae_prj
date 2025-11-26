@@ -1,4 +1,4 @@
-package com.mingisoft.mf.admin;
+package com.mingisoft.mf.socket;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +13,9 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 /**
  * 연결/메시지/종료 이벤트를 처리하는 핵심 부분입니다.
  */
-public class ChatHandler extends TextWebSocketHandler {
+public class SocketRoomHandler extends TextWebSocketHandler {
 
-  private static final Logger logger = LoggerFactory.getLogger(ChatHandler.class); 
+  private static final Logger logger = LoggerFactory.getLogger(SocketRoomHandler.class); 
   
   //연결된 모든 소켓세션을 저장
   private static List<WebSocketSession> webSocketSessionList = new ArrayList<WebSocketSession>();

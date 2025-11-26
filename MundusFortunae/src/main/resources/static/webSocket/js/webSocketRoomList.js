@@ -11,12 +11,11 @@ function roomJoin(){
 	document.querySelectorAll(".joinBtn").forEach( (btns) => {
 		btns.addEventListener("click", (e) => {
 			const roomTitle = e.currentTarget.getAttribute("data-room-title"); //자주 활용하면 편리할 듯 
-			document.getElementById('room-join-title').value = rtitle;	  			
+			document.getElementById('room-join-title').value = roomTitle;	  			
 			document.getElementById('room-join-title').readOnly = true; 
 			
 			const roomPassword = document.getElementById("room-join-password").value;
 			const nickname = document.getElementById("room-join-nickname").value.trim();
-			
 			
 			
 		});
@@ -33,12 +32,12 @@ function createRoom(){
 	  const nickname = document.getElementById("room-create-nickname").value.trim();
 	  
 	  if(!roomTitle || !roomPassword || !nickname){
-		  alert("빈칸을 입력해주세요.");
+		  alert("공백은 허용되지 않습니다.");
 		 	return;
 	  }
 		
-		const roomSetting = [roomTitle, roomPassword, nickname]; //배열 : 반복문 돌리기, 순위/로그 기록 등
-		const roomSetting2 = {roomTitle, roomPassword, nickname}; //객체 : 서버로 JSON 보낼 때, DB DTO 만들 때, 명확한 데이터 구조가 필요할 때
+		const roomSettingArray = [roomTitle, roomPassword, nickname]; //배열 : 반복문 돌리기, 순위/로그 기록 등
+		const roomSettingInstance = {roomTitle, roomPassword, nickname}; //객체 : 서버로 JSON 보낼 때, DB DTO 만들 때, 명확한 데이터 구조가 필요할 때
 	  //	•	자바스크립트 코드 안에서 객체 만들 때
 		//	→ { roomTitle: roomTitle } 또는 { roomTitle }
 		//	•	다른 이름으로 보내고 싶으면
@@ -51,15 +50,16 @@ function createRoom(){
 			const response = await fetch(url, {
 				method : "POST",
 				headers : {"Content-Type": "application/json"}, 
-				body : JSON.stringify(roomSetting)
+				body : JSON.stringify( {roomSetting : roomSettingInstance})
 			});
 			
 			const result = await response.json();
+			//console.log("content-type:", response.headers.get("Content-Type"));
 			
-			if(result.ok){
-				
+			if(response.ok){ //result가 아니라  response임 
+				location.href=contextPath + "webSocket/room/" + result.roomNumber;
 			} else {
-				
+				alert("대충 실패");
 			}
 			
 		} catch (err){
