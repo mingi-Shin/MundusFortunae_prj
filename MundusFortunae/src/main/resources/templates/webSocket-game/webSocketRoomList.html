@@ -72,27 +72,27 @@
 				        <!-- 방이 있을 때 -->
 				        <tbody th:if="${not #lists.isEmpty(roomList)}">
 				          <tr th:each="room : ${roomList}">
-				            <td th:text="${room.id}">1</td>
+				            <td th:text="${room.roomSeq}">1</td>
 				
 				            <td class="text-start">
 				              <div class="fw-semibold" th:text="${room.title}">방 제목</div>
-				              <div class="small text-muted" th:text="|방 번호 #${room.id}|">
+				              <div class="small text-muted" th:text="|방 번호 #${room.roomSeq}|">
 				                방 번호 #1
 				              </div>
 				            </td>
 				
 				            <td>
-				              <span class="badge bg-secondary" th:text="|${room.playerCount}/6|">0/6</span>
+				              <span class="badge bg-secondary" th:text="|${room.playerList.size}/6|">0/6</span>
 				            </td>
 				
 				            <td>
 											<button type="button"
 											        class="btn btn-sm btn-primary joinBtn"
-											        th:data-room-id="${room.id}"
+											        th:data-room-id="${room.roomSeq}"
 											        th:data-room-title="${room.title}" 
 											        data-bs-toggle="modal"
 											        data-bs-target="#joinRoomModal">
-											        버튼
+											        참여
 							        </button>
 				              <script type="text/javascript">
 
@@ -123,7 +123,7 @@
 	        <form>
 	          <div class="mb-3">
 	            <label for="recipient-name" class="col-form-label">방 제목</label>
-	            <input type="text" class="form-control" id="room-create-title">
+	            <input type="text" class="form-control" id="room-create-title" maxlength="16" placeholder="최대 16자">
 	          </div>
 	          <div class="mb-3">
 	            <label for="message-text" class="col-form-label">비밀번호</label>
@@ -131,7 +131,7 @@
 	          </div>
 	          <div class="mb-3">
 	            <label for="message-text" class="col-form-label">닉네임</label>
-	            <input type="text" class="form-control" id="room-create-nickname">
+	            <input type="text" class="form-control" id="room-create-nickname" maxlength="6" placeholder="최대 6자">
 	          </div>
 	        </form>
 	      </div>
@@ -154,9 +154,13 @@
 	      </div>
 	      <div class="modal-body">
 	        <form>
+	          <div class="mb-3" hidden="true">
+	            <label for="recipient-name" class="col-form-label">방 번호</label>
+	            <input type="text" class="form-control" id="room-join-id" readonly="readonly">
+	          </div>
 	          <div class="mb-3">
 	            <label for="recipient-name" class="col-form-label">방 제목</label>
-	            <input type="text" class="form-control" id="room-join-title" >
+	            <input type="text" class="form-control" id="room-join-title" readonly="readonly">
 	          </div>
 	          <div class="mb-3">
 	            <label for="message-text" class="col-form-label">비밀번호</label>
@@ -164,13 +168,13 @@
 	          </div>
 	          <div class="mb-3">
 	            <label for="message-text" class="col-form-label">닉네임</label>
-	            <input type="text" class="form-control" id="room-join-nickname">
+	            <input type="text" class="form-control" id="room-join-nickname" maxlength="6" placeholder="최대 6자">
 	          </div>
 	        </form>
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-	        <button type="button" class="btn btn-primary" id="room-join-btn">참여</button>
+	        <button type="button" class="btn btn-primary" id="room-join-btn">확인</button>
 	      </div>
 	    </div>
 	  </div>

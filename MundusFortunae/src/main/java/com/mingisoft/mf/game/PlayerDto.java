@@ -7,11 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlayerDto<T> {
+public class PlayerDto {
 
   private Long roomSeq;
   private int playerSeq;
   private String nickname;
-  private T data; //나중에 쓸일이 있겠지?
+  private String role; // HOST or USER
+  //private T data; //나중에 쓸일이 있겠지?
   
 }

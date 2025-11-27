@@ -2,25 +2,63 @@ document.addEventListener('DOMContentLoaded', () => {
 	console.log('웹소켓 방리스트 페이지');
 	
 	createRoom();
-	roomJoin();
-	
+	roomJoinModal();
+	roomJoinFormSend();
 });
 
-//방 참여하기 
-function roomJoin(){
+//방 참여하기 모달창 오픈 자동완성 
+function roomJoinModal(){
 	document.querySelectorAll(".joinBtn").forEach( (btns) => {
-		btns.addEventListener("click", (e) => {
+		btns.addEventListener("click", async (e) => {
+			const roomSeq = e.currentTarget.getAttribute("data-room-id"); 
 			const roomTitle = e.currentTarget.getAttribute("data-room-title"); //자주 활용하면 편리할 듯 
+			document.getElementById('room-join-id').value = roomSeq;	  			
 			document.getElementById('room-join-title').value = roomTitle;	  			
-			document.getElementById('room-join-title').readOnly = true; 
-			
-			const roomPassword = document.getElementById("room-join-password").value;
-			const nickname = document.getElementById("room-join-nickname").value.trim();
-			
-			
 		});
 	});		
 } 
+
+function roomJoinFormSend(){
+	document.getElementById("room-join-btn").addEventListener("click", async () => {
+
+		try {
+			const roomSeq = document.getElementById("room-join-id").value;
+			const roomPassword = document.getElementById("room-join-password").value;
+			const nickname = document.getElementById("room-join-nickname").value.trim();
+			
+			if(!roomPassword || !nickname){
+				alert("공백은 허용되지 않습니다.");
+				return;
+			}
+			
+			const url = contextPath + "webSocket/room/" + roomSeq + "/join";
+			const response = await fetch(url , {
+				method : "POST",
+				headers : {"Content-Type":"application/json"},
+				body : JSON.stringify({
+					roomSeq : roomSeq,
+					roomPassword : roomPassword,
+					nickname : nickname
+				})
+			})
+			const result = await response.json();
+			
+			if(response.ok){
+				localStorage.setItem("myNickname", nickname);
+				const url = contextPath + "webSocket/room/" + roomSeq; 
+				window.location.href=url;
+				
+			} else {
+				alert(result.message);
+				return;
+			}
+			
+		} catch(err) {
+			console.error("통신 오류:", err);
+			alert("서버와의 통신 중 오류가 발생했습니다.");
+		}
+	});
+}
 
 
 //방 생성하기 
@@ -50,24 +88,62 @@ function createRoom(){
 			const response = await fetch(url, {
 				method : "POST",
 				headers : {"Content-Type": "application/json"}, 
-				body : JSON.stringify( {roomSetting : roomSettingInstance})
+				//body : JSON.stringify( {roomSetting : roomSettingInstance}) -> 잡바에서 Map으로 변환못
+				body : JSON.stringify(roomSettingInstance)
 			});
 			
 			const result = await response.json();
 			//console.log("content-type:", response.headers.get("Content-Type"));
 			
-			if(response.ok){ //result가 아니라  response임 
-				location.href=contextPath + "webSocket/room/" + result.roomNumber;
+			if(response.ok){ 
+				//닉네임을 localStorage에 저장하고 사용 (로그인이 아니면 이게 최선인거같음)
+				localStorage.setItem("myNickname", result.data.playerList[0].nickname);
+				//방생성 후 해당 방으로 조인 요청 
+				joinRoomRequest(result.data, result.data.playerList[0].role, result.data.playerList[0].nickname); //newRoom
+				
 			} else {
-				alert("대충 실패");
+				alert(result.message);
+				localStorage.removeItem("myNickname");
+				return;
 			}
 			
 		} catch (err){
 			console.error("통신 오류:", err);
 			alert("서버와의 통신 중 오류가 발생했습니다.");
 		}
-	  
   });
-  
+	
+	async function joinRoomRequest(roomDto, role, nickname){
+		
+		const url = contextPath + "webSocket/room/" + roomDto.roomSeq + "/join";
+		try {
+			const response = await fetch(url, {
+				method : "POST",
+				headers : {"Content-Type" : "application/json"},
+				body : JSON.stringify({
+					"role" : role,
+					"roomPassword" : roomDto.password,
+					"nickname" : nickname
+				})
+			});
+			
+			const result = await response.json();
+			
+			if(response.ok){
+				console.log(result.message);
+				window.location.href = contextPath + "webSocket/room/" + roomDto.roomSeq;
+				return;
+				
+			} else {
+				alert(result.message);
+				return;
+			}
+			
+		} catch(err){
+			console.error("통신 오류:", err);
+			alert("서버와의 통신 중 오류가 발생했습니다.");
+		}
+		
+	}
   
 }
