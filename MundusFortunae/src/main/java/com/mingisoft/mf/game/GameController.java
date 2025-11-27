@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import com.mingisoft.mf.api.ApiResponse;
 import com.mingisoft.mf.api.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class GameController {
@@ -106,7 +108,7 @@ public class GameController {
    * @return
    */
   @PostMapping("/webSocket/room/{roomSeq}/join")
-  public ResponseEntity<?> joinRoomRequest(@PathVariable String roomSeq, @RequestBody Map<String, String> bodyData){
+  public ResponseEntity<?> joinRoomRequest(@PathVariable String roomSeq, @RequestBody Map<String, String> bodyData, HttpServletRequest request){
     
     RoomDto room = gameService.getRoom(Long.valueOf(roomSeq));
     
@@ -116,12 +118,15 @@ public class GameController {
     }
     
     logger.info("방 비밀번호 : {}", room.getPassword());
-    logger.info("방장 role : {} / 비밀번호 : {}", bodyData.get("role"), bodyData.get("roomPassword"));
+    String role = Optional.ofNullable(bodyData.get("role")).orElse("USER");
+    logger.info("참여자 role : {} / 비밀번호 : {}", role, bodyData.get("roomPassword"));
     
     //검증
     //1. 맨먼저 방장의 방생성 후 요청
     if("HOST".equals(bodyData.get("role")) && room.getPassword().equals(bodyData.get("roomPassword"))) {
-      logger.info("방장의 방생성 후 조인 요청 통과");
+      //GetMapping용 Session 티켓 생성
+      HttpSession newSession = request.getSession(true);
+      newSession.setAttribute("joinableRoom" + roomSeq, true);
       return ResponseEntity.status(HttpStatus.OK)
           .body(ApiResponse.of(HttpStatus.OK, "검증통과, 방 조인 성공", null));
     }
@@ -154,8 +159,12 @@ public class GameController {
           .body(ErrorResponse.of(HttpStatus.FORBIDDEN, "방 인원이 가득 찼습니다.", "/api/rooms/" + roomSeq + "/join"));
     }
     
-    //검증끝
+    //검증 모두 통과 
     gameService.addPlayerToRoom(Long.valueOf(roomSeq), inputNickname);
+    
+    //GetMapping용 Session 티켓 생성
+    HttpSession newSession = request.getSession(true);
+    newSession.setAttribute("joinableRoom" + roomSeq, true);
     
     return ResponseEntity.status(HttpStatus.OK)
         .body(ApiResponse.of(HttpStatus.OK, "일반 유저 검증통과, 방 조인 성공", null));
@@ -164,16 +173,42 @@ public class GameController {
   
   
   /**
-   * 방 페이지 이동  비상상황! URL하드코딩하면 접속되어버림! 암호화코드를 추가해야 할지도.. 
+   * 방 페이지 이동  비상상황! URL하드코딩하면 접속되어버림!
+   * 처리방법 : 서버에서 하는 게 좋음. js는 조작가능성 존재. -> 세션 활용 
    * @param roomNumber
    * @return
    */
   //RESTful API 디자인에 따르면 방번호를 주는게 맞다. 
   @GetMapping("/webSocket/room/{roomSeq}")
-  public String enterRoom(@PathVariable(value = "roomSeq") String roomSeq, Model model) {
+  public String enterRoom(@PathVariable(value = "roomSeq") String roomSeq, HttpServletRequest request, Model model) {
     
+    //--- 접속자 세션 검증 --- 
+    HttpSession session = request.getSession(false); //1. 접속자의 JESESSIONID 쿠키가 있는지 2. 그 쿠키의 ID가 내 서버 세션에 있는지
+    if(session == null) {
+      // 세션 자체가 없으니 → 이 사람은 ‘우리 시스템이 기억하는 사람’이 아님
+      logger.info("세션 존재하지 않음_session : {}", session);
+      model.addAttribute("error", "ture");
+      return "webSocket-game/webSocketDiceGame";
+    }
+    boolean isJoinable = (Boolean) session.getAttribute("joinableRoom"+roomSeq);
+    if(!Boolean.TRUE.equals(isJoinable)) {
+      logger.info("접속 거절_isJoinable : {}", isJoinable);
+      //세션은 용케 있는데, false값임 
+      model.addAttribute("error", "true");
+      return "webSocket-game/webSocketDiceGame";
+    }
+    
+    
+    //--- 접속자 세션 검증 통과 : 허용 ----
+    logger.info("접속 허용_isJoinable : {}", isJoinable);
+    model.addAttribute("error", "false");
+    
+    
+    //-- 후속처리 
     RoomDto joinRoom = gameService.getRoom(Long.valueOf(roomSeq));
     model.addAttribute("roomObj", joinRoom);
+    
+    logger.info("최종 방 인원 정보 : {}", joinRoom.getPlayerList());
     
     return "webSocket-game/webSocketDiceGame";
   }

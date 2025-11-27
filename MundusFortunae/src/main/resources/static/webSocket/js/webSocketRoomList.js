@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	createRoom();
 	roomJoinModal();
 	roomJoinFormSend();
+	
+	wrongAccessModel();
 });
 
 //방 참여하기 모달창 오픈 자동완성 
@@ -17,7 +19,7 @@ function roomJoinModal(){
 		});
 	});		
 } 
-
+//일반 유저 방 참여 함수 
 function roomJoinFormSend(){
 	document.getElementById("room-join-btn").addEventListener("click", async () => {
 
@@ -112,7 +114,7 @@ function createRoom(){
 			alert("서버와의 통신 중 오류가 발생했습니다.");
 		}
   });
-	
+	//방장이 방 생성후 쓰일 방참여 함수 
 	async function joinRoomRequest(roomDto, role, nickname){
 		
 		const url = contextPath + "webSocket/room/" + roomDto.roomSeq + "/join";
@@ -147,3 +149,17 @@ function createRoom(){
 	}
   
 }
+
+//잘못된 접근 차단 모달 js
+function wrongAccessModel(){
+	const wrongAccessModalBtn = document.getElementById('wrong-access-btn');
+	const errorValue = wrongAccessModalBtn.dataset.errorValue; //true, false
+	if(errorValue == 'true'){
+		wrongAccessModalBtn.click;
+	}
+}
+
+
+
+
+

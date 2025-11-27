@@ -179,7 +179,33 @@
 	    </div>
 	  </div>
 	</div>	
-  
+	
+	<!-- 잘못된 접근에 대한 모달창 data.errorValue로 처리중 -->
+	
+	<button type="button" id="wrong-access-btn"
+        class="btn btn-primary"
+       	th:data-error-value="${error}"
+        data-bs-toggle="modal" data-bs-target="#wrongAccessModal" >
+  	잘못된 접근 모달
+	</button>
+	
+	<div class="modal fade" id="wrongAccessModal"
+	     data-bs-backdrop="static" data-bs-keyboard="false"
+	     tabindex="-1" aria-labelledby="wrongAccessLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-sm modal-dialog-centered">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="wrongAccessLabel">잘못된 접근</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	      </div>
+	      <div class="modal-body text-center">
+	        올바른 절차를 거치지 않은 접근입니다.<br>
+	        방 목록에서 다시 시도해주세요.
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	  
   <footer class="footer-content bg-light py-4 mt-5">
     <div class="container text-center text-muted">
       <p>&copy; 2024 MundusFortunae. All rights reserved.</p>

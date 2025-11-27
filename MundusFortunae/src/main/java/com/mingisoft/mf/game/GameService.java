@@ -68,7 +68,7 @@ public class GameService {
     PlayerDto roomHost = new PlayerDto();
     roomHost.setRoomSeq(roomNumberGenerator);
     roomHost.setPlayerSeq(0);
-    roomHost.setNickname(nickname + " [방장]");
+    roomHost.setNickname(nickname);
     roomHost.setRole("HOST");
     
     //2. 플레이어 리스트 구성
@@ -107,12 +107,12 @@ public class GameService {
     
     PlayerDto newPlayer = new PlayerDto();
     newPlayer.setRoomSeq(roomSeq);
-    newPlayer.setPlayerSeq(room.getPlayerList().size());
+    newPlayer.setPlayerSeq(room.getPlayerList().size()); //유저번호는 1번부터 시작 
     newPlayer.setNickname(nickname);
     newPlayer.setRole("USER");
     
     room.getPlayerList().add(newPlayer);
-    logger.info("새로운 유저 접속.. 방번호 : {}, 유저번호: {}, 닉네임 {}", roomSeq, room.getPlayerList().size(), nickname);
+    logger.info("새로운 유저 접속.. 방번호 : {}, 유저번호: {}, 닉네임 : {}", roomSeq, room.getPlayerList().size(), nickname);
   }
   
   
