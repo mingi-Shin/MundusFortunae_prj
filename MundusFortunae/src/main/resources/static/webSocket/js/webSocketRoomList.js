@@ -5,13 +5,24 @@ document.addEventListener('DOMContentLoaded', () => {
 	roomJoinModal();
 	roomJoinFormSend();
 	
-	wrongAccessModel();
+	wrongAccessOpenModal();
+	
+	changeJoinBtn();
 });
+
+//js에서 만원방 참여버튼 비활성화 (소켓에서도 동일기능 작성)
+function changeJoinBtn(){
+	document.querySelectorAll('.joinBtn').forEach( (btn) => {
+		if(btn.dataset.roomPlayersize === "6"){ //dataset은 문자열
+			btn.disabled = true;
+		}
+	});
+}
 
 //방 참여하기 모달창 오픈 자동완성 
 function roomJoinModal(){
-	document.querySelectorAll(".joinBtn").forEach( (btns) => {
-		btns.addEventListener("click", async (e) => {
+	document.querySelectorAll(".joinBtn").forEach( (btn) => {
+		btn.addEventListener("click", async (e) => {
 			const roomSeq = e.currentTarget.getAttribute("data-room-id"); 
 			const roomTitle = e.currentTarget.getAttribute("data-room-title"); //자주 활용하면 편리할 듯 
 			document.getElementById('room-join-id').value = roomSeq;	  			
@@ -151,11 +162,17 @@ function createRoom(){
 }
 
 //잘못된 접근 차단 모달 js
-function wrongAccessModel(){
+function wrongAccessOpenModal(){
 	const wrongAccessModalBtn = document.getElementById('wrong-access-btn');
-	const errorValue = wrongAccessModalBtn.dataset.errorValue; //true, false
-	if(errorValue == 'true'){
-		wrongAccessModalBtn.click;
+	if(!wrongAccessModalBtn){
+		alert('버튼없음 ');
+		return;
+	}
+	
+	const errorValue = wrongAccessModalBtn.dataset.errorValue; //접속불가자:true
+	if(errorValue === "true"){
+		wrongAccessModalBtn.click();
+		return;
 	}
 }
 

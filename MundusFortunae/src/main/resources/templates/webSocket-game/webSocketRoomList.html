@@ -88,6 +88,7 @@
 				            <td>
 											<button type="button"
 											        class="btn btn-sm btn-primary joinBtn"
+											        th:data-room-playersize="${room.playerList.size}"
 											        th:data-room-id="${room.roomSeq}"
 											        th:data-room-title="${room.title}" 
 											        data-bs-toggle="modal"
@@ -184,8 +185,8 @@
 	
 	<button type="button" id="wrong-access-btn"
         class="btn btn-primary"
-       	th:data-error-value="${error}"
-        data-bs-toggle="modal" data-bs-target="#wrongAccessModal" >
+        th:data-error-value="${hasError}"
+        data-bs-toggle="modal" data-bs-target="#wrongAccessModal" hidden="true">
   	잘못된 접근 모달
 	</button>
 	

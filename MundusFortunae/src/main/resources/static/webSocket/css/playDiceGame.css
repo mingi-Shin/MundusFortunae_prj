@@ -1,0 +1,123 @@
+@charset "UTF-8";
+    body {
+      background-color: #f8f9fa;
+      min-height: 100vh;
+    }
+    
+    .main-content {
+      padding: 1rem;
+    }
+    
+    .game-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    /* 모바일: 세로 레이아웃 */
+    @media (max-width: 767px) {
+      .game-section {
+        min-height: 400px;
+        margin-bottom: 1rem;
+      }
+      
+      .log-section {
+        height: 200px;
+        margin-bottom: 1rem;
+      }
+      
+      .participants-section {
+        height: 250px;
+        margin-bottom: 1rem;
+      }
+      
+      .chat-section {
+        height: 300px;
+      }
+      
+      .dice-display {
+        width: 70px !important;
+        height: 70px !important;
+      }
+      
+      .dice-number {
+        font-size: 2rem !important;
+      }
+    }
+    
+    /* 태블릿 이상: 가로 레이아웃 */
+    @media (min-width: 768px) {
+      .left-column {
+        height: calc(100vh - 8rem);
+        min-height: 600px;
+      }
+      
+      .game-section {
+        flex: 7 1 0;
+        min-height: 0;
+      }
+      
+      .log-section {
+        flex: 3 1 0;
+        min-height: 0;
+      }
+      
+      .right-column {
+        height: calc(100vh - 8rem);
+        min-height: 600px;
+      }
+      
+      .participants-section {
+        flex: 3 1 0;
+        min-height: 0;
+      }
+      
+      .chat-wrapper {
+        flex: 7 1 0;
+        min-height: 0;
+      }
+    }
+    
+    .dice-display {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border: 3px solid #212529;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .dice-number {
+      font-size: 3rem;
+      font-weight: bold;
+    }
+    
+    .log-item, .chat-message {
+      font-size: 0.875rem;
+    }
+    
+    .player-avatar {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+    
+    .scroll-area {
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+    
+    .scroll-area::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .scroll-area::-webkit-scrollbar-thumb {
+      background-color: rgba(0,0,0,0.2);
+      border-radius: 3px;
+    }

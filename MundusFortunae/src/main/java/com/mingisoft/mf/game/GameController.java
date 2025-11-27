@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.mingisoft.mf.api.ApiResponse;
 import com.mingisoft.mf.api.ErrorResponse;
@@ -39,8 +40,12 @@ public class GameController {
    * @param model
    * @return
    */
-  @GetMapping("/admin/websocketRoom")
-  public String getWebsocketGameRoomList(Model model) {
+  @GetMapping({"/webSocket/websocketRoom", "/webSocket/websocketRoom/?hasError=true"})
+  public String getWebsocketGameRoomList(@RequestParam(required = false) String hasError, Model model) {
+    
+    if(hasError != null) {
+      model.addAttribute("hasError", "true");
+    }
     
     List<RoomDto> roomList = gameService.getAllRoomList();
     
@@ -53,7 +58,7 @@ public class GameController {
    * 소켓채팅방 연습용 
    * @return
    */
-  @GetMapping("/admin/socketChat")
+  @GetMapping("/webSocket/socketChat")
   public String getWebsocketChatPage() {
     return "webSocket-game/webSocketChat";
   }
@@ -126,7 +131,7 @@ public class GameController {
     if("HOST".equals(bodyData.get("role")) && room.getPassword().equals(bodyData.get("roomPassword"))) {
       //GetMapping용 Session 티켓 생성
       HttpSession newSession = request.getSession(true);
-      newSession.setAttribute("joinableRoom" + roomSeq, true);
+      newSession.setAttribute("joinableRoom" + roomSeq, "true");
       return ResponseEntity.status(HttpStatus.OK)
           .body(ApiResponse.of(HttpStatus.OK, "검증통과, 방 조인 성공", null));
     }
@@ -164,7 +169,7 @@ public class GameController {
     
     //GetMapping용 Session 티켓 생성
     HttpSession newSession = request.getSession(true);
-    newSession.setAttribute("joinableRoom" + roomSeq, true);
+    newSession.setAttribute("joinableRoom" + roomSeq, "true");
     
     return ResponseEntity.status(HttpStatus.OK)
         .body(ApiResponse.of(HttpStatus.OK, "일반 유저 검증통과, 방 조인 성공", null));
@@ -187,22 +192,18 @@ public class GameController {
     if(session == null) {
       // 세션 자체가 없으니 → 이 사람은 ‘우리 시스템이 기억하는 사람’이 아님
       logger.info("세션 존재하지 않음_session : {}", session);
-      model.addAttribute("error", "ture");
-      return "webSocket-game/webSocketDiceGame";
-    }
-    boolean isJoinable = (Boolean) session.getAttribute("joinableRoom"+roomSeq);
-    if(!Boolean.TRUE.equals(isJoinable)) {
-      logger.info("접속 거절_isJoinable : {}", isJoinable);
-      //세션은 용케 있는데, false값임 
-      model.addAttribute("error", "true");
-      return "webSocket-game/webSocketDiceGame";
+      return "redirect:/webSocket/websocketRoom?hasError=true";
     }
     
+    boolean isJoinableTrue =  "true".equals(session.getAttribute("joinableRoom"+roomSeq));
+    if(!Boolean.TRUE.equals(isJoinableTrue)) {
+      logger.info("접속 거절_isJoinable : {}", isJoinableTrue);
+      //세션은 용케 있는데, true값이 아님
+      return "redirect:/webSocket/websocketRoom?hasError=true";
+    }
     
     //--- 접속자 세션 검증 통과 : 허용 ----
-    logger.info("접속 허용_isJoinable : {}", isJoinable);
-    model.addAttribute("error", "false");
-    
+    logger.info("접속 허용_isJoinable : {}", isJoinableTrue);
     
     //-- 후속처리 
     RoomDto joinRoom = gameService.getRoom(Long.valueOf(roomSeq));
@@ -210,6 +211,6 @@ public class GameController {
     
     logger.info("최종 방 인원 정보 : {}", joinRoom.getPlayerList());
     
-    return "webSocket-game/webSocketDiceGame";
+    return "webSocket-game/playDiceGame";
   }
 }
