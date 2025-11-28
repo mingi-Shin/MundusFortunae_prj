@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.mingisoft.mf.api.ApiResponse;
-import com.mingisoft.mf.game.GameService;
+import com.mingisoft.mf.game.RoomService;
 import com.mingisoft.mf.jwt.CookieUtil;
 import com.mingisoft.mf.jwt.JwtService;
 

@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GameService {
+public class RoomService {
   
-  private final static Logger logger = LoggerFactory.getLogger(GameService.class);  
+  private final static Logger logger = LoggerFactory.getLogger(RoomService.class);  
       
   /**
    * 스토리 만들기 -> 리팩토링 요소 

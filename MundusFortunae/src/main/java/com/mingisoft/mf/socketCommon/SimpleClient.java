@@ -1,4 +1,4 @@
-package com.mingisoft.mf.socket;
+package com.mingisoft.mf.socketCommon;
 
 import java.io.BufferedReader;
 import java.io.IOException;

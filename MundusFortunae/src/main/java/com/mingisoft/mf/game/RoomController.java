@@ -1,7 +1,5 @@
 package com.mingisoft.mf.game;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,7 +7,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,13 +23,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-public class GameController {
+public class RoomController {
 
-  private final static Logger logger = LoggerFactory.getLogger(GameController.class);
+  private final static Logger logger = LoggerFactory.getLogger(RoomController.class);
 
-  private final GameService gameService;
+  private final RoomService gameService;
   
-  public GameController(GameService gameService) {
+  public RoomController(RoomService gameService) {
     this.gameService = gameService;
   }
   /**
@@ -203,7 +200,7 @@ public class GameController {
     }
     
     //--- 접속자 세션 검증 통과 : 허용 ----
-    logger.info("접속 허용_isJoinable : {}", isJoinableTrue);
+    logger.info("- 모든 검증 통과 - 접속 허용_isJoinable : {}", isJoinableTrue);
     
     //-- 후속처리 
     RoomDto joinRoom = gameService.getRoom(Long.valueOf(roomSeq));

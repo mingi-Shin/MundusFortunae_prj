@@ -29,7 +29,7 @@
 			
 			//localhost는 내 pc기준, 다른 기기접속을 위해 공인ip주소를 넣어줘야함 
 			const host = window.location.host;
-		  socket = new WebSocket("ws://" + host + "/mf/chat");
+		  socket = new WebSocket("ws://" + host + "/mf/playWebSocket");
 	
 	    socket.onopen = () => { 
 	    	//서버와 websocket 연결됨 
