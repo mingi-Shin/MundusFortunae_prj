@@ -1,15 +1,3 @@
-document.addEventListener('DOMContentLoaded', () => {
-	console.log('웹소켓 방리스트 페이지');
-	
-	createRoom();
-	roomJoinModal();
-	roomJoinFormSend();
-	
-	wrongAccessOpenModal();
-	
-	changeJoinBtn();
-});
-
 //js에서 만원방 참여버튼 비활성화 (소켓에서도 동일기능 작성)
 function changeJoinBtn(){
 	document.querySelectorAll('.joinBtn').forEach( (btn) => {

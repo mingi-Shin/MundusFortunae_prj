@@ -18,9 +18,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mingisoft.mf.common.ObjectMapperSingleton;
 import com.mingisoft.mf.game.RoomDto;
 import com.mingisoft.mf.game.RoomService;
-import com.mingisoft.mf.game.SocketChatController;
+import com.mingisoft.mf.game.SocketChatBroadcaster;
 import com.mingisoft.mf.game.SocketGameController;
-import com.mingisoft.mf.game.SocketRoomController;
+import com.mingisoft.mf.game.SocketRoomBroadcaster;
 
 /**
  * 연결/메시지/종료 이벤트를 처리하는 핵심 부분입니다.
@@ -30,17 +30,17 @@ public class SocketRoomHandler extends TextWebSocketHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(SocketRoomHandler.class); 
   
-  private final SocketRoomController socketRoomController;
+  private final SocketRoomBroadcaster socketRoomBroadcaster;
   private final RoomService roomService;
   
-  public SocketRoomHandler(SocketRoomController socketRoomController, RoomService roomService) {
-    this.socketRoomController = socketRoomController; //스프링 : 아 컨테이너에 있는거 찾아 넣어줘야지 (의존성 주입 : DI)
+  public SocketRoomHandler(SocketRoomBroadcaster socketRoomBroadcaster, RoomService roomService) {
+    this.socketRoomBroadcaster = socketRoomBroadcaster; //스프링 : 아 컨테이너에 있는거 찾아 넣어줘야지 (의존성 주입 : DI)
     this.roomService = roomService;
   }
   
   
-  //연결된 모든 소켓세션을 저장
-  private static List<WebSocketSession> webSocketSessionList = new ArrayList<WebSocketSession>();
+  //연결된 모든 소켓세션을 저장 (ArrayList는 불안정, 나중에 바꿔야함)
+  private List<WebSocketSession> webSocketSessionList = new ArrayList<WebSocketSession>();
   
   /** 
    * WebSocket 협상이 성공하고, WebSocket 연결이 열려서 사용할 준비가 되었을 때 호출된다.
@@ -79,43 +79,14 @@ public class SocketRoomHandler extends TextWebSocketHandler {
   }
   
   /**
-   * 방 리스트 갱신 소켓 메서드 
+   * 추천 방법 (Service와 Broadcaster 의 역할을 나눔)
    */
-  public void renewalRoomList() {
-    // 1. 방 목록 조회
+  public void renewalRoomList2() {
     List<RoomDto> roomList = roomService.getAllRoomList();
-    //데이터를 JSON으로 변환해줘야 sendMessage의 매개변수로 대입 가능 (자바 <-> JSON : objectMapper.writeValueAsString(), JSON.parse() 
-    // 2. 클라이언트와 약속한 프로토콜 형태로 포장
-    Map<String, Object> roomListMap = Map.of(
-        "type", "roomList",  // "room" 보단 좀 더 의미가 드러나는 이름 추천
-        "data", roomList
-    );
-
-    // 3. JSON으로 변환
-    String jsonMsg;
-    try {
-        jsonMsg = ObjectMapperSingleton.getInstance()
-                                       .writeValueAsString(roomListMap);
-    } catch (JsonProcessingException e) {
-        // JSON 직렬화도 실패하면 보낼 게 없으니까 로그만 남기고 종료
-        e.printStackTrace(); // 나중엔 logger.error(...)로 교체 추천
-        return;
-    }
-
-    // 4. 모든 세션에 브로드캐스트
-    for (WebSocketSession s : webSocketSessionList) {
-        if (!s.isOpen()) {
-            continue; // 이미 끊긴 세션이면 패스
-        }
-
-        try {
-            s.sendMessage(new TextMessage(jsonMsg));
-        } catch (IOException e) {
-            e.printStackTrace(); // 마찬가지로 logger.warn 정도로 처리 추천
-        }
-    }
-    
+    socketRoomBroadcaster.sendRoomList(webSocketSessionList, roomList);
   }
+
+
   
   
 }

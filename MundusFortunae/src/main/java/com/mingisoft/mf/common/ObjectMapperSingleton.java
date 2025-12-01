@@ -1,7 +1,10 @@
 package com.mingisoft.mf.common;
 
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@Component
 public class ObjectMapperSingleton {
   
   //애플리케이션 전체에서 하나만 쓸 인스턴스

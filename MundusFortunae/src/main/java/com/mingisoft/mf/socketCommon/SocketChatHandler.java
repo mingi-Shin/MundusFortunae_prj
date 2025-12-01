@@ -11,9 +11,9 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import com.mingisoft.mf.game.SocketChatController;
+import com.mingisoft.mf.game.SocketChatBroadcaster;
 import com.mingisoft.mf.game.SocketGameController;
-import com.mingisoft.mf.game.SocketRoomController;
+import com.mingisoft.mf.game.SocketRoomBroadcaster;
 
 /**
  * 연결/메시지/종료 이벤트를 처리하는 핵심 부분입니다.
@@ -23,9 +23,9 @@ public class SocketChatHandler extends TextWebSocketHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(SocketChatHandler.class); 
   
-  private final SocketChatController socketChatController;
+  private final SocketChatBroadcaster socketChatController;
   
-  public SocketChatHandler(SocketChatController socketChatController) {
+  public SocketChatHandler(SocketChatBroadcaster socketChatController) {
     this.socketChatController = socketChatController; //스프링 : 아 컨테이너에 있는거 찾아 넣어줘야지 (의존성 주입 : DI)
   }
   

@@ -14,13 +14,24 @@
   <link rel="stylesheet" th:href="@{/header-footer/css/footer.css}" />
   <link rel="stylesheet" th:href="@{/home/css/home.css}">
   
+  <!-- http통신 js -->
   <script th:src="@{/gameRoomList/js/gameRoomList.js}"></script>
+  <!-- socket통신 js -->
+	<script th:src="@{/gameRoomList/js/webSocketGameRoomList.js}"></script>
 
 	<script th:inline="javascript">
 	const contextPath = /*[[@{/}]]*/ '';
 	
 	document.addEventListener('DOMContentLoaded', () => {
 		console.log('웹소켓 방리스트 페이지');
+		/* Http통신 js */
+		createRoom();
+		roomJoinModal();
+		roomJoinFormSend();
+		wrongAccessOpenModal();
+		changeJoinBtn();
+		/* Socket통신 js */
+		connectSocket();
 		
 	});
 	</script>	
