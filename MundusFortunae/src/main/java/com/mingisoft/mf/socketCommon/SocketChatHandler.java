@@ -12,7 +12,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.mingisoft.mf.game.SocketChatBroadcaster;
-import com.mingisoft.mf.game.SocketGameController;
+import com.mingisoft.mf.game.SocketGameBroadcaster;
 import com.mingisoft.mf.game.SocketRoomBroadcaster;
 
 /**
@@ -21,17 +21,11 @@ import com.mingisoft.mf.game.SocketRoomBroadcaster;
 @Component
 public class SocketChatHandler extends TextWebSocketHandler {
 
-  private static final Logger logger = LoggerFactory.getLogger(SocketChatHandler.class); 
+  private final SocketChatBroadcaster socketChatBroadcaster;
   
-  private final SocketChatBroadcaster socketChatController;
-  
-  public SocketChatHandler(SocketChatBroadcaster socketChatController) {
-    this.socketChatController = socketChatController; //스프링 : 아 컨테이너에 있는거 찾아 넣어줘야지 (의존성 주입 : DI)
+  public SocketChatHandler(SocketChatBroadcaster socketChatBroadcaster) {
+    this.socketChatBroadcaster = socketChatBroadcaster; //스프링 : 아 컨테이너에 있는거 찾아 넣어줘야지 (의존성 주입 : DI)
   }
-  
-  
-  //연결된 모든 소켓세션을 저장
-  private static List<WebSocketSession> webSocketSessionList = new ArrayList<WebSocketSession>();
   
   /** 
    * WebSocket 협상이 성공하고, WebSocket 연결이 열려서 사용할 준비가 되었을 때 호출된다.
@@ -39,16 +33,8 @@ public class SocketChatHandler extends TextWebSocketHandler {
    */
   @Override
   public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-    
-    webSocketSessionList.add(session);
-    logger.info("클라이언트 접속 : {}" , session.getId()); //세션아이디 
-    logger.info("클라이언트 Attribute : {}" , session.getAttributes()); //빈칸 
-    logger.info("클라이언트 Principal : {}" , session.getPrincipal());
-    logger.info("클라이언트 Uri : {}" , session.getUri()); // ws://localhost:8081/mf/chat
-    logger.info("클라이언트 LocalAddress : {}" , session.getLocalAddress()); // /[0:0:0:0:0:0:0:1]:8081
-    logger.info("클라이언트 RemoteAddress : {}" , session.getRemoteAddress()); // /[0:0:0:0:0:0:0:1]:65084
-    
-    logger.info("현재 웹소켓 세션 갯수 : {}", webSocketSessionList.size());
+    //참여자를 해당하는 방 세션에 저장 
+    socketChatBroadcaster.addSession(session);
     
   }
   
@@ -56,7 +42,7 @@ public class SocketChatHandler extends TextWebSocketHandler {
   protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
     // 클라이언트가 보낸 메시지 
     String payload = message.getPayload();
-    logger.info("클라이언트로 부터 데이터 수신: {}", payload);
+    //logger.info("클라이언트로 부터 데이터 수신: {}", payload);
     
     // 연결되어있는 모든 소켓세션들에게 메시지를 브로드캐스트!!  
     for(WebSocketSession s : webSocketSessionList) {
@@ -67,7 +53,6 @@ public class SocketChatHandler extends TextWebSocketHandler {
   @Override
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
     webSocketSessionList.remove(session);
-    logger.info("연결 종료 : {}", session.getId());
   }
   
   

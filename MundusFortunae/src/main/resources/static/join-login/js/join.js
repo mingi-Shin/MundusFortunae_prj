@@ -154,7 +154,7 @@ async function duplicateUser(field, value){ //async는 함수선언 앞에
 		  return;
 		}
 		
-		const isDuplicated = await response.json();
+		const isDuplicated = await response.json(); //json()은 fetch()로 받은 Response 객체에서 쓰는 메서드
 		
 		if(isDuplicated){
 			alert(value + "는 사용하실 수 없습니다.");

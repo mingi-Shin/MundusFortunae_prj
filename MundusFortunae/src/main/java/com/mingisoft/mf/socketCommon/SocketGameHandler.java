@@ -12,7 +12,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.mingisoft.mf.game.SocketChatBroadcaster;
-import com.mingisoft.mf.game.SocketGameController;
+import com.mingisoft.mf.game.SocketGameBroadcaster;
 import com.mingisoft.mf.game.SocketRoomBroadcaster;
 
 /**
@@ -23,9 +23,9 @@ public class SocketGameHandler extends TextWebSocketHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(SocketGameHandler.class); 
   
-  private final SocketGameController socketGameController;
+  private final SocketGameBroadcaster socketGameController;
   
-  public SocketGameHandler(SocketGameController socketGameController) {
+  public SocketGameHandler(SocketGameBroadcaster socketGameController) {
     this.socketGameController = socketGameController;
   }
   

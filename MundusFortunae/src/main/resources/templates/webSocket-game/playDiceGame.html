@@ -15,7 +15,12 @@
   <link rel="stylesheet" th:href="@{/home/css/home.css}">
 
 	<!-- 주사위 게임방 css -->
-	<link rel="stylesheet" th:href="@{/playDiceGameRoom/css/playDiceGame.css}">
+	<link rel="stylesheet" th:href="@{/playDiceGame/css/playDiceGame.css}">
+	
+	<!-- 주사위 게임방 게임전용 웹소켓 js -->
+	<script th:href="@{/playDiceGame/js/webSocketDiceGame.js}"></script>
+	<!-- 주사위 게임방 채팅전용 웹소켓 js -->
+	<script th:href="@{/playDiceGame/js/webSocketDiceChat.js}"></script>
 	
 	<script th:inline="javascript">
 	  const contextPath = /*[[@{/}]]*/ '';
@@ -143,7 +148,7 @@
                   
                   <!-- 다른 플레이어들 -->
                   <div class="p-2 border rounded">
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2" id="playerInfo">
                       <div class="player-avatar bg-secondary">P2</div>
                       <div>
                         <div class="fw-bold small">플레이어2</div>

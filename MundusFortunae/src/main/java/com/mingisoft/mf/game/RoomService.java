@@ -11,10 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.mingisoft.mf.socketCommon.SocketRoomHandler;
+
 @Service
 public class RoomService {
   
   private final static Logger logger = LoggerFactory.getLogger(RoomService.class);  
+  
       
   /**
    * 스토리 만들기 -> 리팩토링 요소 
@@ -38,8 +41,6 @@ public class RoomService {
   
   //다른곳에서 필요할수 있어 
   public List<RoomDto> getAllRoomList(){
-    //List<RoomDto> roomList = new ArrayList<RoomDto>();
-    //roomList.addAll(rooms.values());
     List<RoomDto> roomList = new ArrayList<>(rooms.values());
     return roomList;
   }

@@ -22,7 +22,7 @@ public class ObjectMapperSingleton {
     return mapper;
   }
   
-  public static ObjectMapper getInstance() {
+  public ObjectMapper getInstance() {
     return INSTANCE;
   }
   

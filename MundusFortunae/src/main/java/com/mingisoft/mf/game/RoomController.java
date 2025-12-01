@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.mingisoft.mf.api.ApiResponse;
 import com.mingisoft.mf.api.ErrorResponse;
+import com.mingisoft.mf.socketCommon.SocketRoomHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -28,9 +29,11 @@ public class RoomController {
   private final static Logger logger = LoggerFactory.getLogger(RoomController.class);
 
   private final RoomService gameService;
+  private final SocketRoomBroadcaster socketRoomBroadcaster;
   
-  public RoomController(RoomService gameService) {
+  public RoomController(RoomService gameService, SocketRoomBroadcaster socketRoomBroadcaster) {
     this.gameService = gameService;
+    this.socketRoomBroadcaster = socketRoomBroadcaster;
   }
   /**
    * 웹게임 방 리스트 뷰페이지 
@@ -88,6 +91,10 @@ public class RoomController {
     
     try {
       RoomDto newRoom =  gameService.createGameRoom(roomTitle, roomPassword, nickname);
+      
+      //웹소켓 브로드캐스트 호출(데이터 전달)
+      List<RoomDto> allRooms  = gameService.getAllRoomList();
+      socketRoomBroadcaster.sendRoomList(allRooms);
 
       return ResponseEntity
           .status(HttpStatus.OK)
@@ -182,7 +189,7 @@ public class RoomController {
    */
   //RESTful API 디자인에 따르면 방번호를 주는게 맞다. 
   @GetMapping("/webSocket/room/{roomSeq}")
-  public String enterRoom(@PathVariable(value = "roomSeq") String roomSeq, HttpServletRequest request, Model model) {
+  public String enterRoom(@PathVariable(value = "roomSeq") String roomSeq, HttpServletRequest request) {
     
     //--- 접속자 세션 검증 --- 
     HttpSession session = request.getSession(false); //1. 접속자의 JESESSIONID 쿠키가 있는지 2. 그 쿠키의 ID가 내 서버 세션에 있는지
@@ -204,9 +211,16 @@ public class RoomController {
     
     //-- 후속처리 
     RoomDto joinRoom = gameService.getRoom(Long.valueOf(roomSeq));
-    model.addAttribute("roomObj", joinRoom);
     
-    logger.info("최종 방 인원 정보 : {}", joinRoom.getPlayerList());
+    //브로드캐스트 호출(방 참여인원 업뎃)
+    List<RoomDto> allRooms  = gameService.getAllRoomList();
+    socketRoomBroadcaster.sendRoomList(allRooms);
+    
+    //해당 방번호 객체에 플레이어추가??
+    
+    
+    logger.info("접속하는 방 토탈 정보 : {}", joinRoom);
+    logger.info("접속하는 방 인원 리스트 : {}", joinRoom.getPlayerList());
     
     return "webSocket-game/playDiceGame";
   }
