@@ -28,6 +28,8 @@
 	  document.addEventListener('DOMContentLoaded', () => {
 			console.log('웹소켓 주사위게임 방 페이지');
 			
+			const roomSeq = document.getElementById("roomSeq").dataset.roomSeq;
+			console.log(roomSeq + "번 방에 입장. ");
 		});
 	  
 	</script>	
@@ -127,7 +129,7 @@
             <!-- 참여자 리스트 -->
             <div class="game-card participants-section p-3">
               <h6 class="fw-bold mb-3 text-secondary">
-                <i class="bi bi-people-fill"></i> 참여자 (3/6)
+                <i class="bi bi-people-fill"></i> <span id="roomSeq" th:data-room-seq="${roomSeq}" th:text="${roomSeq}"></span>번방 참여자 (3/6)
               </h6>
               <div class="scroll-area h-75">
                 <div class="d-flex flex-column gap-2">

@@ -101,7 +101,7 @@ public class RoomService {
   }
   
   /**
-   * 방 유저추가 메서드 
+   * 방 유저 추가 메서드 
    */
   public void addPlayerToRoom(Long roomSeq, String nickname) {
     RoomDto room = getRoom(roomSeq);

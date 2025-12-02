@@ -11,6 +11,9 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.mingisoft.mf.common.ObjectMapperSingleton;
+import com.mingisoft.mf.game.RoomService;
 import com.mingisoft.mf.game.SocketChatBroadcaster;
 import com.mingisoft.mf.game.SocketGameBroadcaster;
 import com.mingisoft.mf.game.SocketRoomBroadcaster;
@@ -22,9 +25,13 @@ import com.mingisoft.mf.game.SocketRoomBroadcaster;
 public class SocketChatHandler extends TextWebSocketHandler {
 
   private final SocketChatBroadcaster socketChatBroadcaster;
+  private final ObjectMapperSingleton objectMapperSingleton;
+  private final RoomService roomService;
   
-  public SocketChatHandler(SocketChatBroadcaster socketChatBroadcaster) {
+  public SocketChatHandler(SocketChatBroadcaster socketChatBroadcaster, ObjectMapperSingleton objectMapperSingleton, RoomService roomService) {
     this.socketChatBroadcaster = socketChatBroadcaster; //스프링 : 아 컨테이너에 있는거 찾아 넣어줘야지 (의존성 주입 : DI)
+    this.objectMapperSingleton = objectMapperSingleton;
+    this.roomService = roomService;
   }
   
   /** 
@@ -33,26 +40,36 @@ public class SocketChatHandler extends TextWebSocketHandler {
    */
   @Override
   public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-    //참여자를 해당하는 방 세션에 저장 
-    socketChatBroadcaster.addSession(session);
     
   }
   
   @Override
   protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-    // 클라이언트가 보낸 메시지 
-    String payload = message.getPayload();
-    //logger.info("클라이언트로 부터 데이터 수신: {}", payload);
-    
-    // 연결되어있는 모든 소켓세션들에게 메시지를 브로드캐스트!!  
-    for(WebSocketSession s : webSocketSessionList) {
-      s.sendMessage(new TextMessage(payload));
+    // 클라이언트가 socket.send()한 메시지 
+    /**
+     * JSON 문자열을 파싱해서 node라는 JSON 트리 객체로 만들어라 라는 뜻 = 이제부터 node는 JSON 최상위 객체를 가리키고 있음
+     */
+    JsonNode node = objectMapperSingleton.getInstance().readTree(message.getPayload()); //json -> java
+    String type = node.path("type").asText(null); //NPE피하기 용도 : 없으면 null반환 
+    switch (type) {
+    case "playerUI": {
+      
     }
+    case "chat" : {
+      
+    }
+    default:
+      throw new IllegalArgumentException("Unexpected value: " + type);
+    }
+    
+    
+    
+    
   }
   
   @Override
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-    webSocketSessionList.remove(session);
+    socketChatBroadcaster.removeSession(session);
   }
   
   

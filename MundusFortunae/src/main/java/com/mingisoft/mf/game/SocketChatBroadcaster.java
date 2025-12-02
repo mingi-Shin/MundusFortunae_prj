@@ -17,9 +17,11 @@ import com.mingisoft.mf.common.ObjectMapperSingleton;
 public class SocketChatBroadcaster {
   
   private final ObjectMapperSingleton objectMapper;
+  private final RoomService roomService;
   
-  public SocketChatBroadcaster(ObjectMapperSingleton objectMapper) {
+  public SocketChatBroadcaster(ObjectMapperSingleton objectMapper, RoomService roomService) {
     this.objectMapper = objectMapper;
+    this.roomService = roomService;
   }
   
   //map도 불안정함 바꿔야해 
@@ -27,5 +29,17 @@ public class SocketChatBroadcaster {
   
   public void addSession(WebSocketSession session) {
     
+  }
+  
+  public void removeSession(WebSocketSession session) {
+    
+  }
+  
+  //해당 방의 최신정보를 해당방 인원들에게 브로드캐스트
+  public void renewalRoomPlayers(Long roomSeq) {
+    RoomDto currentRoom = roomService.getRoom(roomSeq);
+    for() {
+      
+    }
   }
 }

@@ -60,7 +60,7 @@ public class SocketRoomBroadcaster {
     );
     String jsonMsg;
     try {
-      jsonMsg = objectMapper.getInstance().writeValueAsString(roomWaitingPeople);
+      jsonMsg = objectMapper.getInstance().writeValueAsString(roomWaitingPeople); //java -> json
       
     } catch (JsonProcessingException e) {
       // 데이터가 존재하지 않아서, JSON 직렬화도 실패하면 보낼 게 없으니까 로그만 남기고 종료
@@ -74,7 +74,7 @@ public class SocketRoomBroadcaster {
       }
 
       try {
-        s.sendMessage(new TextMessage(jsonMsg));
+        s.sendMessage(new TextMessage(jsonMsg)); //아무 문자열이면 됨, 다만 프론트에서 JSON.parse()할거니까 json으로 보내는 중 
       } catch (IOException e) {
         logger.warn("소켓에 sendMessage() 실패", e.getMessage(), e);
       }

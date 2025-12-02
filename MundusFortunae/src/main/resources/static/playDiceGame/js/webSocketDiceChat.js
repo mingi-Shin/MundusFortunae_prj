@@ -2,13 +2,18 @@
  * 게임 채팅 + 참여자 목록 + 나가기 소켓 
  */
 let chatSocket;
+const roomSeq = document.getElementById("roomSeq").dataset.roomSeq;
 
 function connectChatSocket(){
 	const host = window.location.host;
 	const protocol = window.location.protocol === "https://" ? "wss://" : "ws://";
+
 	chatSocket = new WebSocket(protocol + host + "/mf/chat");
-	
+
+	sendRoomSeqToHandler();
+
 	initChatSocketHandlers();
+	
 }
 
 /**
@@ -21,11 +26,10 @@ function initChatSocketHandlers(){
 	}
 	
 	chatSocket.onopen = () => {
-	  console.log("서버와 채팅소켓 연결 open!");
+	  console.log(roomSeq + "번 방 채팅소켓 연결 open!");
 	};
 	
 	chatSocket.onmessage = (event) => {
-		const myNickname = localStorage.getItem("myNickname");
 		
 	}
 	
@@ -40,3 +44,14 @@ function initChatSocketHandlers(){
 	};
 	
 }
+/* roomSeq를 Handler에게 던지기*/
+function sendRoomSeqToHandler(){
+	const payload = {
+		type : "playerUI",
+		roomSeq : Number(roomSeq),
+		nickname : localStorage.getItem("myNickname") //이건 그냥 필요할까봐 
+	}
+	
+	chatSocket.send(JSON.stringify(payload));
+}
+

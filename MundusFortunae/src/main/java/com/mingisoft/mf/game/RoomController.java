@@ -30,10 +30,12 @@ public class RoomController {
 
   private final RoomService gameService;
   private final SocketRoomBroadcaster socketRoomBroadcaster;
+  private final SocketChatBroadcaster socketChatBroadcaster;
   
-  public RoomController(RoomService gameService, SocketRoomBroadcaster socketRoomBroadcaster) {
+  public RoomController(RoomService gameService, SocketRoomBroadcaster socketRoomBroadcaster, SocketChatBroadcaster socketChatBroadcaster) {
     this.gameService = gameService;
     this.socketRoomBroadcaster = socketRoomBroadcaster;
+    this.socketChatBroadcaster = socketChatBroadcaster;
   }
   /**
    * 웹게임 방 리스트 뷰페이지 
@@ -189,7 +191,7 @@ public class RoomController {
    */
   //RESTful API 디자인에 따르면 방번호를 주는게 맞다. 
   @GetMapping("/webSocket/room/{roomSeq}")
-  public String enterRoom(@PathVariable(value = "roomSeq") String roomSeq, HttpServletRequest request) {
+  public String enterRoom(@PathVariable(value = "roomSeq") String roomSeq, HttpServletRequest request, Model model) {
     
     //--- 접속자 세션 검증 --- 
     HttpSession session = request.getSession(false); //1. 접속자의 JESESSIONID 쿠키가 있는지 2. 그 쿠키의 ID가 내 서버 세션에 있는지
@@ -206,21 +208,17 @@ public class RoomController {
       return "redirect:/webSocket/websocketRoom?hasError=true";
     }
     
-    //--- 접속자 세션 검증 통과 : 허용 ----
-    logger.info("- 모든 검증 통과 - 접속 허용_isJoinable : {}", isJoinableTrue);
-    
+    // --- 접속자 세션 검증 통과 ---
     //-- 후속처리 
-    RoomDto joinRoom = gameService.getRoom(Long.valueOf(roomSeq));
+    RoomDto roomInfo = gameService.getRoom(Long.valueOf(roomSeq));
+    logger.info("접속하는 방 정보 : {}", roomInfo);
     
-    //브로드캐스트 호출(방 참여인원 업뎃)
+    //대기실 브로드캐스트 호출(방 참여인원 표기 업데이트 때문에 )
     List<RoomDto> allRooms  = gameService.getAllRoomList();
     socketRoomBroadcaster.sendRoomList(allRooms);
     
-    //해당 방번호 객체에 플레이어추가??
-    
-    
-    logger.info("접속하는 방 토탈 정보 : {}", joinRoom);
-    logger.info("접속하는 방 인원 리스트 : {}", joinRoom.getPlayerList());
+    //최초렌더링 : html, 그 후 렌더링 : 소켓 
+    model.addAttribute("roomSeq", roomSeq);
     
     return "webSocket-game/playDiceGame";
   }
