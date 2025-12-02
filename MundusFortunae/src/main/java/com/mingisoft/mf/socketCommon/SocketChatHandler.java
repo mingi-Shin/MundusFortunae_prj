@@ -12,7 +12,8 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.mingisoft.mf.common.ObjectMapperSingleton;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mingisoft.mf.common.RoomSocketBroadcaster;
 import com.mingisoft.mf.game.RoomService;
 import com.mingisoft.mf.game.SocketChatBroadcaster;
 import com.mingisoft.mf.game.SocketGameBroadcaster;
@@ -25,12 +26,12 @@ import com.mingisoft.mf.game.SocketRoomBroadcaster;
 public class SocketChatHandler extends TextWebSocketHandler {
 
   private final SocketChatBroadcaster socketChatBroadcaster;
-  private final ObjectMapperSingleton objectMapperSingleton;
+  private final ObjectMapper objectMapper;
   private final RoomService roomService;
   
-  public SocketChatHandler(SocketChatBroadcaster socketChatBroadcaster, ObjectMapperSingleton objectMapperSingleton, RoomService roomService) {
+  public SocketChatHandler(SocketChatBroadcaster socketChatBroadcaster, ObjectMapper objectMapper, RoomService roomService) {
     this.socketChatBroadcaster = socketChatBroadcaster; //스프링 : 아 컨테이너에 있는거 찾아 넣어줘야지 (의존성 주입 : DI)
-    this.objectMapperSingleton = objectMapperSingleton;
+    this.objectMapper = objectMapper;
     this.roomService = roomService;
   }
   
@@ -49,7 +50,7 @@ public class SocketChatHandler extends TextWebSocketHandler {
     /**
      * JSON 문자열을 파싱해서 node라는 JSON 트리 객체로 만들어라 라는 뜻 = 이제부터 node는 JSON 최상위 객체를 가리키고 있음
      */
-    JsonNode node = objectMapperSingleton.getInstance().readTree(message.getPayload()); //json -> java
+    JsonNode node = objectMapper.readTree(message.getPayload()); //json -> java
     String type = node.path("type").asText(null); //NPE피하기 용도 : 없으면 null반환 
     switch (type) {
     case "playerUI": {

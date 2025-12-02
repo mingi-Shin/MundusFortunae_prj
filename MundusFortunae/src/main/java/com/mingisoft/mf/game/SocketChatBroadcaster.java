@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mingisoft.mf.common.ObjectMapperSingleton;
 
 /**
@@ -16,10 +17,11 @@ import com.mingisoft.mf.common.ObjectMapperSingleton;
 @Component
 public class SocketChatBroadcaster {
   
-  private final ObjectMapperSingleton objectMapper;
+  //스프링에서 기본으로 ObjectMapper를 bean으로 들고있어서 바로 주입이 가능 
+  private final ObjectMapper objectMapper;
   private final RoomService roomService;
   
-  public SocketChatBroadcaster(ObjectMapperSingleton objectMapper, RoomService roomService) {
+  public SocketChatBroadcaster(ObjectMapper objectMapper, RoomService roomService) {
     this.objectMapper = objectMapper;
     this.roomService = roomService;
   }

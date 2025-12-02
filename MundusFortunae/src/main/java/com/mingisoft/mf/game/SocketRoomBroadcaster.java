@@ -13,7 +13,6 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mingisoft.mf.common.ObjectMapperSingleton;
 
 /**
  * RoomSocketBroadcaster
@@ -23,9 +22,9 @@ import com.mingisoft.mf.common.ObjectMapperSingleton;
 public class SocketRoomBroadcaster {
 
   private final static Logger logger = LoggerFactory.getLogger(SocketRoomBroadcaster.class);
-  private final ObjectMapperSingleton objectMapper;
+  private final ObjectMapper objectMapper;
   
-  public SocketRoomBroadcaster(ObjectMapperSingleton objectMapper) {
+  public SocketRoomBroadcaster(ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
   }
   
@@ -60,7 +59,7 @@ public class SocketRoomBroadcaster {
     );
     String jsonMsg;
     try {
-      jsonMsg = objectMapper.getInstance().writeValueAsString(roomWaitingPeople); //java -> json
+      jsonMsg = objectMapper.writeValueAsString(roomWaitingPeople); //java -> json
       
     } catch (JsonProcessingException e) {
       // 데이터가 존재하지 않아서, JSON 직렬화도 실패하면 보낼 게 없으니까 로그만 남기고 종료
@@ -95,7 +94,7 @@ public class SocketRoomBroadcaster {
     // 2. JSON으로 변환
     String jsonMsg;
     try {
-      jsonMsg = objectMapper.getInstance().writeValueAsString(roomListMap); //생성된 방 리스트를 JSON(문자열)으로 변환
+      jsonMsg = objectMapper.writeValueAsString(roomListMap); //생성된 방 리스트를 JSON(문자열)으로 변환
       
     } catch (JsonProcessingException e) {
       // 데이터가 존재하지 않아서, JSON 직렬화도 실패하면 보낼 게 없으니까 로그만 남기고 종료
