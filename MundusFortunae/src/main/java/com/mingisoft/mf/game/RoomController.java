@@ -1,5 +1,6 @@
 package com.mingisoft.mf.game;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,14 +29,12 @@ public class RoomController {
 
   private final static Logger logger = LoggerFactory.getLogger(RoomController.class);
 
-  private final RoomService gameService;
-  private final SocketRoomBroadcaster socketRoomBroadcaster;
-  private final SocketChatBroadcaster socketChatBroadcaster;
+  private final RoomService roomService;
+  private final SocketRoomBroadcaster socketRoomBroadcaster; //원래 여기서 하면 안되고, 소켓관련 로직은 따로 처리해줘야 하는데..
   
-  public RoomController(RoomService gameService, SocketRoomBroadcaster socketRoomBroadcaster, SocketChatBroadcaster socketChatBroadcaster) {
-    this.gameService = gameService;
+  public RoomController(RoomService roomService, SocketRoomBroadcaster socketRoomBroadcaster) {
+    this.roomService = roomService;
     this.socketRoomBroadcaster = socketRoomBroadcaster;
-    this.socketChatBroadcaster = socketChatBroadcaster;
   }
   /**
    * 웹게임 방 리스트 뷰페이지 
@@ -49,7 +48,7 @@ public class RoomController {
       model.addAttribute("hasError", "true");
     }
     
-    List<RoomDto> roomList = gameService.getAllRoomList();
+    Collection<RoomDto> roomList = roomService.getAllRooms();
     
     model.addAttribute("roomList", roomList);
     
@@ -92,10 +91,10 @@ public class RoomController {
         roomTitle, roomPassword, nickname);
     
     try {
-      RoomDto newRoom =  gameService.createGameRoom(roomTitle, roomPassword, nickname);
+      RoomDto newRoom =  roomService.createGameRoom(roomTitle, roomPassword, nickname);
       
       //웹소켓 브로드캐스트 호출(데이터 전달)
-      List<RoomDto> allRooms  = gameService.getAllRoomList();
+      Collection<RoomDto> allRooms  = roomService.getAllRooms();
       socketRoomBroadcaster.sendRoomList(allRooms);
 
       return ResponseEntity
@@ -121,7 +120,7 @@ public class RoomController {
   @PostMapping("/webSocket/room/{roomSeq}/join")
   public ResponseEntity<?> joinRoomRequest(@PathVariable String roomSeq, @RequestBody Map<String, String> bodyData, HttpServletRequest request){
     
-    RoomDto room = gameService.getRoom(Long.valueOf(roomSeq));
+    RoomDto room = roomService.getRoom(Long.valueOf(roomSeq));
     
     if(room == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -165,13 +164,13 @@ public class RoomController {
     }
       
     //3. 일반유저의 방인원 체크 
-    if(gameService.isFullRoom(Long.valueOf(roomSeq))) {
+    if(roomService.isFullRoom(Long.valueOf(roomSeq))) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(ErrorResponse.of(HttpStatus.FORBIDDEN, "방 인원이 가득 찼습니다.", "/api/rooms/" + roomSeq + "/join"));
     }
     
     //검증 모두 통과 
-    gameService.addPlayerToRoom(Long.valueOf(roomSeq), inputNickname);
+    roomService.addPlayerToRoom(Long.valueOf(roomSeq), inputNickname);
     
     //GetMapping용 Session 티켓 생성
     HttpSession newSession = request.getSession(true);
@@ -185,7 +184,7 @@ public class RoomController {
   
   /**
    * 방 페이지 이동  비상상황! URL하드코딩하면 접속되어버림!
-   * 처리방법 : 서버에서 하는 게 좋음. js는 조작가능성 존재. -> 세션 활용 
+   * 처리한 방법 = 서버에서 하는 게 좋음. js는 조작가능성 존재. -> 세션 활용 
    * @param roomNumber
    * @return
    */
@@ -210,11 +209,11 @@ public class RoomController {
     
     // --- 접속자 세션 검증 통과 ---
     //-- 후속처리 
-    RoomDto roomInfo = gameService.getRoom(Long.valueOf(roomSeq));
+    RoomDto roomInfo = roomService.getRoom(Long.valueOf(roomSeq));
     logger.info("접속하는 방 정보 : {}", roomInfo);
     
     //대기실 브로드캐스트 호출(방 참여인원 표기 업데이트 때문에 )
-    List<RoomDto> allRooms  = gameService.getAllRoomList();
+    Collection<RoomDto> allRooms  = roomService.getAllRooms();
     socketRoomBroadcaster.sendRoomList(allRooms);
     
     //최초렌더링 : html, 그 후 렌더링 : 소켓 
@@ -222,4 +221,26 @@ public class RoomController {
     
     return "webSocket-game/playDiceGame";
   }
+  
+  //유저 퇴장시 서버단 리스트에서 삭제 요청 
+  @PostMapping("/webSocket/leave")
+  public ResponseEntity<?> removePlayerFromServerRoom(@RequestBody PlayerDto player) {
+    Long roomSeq = player.getRoomSeq();
+    String nickname = player.getNickname();
+    try {
+      roomService.leavePlayerFromRoom(roomSeq, nickname);
+      roomService.deleteEmptyRoom(roomSeq); //만약 빈방되면 리스트에서 방 삭제 
+      logger.info("처리후 생성되어있는 방 갯수 : {}", roomService.getAllRooms().size());
+      logger.info("방 리스트가 비어있냐? : {}", roomService.getAllRooms().isEmpty());
+      return ResponseEntity
+          .status(HttpStatus.OK)
+          .body(ApiResponse.of(HttpStatus.OK, "퇴장 유저 리스트에서 추출 성공", null));
+    } catch (Exception e) {
+      logger.warn("유저 퇴장처리 실패 : {}", e.getMessage(), e);
+      return ResponseEntity
+              .status(HttpStatus.BAD_REQUEST)
+              .body(ErrorResponse.of(HttpStatus.BAD_REQUEST, "유저 퇴장처리 실패", "/webSocket/leave"));
+    }
+  }
+  
 }

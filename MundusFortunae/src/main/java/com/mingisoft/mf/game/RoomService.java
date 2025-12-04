@@ -1,6 +1,7 @@
 package com.mingisoft.mf.game;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,6 @@ public class RoomService {
   //private final AtomicLong roomNumberGenerator = new AtomicLong(0L);
   private Long roomNumberGenerator = 0L; //Service싱글톤에서 다루므로 전역변수처럼 동작 
   
-  
   //메모리에 올라갈 방 정보
   //private final Map<Long, RoomDto> rooms = new ConcurrentHashMap<Long, RoomDto>();
   private final Map<Long, RoomDto> rooms = new HashMap<Long, RoomDto>();
@@ -40,9 +40,8 @@ public class RoomService {
   }
   
   //다른곳에서 필요할수 있어 
-  public List<RoomDto> getAllRoomList(){
-    List<RoomDto> roomList = new ArrayList<>(rooms.values());
-    return roomList;
+  public Collection<RoomDto> getAllRooms(){
+    return rooms.values(); // 리스트 형태로 반환됨
   }
   
   public RoomDto getRoom(Long roomSeq){
@@ -52,6 +51,11 @@ public class RoomService {
   public boolean isFullRoom(Long roomSeq) {
     RoomDto room = getRoom(roomSeq);
     return room.getMaxPlayerCount() == room.getPlayerList().size();
+  }
+  
+  public boolean isEmptyRoom(Long roomSeq) {
+    RoomDto room = this.getRoom(roomSeq);
+    return room.getPlayerList().isEmpty();
   }
   
   //------------------------------------------------------------------------------------
@@ -104,7 +108,7 @@ public class RoomService {
    * 방 유저 추가 메서드 
    */
   public void addPlayerToRoom(Long roomSeq, String nickname) {
-    RoomDto room = getRoom(roomSeq);
+    RoomDto room = this.getRoom(roomSeq);
     
     PlayerDto newPlayer = new PlayerDto();
     newPlayer.setRoomSeq(roomSeq);
@@ -114,6 +118,27 @@ public class RoomService {
     
     room.getPlayerList().add(newPlayer);
     logger.info("새로운 유저 접속.. 방번호 : {}, 유저번호: {}, 닉네임 : {}", roomSeq, room.getPlayerList().size(), nickname);
+  }
+  
+  /**
+   * 방 유저 탈퇴 메서드
+   */
+  public void leavePlayerFromRoom(Long roomSeq, String nickname) {
+    RoomDto room = this.getRoom(roomSeq);
+    List <PlayerDto> players = room.getPlayerList();
+    players.removeIf(p -> nickname.equals(p.getNickname()));
+    logger.info("퇴장 처리된 인원 : {}", nickname);
+    logger.info("남은 인원 : {}", room.getPlayerList());
+  }
+  
+  /**
+   * 방에 유저 없으면 방 삭제 메서드
+   */
+  public void deleteEmptyRoom(Long roomSeq) {
+    if(isEmptyRoom(roomSeq)) {
+      logger.info("빈방 확인, 삭제처리 : {}", roomSeq);
+      rooms.remove(roomSeq);
+    }
   }
   
   

@@ -1,5 +1,6 @@
 package com.mingisoft.mf.socketCommon;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public class SocketRoomHandler extends TextWebSocketHandler {
     socketRoomBroadcaster.currentWaitingPeople();
     
     // 새 접속자에게도 최신 리스트(이미 http통신으로 주고 있지만, 렌더링 되는 그 짧은 간격을 메꾸고자 한다면 넣어도 된다) 
-    List<RoomDto> roomList = roomService.getAllRoomList();
+    Collection<RoomDto> roomList = roomService.getAllRooms();
     socketRoomBroadcaster.sendRoomList(roomList);
     
   }

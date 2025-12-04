@@ -1,7 +1,9 @@
 package com.mingisoft.mf.socketCommon;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.logging.SocketHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +15,10 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mingisoft.mf.common.RoomSocketBroadcaster;
+import com.mingisoft.mf.game.RoomDto;
 import com.mingisoft.mf.game.RoomService;
 import com.mingisoft.mf.game.SocketChatBroadcaster;
+import com.mingisoft.mf.game.SocketChatService;
 import com.mingisoft.mf.game.SocketGameBroadcaster;
 import com.mingisoft.mf.game.SocketRoomBroadcaster;
 
@@ -25,14 +28,26 @@ import com.mingisoft.mf.game.SocketRoomBroadcaster;
 @Component
 public class SocketChatHandler extends TextWebSocketHandler {
 
+  private static final Logger logger = LoggerFactory.getLogger(SocketChatHandler.class);
+  
   private final SocketChatBroadcaster socketChatBroadcaster;
   private final ObjectMapper objectMapper;
-  private final RoomService roomService;
+  private final SocketChatService socketChatService;
+  private final SocketSessionRegistry socketSessionRegistry;
   
-  public SocketChatHandler(SocketChatBroadcaster socketChatBroadcaster, ObjectMapper objectMapper, RoomService roomService) {
-    this.socketChatBroadcaster = socketChatBroadcaster; //스프링 : 아 컨테이너에 있는거 찾아 넣어줘야지 (의존성 주입 : DI)
+  private final RoomService roomService;
+  private final SocketRoomBroadcaster socketRoomBroadcaster;
+  
+  
+  
+  public SocketChatHandler(SocketChatBroadcaster socketChatBroadcaster, ObjectMapper objectMapper, SocketChatService socketChatService, SocketSessionRegistry socketSessionRegistry
+      , RoomService roomServic, SocketRoomBroadcaster socketRoomBroadcaster) {
     this.objectMapper = objectMapper;
-    this.roomService = roomService;
+    this.socketChatBroadcaster = socketChatBroadcaster; //스프링 : 아 컨테이너에 있는거 찾아 넣어줘야지 (의존성 주입 : DI)
+    this.socketChatService = socketChatService;
+    this.socketSessionRegistry = socketSessionRegistry;
+    this.roomService = roomServic;
+    this.socketRoomBroadcaster = socketRoomBroadcaster;
   }
   
   /** 
@@ -45,20 +60,36 @@ public class SocketChatHandler extends TextWebSocketHandler {
   }
   
   @Override
-  protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-    // 클라이언트가 socket.send()한 메시지 
-    /**
-     * JSON 문자열을 파싱해서 node라는 JSON 트리 객체로 만들어라 라는 뜻 = 이제부터 node는 JSON 최상위 객체를 가리키고 있음
-     */
+  protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {// socket.send() 메시지 
+    //입구에서 json메시지 파싱해서 필요정보만 전달 
     JsonNode node = objectMapper.readTree(message.getPayload()); //json -> java
     String type = node.path("type").asText(null); //NPE피하기 용도 : 없으면 null반환 
     switch (type) {
-    case "playerUI": {
-      
+    //방참여 메시지 수신
+    case "addPlayer": {
+      Long roomSeq = node.path("roomSeq").asLong();
+      String nickname = node.path("nickname").asText(null);
+      socketChatService.addPlayer(session, roomSeq, nickname); //서비스를 통해 방번호, 닉네임 세션을 저장 
+      socketChatBroadcaster.addPlayerBroadcaster(session, roomSeq, nickname);
+      break;
     }
+    //방탈퇴 메시지 수신 
+    case "removePlayer" : {
+      session.getAttributes().put("manualClose", true);
+      
+      socketChatService.removePlayer(session); //세션에서 삭제 
+      socketChatBroadcaster.removePlayerBroadcaster(session); //퇴장 브로드캐스팅
+      break;
+    }
+    
+    //메시지 수신
     case "chat" : {
+      String msg = node.path("msg").asText();
+      socketChatBroadcaster.sendChatBroadcaster(session, msg);
       
+      break;
     }
+    
     default:
       throw new IllegalArgumentException("Unexpected value: " + type);
     }
@@ -68,9 +99,35 @@ public class SocketChatHandler extends TextWebSocketHandler {
     
   }
   
+  //비정상 접속 종료일 때다. 
   @Override
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-    socketChatBroadcaster.removeSession(session);
+    
+    // 정상 퇴장이면 중복처리 방지
+    Boolean manual = (Boolean) session.getAttributes().get("manualClose");
+    if (manual != null && manual) {
+        logger.info("정상 퇴장 → afterConnectionClosed 로직은 스킵합니다.");
+        return;
+    }
+    
+    logger.info("비정상 퇴장 발생, 정상 처리된것처럼 방 유저들에게 브로드캐스팅");
+    socketChatService.removePlayer(session); //세션에서 삭제 
+    socketChatBroadcaster.removePlayerBroadcaster(session); //퇴장 브로드캐스팅 
+    
+    
+    /**
+     * removePlayerFromServerRoom와 SocketRoomHandler에서 가져왔다. 
+     * 비정상 방퇴장시 fetch를 탈수 없기때문에 기존의 코드를 재사용해야한다. 그런데.. 
+     * 로직 구성에 맞지 않는 코드이지만, websocketRoom 페이지 렌더링을 도메인로직에 의존해서 생성하고 세션에 뿌리는 걸로 코드를 짜놔서 
+     * 지금와서 바꾸기가 쉽지않다. 
+     * 나중에 리팩토링 해야겠다. 일단 되게 만들자 
+     */
+    SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
+    roomService.leavePlayerFromRoom(playerDto.getRoomSeq(), playerDto.getNickname());
+    roomService.deleteEmptyRoom(playerDto.getRoomSeq()); //만약 빈방되면 리스트에서 방 삭제 
+    Collection<RoomDto> roomList = roomService.getAllRooms();
+    socketRoomBroadcaster.sendRoomList(roomList);
+    
   }
   
   

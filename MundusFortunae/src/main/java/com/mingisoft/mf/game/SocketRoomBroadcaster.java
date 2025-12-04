@@ -2,6 +2,7 @@ package com.mingisoft.mf.game;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mingisoft.mf.socketCommon.SocketSessionRegistry;
 
 /**
  * RoomSocketBroadcaster
@@ -23,30 +25,31 @@ public class SocketRoomBroadcaster {
 
   private final static Logger logger = LoggerFactory.getLogger(SocketRoomBroadcaster.class);
   private final ObjectMapper objectMapper;
+  private final SocketSessionRegistry socketSessionRegistry;
   
-  public SocketRoomBroadcaster(ObjectMapper objectMapper) {
+  
+  public SocketRoomBroadcaster(ObjectMapper objectMapper, SocketSessionRegistry socketSessionRegistry) {
     this.objectMapper = objectMapper;
+    this.socketSessionRegistry = socketSessionRegistry;
   }
   
-  //연결된 모든 소켓세션을 저장 (ArrayList는 불안정, 나중에 바꿔야함)
-  private List<WebSocketSession> webSocketSessionList = new ArrayList<WebSocketSession>();
   
   /**
    * Handler가 연결/해제 시 세션 등록/삭제용으로 호출
    */
   public void addSession(WebSocketSession session) {
-    webSocketSessionList.add(session);
+    socketSessionRegistry.getWaitingRoomSessions().add(session);
     logger.info("클라이언트 접속 : {}" , session.getId()); //세션아이디 
     logger.info("클라이언트 Attribute : {}" , session.getAttributes()); //빈칸 
     logger.info("클라이언트 Principal : {}" , session.getPrincipal());
     logger.info("클라이언트 Uri : {}" , session.getUri()); // ws://localhost:8081/mf/chat
     logger.info("클라이언트 LocalAddress : {}" , session.getLocalAddress()); // /[0:0:0:0:0:0:0:1]:8081
     logger.info("클라이언트 RemoteAddress : {}" , session.getRemoteAddress()); // /[0:0:0:0:0:0:0:1]:65084
-    logger.info("현재 웹소켓 세션 갯수 : {}", webSocketSessionList.size());
+    logger.info("현재 웹소켓 세션 갯수 : {}", socketSessionRegistry.getWaitingRoomSessions().size());
   }
   public void removeSession(WebSocketSession session) {
-    webSocketSessionList.remove(session);
-    logger.info("연결 종료 : {}", session.getId());
+    socketSessionRegistry.getWaitingRoomSessions().remove(session);
+    logger.info("연결 종료 (대기방 세션 종료) : {}", session.getId());
   }
   
   /**
@@ -55,7 +58,7 @@ public class SocketRoomBroadcaster {
   public void currentWaitingPeople() {
     Map<String, Object> roomWaitingPeople = Map.of(
       "type","roomWaitingPeople",
-      "data", webSocketSessionList.size()
+      "data", socketSessionRegistry.getWaitingRoomSessions().size()
     );
     String jsonMsg;
     try {
@@ -67,7 +70,7 @@ public class SocketRoomBroadcaster {
       return;
     }
     
-    for (WebSocketSession s : webSocketSessionList) {
+    for (WebSocketSession s : socketSessionRegistry.getWaitingRoomSessions()) {
       if (!s.isOpen()) {
         continue; // 이미 끊긴 세션이면 패스
       }
@@ -83,7 +86,7 @@ public class SocketRoomBroadcaster {
   /**
    * 방 리스트 갱신 메서드 
    */
-  public void sendRoomList(List<RoomDto> roomList) {
+  public void sendRoomList(Collection<RoomDto> roomList) {
     //데이터를 JSON으로 변환해줘야 sendMessage의 매개변수로 대입 가능 (자바 <-> JSON : objectMapper.writeValueAsString(), JSON.parse() 
     // 1. 클라이언트와 약속한 프로토콜 형태로 포장
     Map<String, Object> roomListMap = Map.of(
@@ -103,7 +106,7 @@ public class SocketRoomBroadcaster {
     }
 
     // 3. 모든 세션에 브로드캐스트
-    for (WebSocketSession s : webSocketSessionList) {
+    for (WebSocketSession s : socketSessionRegistry.getWaitingRoomSessions()) {
       if (!s.isOpen()) {
         continue; // 이미 끊긴 세션이면 패스
       }

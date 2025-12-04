@@ -92,7 +92,7 @@ function renderRoomList(roomList) {
   tbody.innerHTML = "";
 
   // 2. 방이 하나도 없을 때
-  if (!roomList || roomList.length === 0) {
+  if (!roomList || roomList.length === 0 ) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td colspan="4" class="text-center text-muted py-4">
@@ -157,3 +157,11 @@ function appendChat(chatData) {
 /**
  * 버튼 재 생성 후 이벤트 바인딩 
  */
+
+
+const jsonWords = JSON.stringify({
+	age : 36,
+	name : "Raphael",
+	isMerried : false
+});
+const javaWords = JSON.parse(jsonWords);
