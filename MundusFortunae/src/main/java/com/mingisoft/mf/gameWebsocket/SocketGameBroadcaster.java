@@ -1,4 +1,4 @@
-package com.mingisoft.mf.game;
+package com.mingisoft.mf.gameWebsocket;
 
 import org.springframework.stereotype.Controller;
 

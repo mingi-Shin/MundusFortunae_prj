@@ -1,4 +1,4 @@
-package com.mingisoft.mf.socketCommon;
+package com.mingisoft.mf.gameWebsocket;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,12 +15,10 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mingisoft.mf.game.RoomDto;
-import com.mingisoft.mf.game.RoomService;
-import com.mingisoft.mf.game.SocketChatBroadcaster;
-import com.mingisoft.mf.game.SocketChatService;
-import com.mingisoft.mf.game.SocketGameBroadcaster;
-import com.mingisoft.mf.game.SocketRoomBroadcaster;
+import com.mingisoft.mf.gameApplication.RoomDto;
+import com.mingisoft.mf.gameApplication.RoomService;
+import com.mingisoft.mf.gameWebsocket.SocketPlayerDto;
+import com.mingisoft.mf.gameWebsocket.SocketSessionRegistry;
 
 /**
  * 연결/메시지/종료 이벤트를 처리하는 핵심 부분입니다.

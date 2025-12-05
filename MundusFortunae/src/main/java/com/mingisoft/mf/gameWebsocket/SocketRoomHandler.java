@@ -1,19 +1,15 @@
-package com.mingisoft.mf.socketCommon;
+package com.mingisoft.mf.gameWebsocket;
 
 import java.util.Collection;
-import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import com.mingisoft.mf.game.RoomDto;
-import com.mingisoft.mf.game.RoomService;
-import com.mingisoft.mf.game.SocketRoomBroadcaster;
+import com.mingisoft.mf.gameApplication.RoomDto;
+import com.mingisoft.mf.gameApplication.RoomService;
 
 /**
  * 연결/메시지/종료 이벤트를 처리하는 핵심 부분입니다.

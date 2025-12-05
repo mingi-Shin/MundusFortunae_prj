@@ -1,4 +1,4 @@
-package com.mingisoft.mf.game;
+package com.mingisoft.mf.gameWebsocket;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
-import com.mingisoft.mf.socketCommon.SocketPlayerDto;
-import com.mingisoft.mf.socketCommon.SocketSessionRegistry;
+import com.mingisoft.mf.gameWebsocket.SocketPlayerDto;
+import com.mingisoft.mf.gameWebsocket.SocketSessionRegistry;
 
 @Component
 public class SocketChatService {

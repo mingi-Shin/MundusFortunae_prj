@@ -1,4 +1,4 @@
-package com.mingisoft.mf.game;
+package com.mingisoft.mf.gameWebsocket;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +14,8 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mingisoft.mf.socketCommon.SocketSessionRegistry;
+import com.mingisoft.mf.gameApplication.RoomDto;
+import com.mingisoft.mf.gameWebsocket.SocketSessionRegistry;
 
 /**
  * RoomSocketBroadcaster

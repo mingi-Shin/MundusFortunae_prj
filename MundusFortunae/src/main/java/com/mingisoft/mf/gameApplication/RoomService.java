@@ -1,4 +1,4 @@
-package com.mingisoft.mf.game;
+package com.mingisoft.mf.gameApplication;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,8 +11,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import com.mingisoft.mf.socketCommon.SocketRoomHandler;
 
 @Service
 public class RoomService {

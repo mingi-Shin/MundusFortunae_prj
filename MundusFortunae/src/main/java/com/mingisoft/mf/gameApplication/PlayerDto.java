@@ -1,17 +1,18 @@
-package com.mingisoft.mf.socketCommon;
+package com.mingisoft.mf.gameApplication;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class SocketPlayerDto {
+@AllArgsConstructor
+public class PlayerDto {
 
   private Long roomSeq;
   private int playerSeq;
   private String nickname;
-  private int gameScore;
+  private String role; // HOST or USER
+  //private T data; //나중에 쓸일이 있겠지?
   
 }

@@ -1,4 +1,4 @@
-package com.mingisoft.mf.socketCommon;
+package com.mingisoft.mf.gameWebsocket;
 
 import java.util.ArrayList;
 import java.util.HashMap;

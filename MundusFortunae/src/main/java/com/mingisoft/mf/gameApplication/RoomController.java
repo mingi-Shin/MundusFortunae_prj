@@ -1,4 +1,4 @@
-package com.mingisoft.mf.game;
+package com.mingisoft.mf.gameApplication;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.mingisoft.mf.api.ApiResponse;
 import com.mingisoft.mf.api.ErrorResponse;
-import com.mingisoft.mf.socketCommon.SocketRoomHandler;
+import com.mingisoft.mf.gameWebsocket.SocketRoomBroadcaster;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;

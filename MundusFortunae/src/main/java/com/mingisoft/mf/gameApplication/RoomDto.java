@@ -1,4 +1,4 @@
-package com.mingisoft.mf.game;
+package com.mingisoft.mf.gameApplication;
 
 import java.util.ArrayList;
 import java.util.List;

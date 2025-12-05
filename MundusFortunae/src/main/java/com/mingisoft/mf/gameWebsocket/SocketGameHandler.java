@@ -1,4 +1,4 @@
-package com.mingisoft.mf.socketCommon;
+package com.mingisoft.mf.gameWebsocket;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +10,6 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-
-import com.mingisoft.mf.game.SocketChatBroadcaster;
-import com.mingisoft.mf.game.SocketGameBroadcaster;
-import com.mingisoft.mf.game.SocketRoomBroadcaster;
 
 /**
  * 연결/메시지/종료 이벤트를 처리하는 핵심 부분입니다.

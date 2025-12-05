@@ -1,4 +1,4 @@
-package com.mingisoft.mf.game;
+package com.mingisoft.mf.gameWebsocket;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,8 +14,8 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mingisoft.mf.socketCommon.SocketPlayerDto;
-import com.mingisoft.mf.socketCommon.SocketSessionRegistry;
+import com.mingisoft.mf.gameWebsocket.SocketPlayerDto;
+import com.mingisoft.mf.gameWebsocket.SocketSessionRegistry;
 
 /**
  * 여기는 방별로 세션 관리  사용자 방 추가는 controller가 아니라 Handler에서 처리해야함 

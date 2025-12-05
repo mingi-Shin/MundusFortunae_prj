@@ -1,10 +1,9 @@
-package com.mingisoft.mf.socketCommon;
+package com.mingisoft.mf.gameWebsocket;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 /**
  * 핸들러 등록 : 웹소켓을 활성화
