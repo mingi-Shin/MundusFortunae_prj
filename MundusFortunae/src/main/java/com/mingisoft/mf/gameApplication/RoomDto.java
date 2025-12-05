@@ -24,6 +24,8 @@ public class RoomDto {
   @Builder.Default
   private List<PlayerDto> playerList = new ArrayList<PlayerDto>();
   
-  //  builder로 maxPlayerCount, playerList 안 채웠을 때도 기본값이 들어감
+  // builder로 maxPlayerCount, playerList 안 채웠을 때도 기본값이 들어감
   // 굳이 따로 생성자를 안 만들어도 됨 (직접 생성자 필요하면 유지해도 되고)
+  
+  private boolean isStarted;
 }

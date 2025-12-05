@@ -56,6 +56,11 @@ public class RoomService {
     return room.getPlayerList().isEmpty();
   }
   
+  public boolean isStartedRoom(Long roomSeq) {
+    RoomDto room = this.getRoom(roomSeq);
+    return room.isStarted();
+  }
+  
   //------------------------------------------------------------------------------------
   
   /**

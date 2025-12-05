@@ -24,7 +24,7 @@ function initGameSocketHandlers(){
 	  console.log("서버와 채팅소켓 연결 open!");
 	};
 	
-	gameSocket.onmessage = (event) => {
+	gameSocket.onmessage = (event) => { //chat 제외 게임만 
 		const myNickname = localStorage.getItem("myNickname");
 		
 	}
