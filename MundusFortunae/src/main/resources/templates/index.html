@@ -7,6 +7,14 @@
   <link rel="stylesheet" th:href="@{/header-footer/css/header.css}" />
   <link rel="stylesheet" th:href="@{/header-footer/css/footer.css}" />
   <link rel="stylesheet" th:href="@{/home/css/home.css}">
+  
+  <!-- 구글 seo 전용 -->
+  <th:block th:replace="~{fragments/seo :: seo(
+  'Welcome to MundusFortunae ',
+  'MundusFortunae 메인페이지',
+  'url : https://MundusFortunae.onrender.com ??'
+	)}"></th:block>
+  
   <style>
     
   </style>

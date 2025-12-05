@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title th:text="${title} ?: 'Template'"></title>
+  <title th:text="${title} ?: '게임 참가 대기장소'"></title>
 
 	<!-- 공통 CSS -->
   <th:block th:replace="~{fragments/external :: bootstrap_cdn_block}"></th:block>
@@ -18,6 +18,13 @@
   <script th:src="@{/gameRoomList/js/gameRoomList.js}"></script>
   <!-- socket통신 js -->
 	<script th:src="@{/gameRoomList/js/webSocketWaitingRoomList.js}"></script>
+	
+ 	<!-- 구글 seo 전용 -->
+  <th:block th:replace="~{fragments/seo :: seo(
+  'Mundus Fortunae | 게임 참가 대기장소 ',
+  'Mundus Fortunae 게임 참가 대기 페이지',
+  ' url : https://MundusFortunae.onrender.com'
+	)}"></th:block>
 
 	<script th:inline="javascript">
 	const contextPath = /*[[@{/}]]*/ '';

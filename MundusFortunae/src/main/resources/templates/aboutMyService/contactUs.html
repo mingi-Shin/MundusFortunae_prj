@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title th:text="${title} ?: 'Template'"></title>
+  <title th:text="${title} ?: 'Mundus Fortunae | Contact'"></title>
 
 	<!-- 공통 CSS -->
   <th:block th:replace="~{fragments/external :: bootstrap_cdn_block}"></th:block>
@@ -14,13 +14,14 @@
   <link rel="stylesheet" th:href="@{/header-footer/css/footer.css}" />
   <link rel="stylesheet" th:href="@{/home/css/home.css}">
   
+  <link rel="stylesheet" th:href="@{/home/css/contactUs.css}">
+  
   <!-- 구글 seo 전용 -->
   <th:block th:replace="~{fragments/seo :: seo(
-  ' title : Mundus Fortunae 소개 ',
-  ' desc : 페이지별 요약 설명 (고객센터 안내 페이지)',
-  ' url : https://MundusFortunae.onrender.com'
+  'Mundus Fortunae | Contact',
+  'MundusFortunae 고객센터',
+  'url : https://MundusFortunae.onrender.com ??'
 	)}"></th:block>
-  
 
 	<script th:inline="javascript">
 	  const contextPath = /*[[@{/}]]*/ '';
@@ -39,7 +40,109 @@
 	<div class="d-flex justify-content-center main-content">
 		<div class="card p-4 mt-5">
 			<main>
-			
+		    <div class="container">
+		      <div class="mf-contact-card">
+		
+		        <!-- 상단 헤드 -->
+		        <div class="mf-contact-hero text-center">
+		          <span class="mf-badge">Support & Feedback</span>
+		          <h1 class="mf-title">📮 Contact</h1>
+		          <p class="mf-subtitle">
+		            버그 제보, 기능 제안, 협업 문의까지 환영합니다.
+		          </p>
+		        </div>
+		
+		        <div class="mf-divider"></div>
+							<!-- 본문: 1컬럼(정돈 버전) -->
+							<div class="row">
+							  <div class="col-12">
+							    
+							    <!-- 안내/정보 -->
+							    <section class="mf-info-panel mb-4">
+							      <h2 class="mf-section-title">환영해요!</h2>
+							      <ul class="mf-bullets">
+							        <li>실시간 방/채팅/게임 진행 중 발생한 오류</li>
+							        <li>UI/UX 개선 아이디어</li>
+							        <li>새로운 미니게임 룰 제안</li>
+							        <li>포트폴리오/기술 협업 논의</li>
+							      </ul>
+							
+							      <div class="mf-mini-divider"></div>
+							
+							      <div class="mf-contact-meta">
+							        <div class="mf-meta-row">
+							          <span class="mf-meta-label">Email</span>
+							          <!-- 엔티티 표기 오류 수정 버전 -->
+							          <a class="mf-meta-value"
+							             href="mailto:mundusfortunae&#46;help&#64;gmail&#46;com">
+							            mundusfortunae&#46;help&#64;gmail&#46;com
+							          </a>
+							        </div>
+							        <div class="mf-meta-row">
+							          <span class="mf-meta-label">Response</span>
+							          <span class="mf-meta-value">가능한 빨리 확인합니다</span>
+							        </div>
+							      </div>
+							    </section>
+							
+							    <div class="mf-divider"></div>
+							
+							    <!-- 연락 방법 -->
+							    <section class="mf-form-panel mt-4">
+							      <h2 class="mf-section-title">연락 방법</h2>
+							
+							      <div class="p-3">
+							        <p class="mb-3">
+							          현재 <strong>Mundus Fortunae</strong>의 문의는
+							          <strong>이메일 접수 방식</strong>으로 운영됩니다.
+							        </p>
+							
+							        <ul class="mf-bullets">
+							          <li>버그 제보: 발생 환경/재현 경로/스크린샷</li>
+							          <li>기능 제안: 목적/기대 효과/간단한 예시</li>
+							          <li>협업 문의: 역할/기간/연락 가능 시간</li>
+							        </ul>
+							
+							        <div class="mf-mini-divider"></div>
+							
+							        <div class="alert alert-light border mb-3">
+							          아래 이메일로 보내주세요:
+							          <strong>mundusfortunae.help@gmail.com</strong>
+							        </div>
+							
+							        <div class="d-flex gap-2 flex-wrap">
+							
+							          <button class="btn btn-outline-secondary"
+							                  type="button"
+							                  onclick="navigator.clipboard.writeText('mundusfortunae.help@gmail.com')">
+							            이메일 복사
+							          </button>
+							        </div>
+							
+							        <small class="mf-hint d-block mt-3">
+							          개인정보는 문의 응대 목적 외에는 사용하지 않습니다.
+							        </small>
+							      </div>
+							    </section>
+							
+							  </div>
+							</div>
+							
+		
+		        <div class="mf-divider"></div>
+		
+		        <!-- 하단 짧은 카피 -->
+		        <div class="mf-closing text-center">
+		          <p class="mf-quote">
+		            작은 피드백 하나가 서비스의 세계선을 바꿉니다.
+		          </p>
+		          <p class="mf-quote">
+		            <strong>Mundus Fortunae</strong>는 계속 진화 중입니다.
+		          </p>
+		        </div>
+		
+		      </div>
+		    </div>
 			</main>
 		</div>
 	</div>

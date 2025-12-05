@@ -20,7 +20,7 @@
 	      <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 60vh;">
 	
 	        <li class="nav-item">
-	          <a class="nav-link" th:href="@{/about}">소개</a>
+	          <a class="nav-link" th:href="@{/aboutMyService}">소개</a>
 	        </li>
 	
 	        <!-- 학습하기 -->
@@ -31,7 +31,6 @@
 	            	<a class="dropdown-item" th:href="@{/webSocket/websocketRoom}"> 
 	            		<span class="text-danger small" > [mini] </span>운명의 주사위
             		</a>
-		            <li><a class="dropdown-item" th:href="@{/webSocket/socketChat}">관리자: WebSocket 채팅 예시</a></li>
             	</li>
               <!-- 관리자 전용 메뉴 묶음 -->
 	            <th:block sec:authorize="hasAuthority('ROLE_ADMIN')">
@@ -43,25 +42,23 @@
 	
 	        <!-- 커뮤니티 -->
 	        <li class="nav-item dropdown">
-	          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">커뮤니티</a>
+	          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" >커뮤니티</a>
 	          <ul class="dropdown-menu">
 	            <li>
-	              <a class="dropdown-item d-flex align-items-center justify-content-between" th:href="@{/board/notices}">
-	                공지사항 <span class="badge bg-secondary ms-2">1</span>
+	              <a class="dropdown-item d-flex align-items-center justify-content-between" th:href="@{#}" onclick="javascript:alert('현재 준비중입니다.');">
+	                공지사항 <span class="badge bg-secondary ms-2"></span>
 	              </a>
 	            </li>
 	            <li><hr class="dropdown-divider"></li>
-	            <li><a class="dropdown-item" th:href="@{/board/dailyQuizzes}">데일리 퀴즈</a></li>
-	            <li><hr class="dropdown-divider"></li>
 	            <li>
-	              <a class="dropdown-item d-flex align-items-center justify-content-between" th:href="@{/board/communities}">
-	                자유게시판 <span class="badge bg-secondary ms-2">5</span>
+	              <a class="dropdown-item d-flex align-items-center justify-content-between" th:href="@{#}" onclick="javascript:alert('현재 준비중입니다.');">
+	                자유게시판 <span class="badge bg-secondary ms-2"></span>
 	              </a>
 	            </li>
 	          </ul>
 	        </li>
 	
-	        <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+	        <li class="nav-item"><a class="nav-link" th:href="@{/contactUs}">Contact</a></li>
 	      </ul>
 	
 	      <!-- Middle/Right: Search (모바일에선 줄바꿈되어 아래로 내려감) -->

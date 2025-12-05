@@ -1,0 +1,194 @@
+@charset "UTF-8";
+:root{
+  --mf-bg: #0f172a;          /* slate-900 느낌 */
+  --mf-bg-soft: #111827;     /* 살짝 더 부드러운 배경 */
+  --mf-surface: #0b1220;
+  --mf-card: #0f1b2d;
+  --mf-text: #e5e7eb;
+  --mf-muted: #a3aab8;
+  --mf-accent: #60a5fa;      /* blue-400 */
+  --mf-accent-strong: #38bdf8; /* sky-400 */
+  --mf-border: rgba(255,255,255,0.08);
+  --mf-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  --mf-radius-lg: 18px;
+  --mf-radius-md: 12px;
+}
+
+#385cb1
+#385cb1
+
+/* body 배경 */
+.mf-about-body{
+  background:
+    radial-gradient(900px 500px at 10% 10%, rgba(56,189,248,0.08), transparent 60%),
+    radial-gradient(900px 500px at 90% 20%, rgba(96,165,250,0.08), transparent 60%),
+    linear-gradient(180deg, var(--mf-bg), var(--mf-bg-soft));
+  color: var(--mf-text);
+}
+
+/* header/footer 폭을 기존과 비슷하게 맞추고 싶을 때 */
+.mf-layout-narrow{
+  width: 80%;
+  margin: 0 auto;
+}
+
+/* 메인 영역 */
+.mf-about-main{
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 48px 0 72px;
+}
+
+/* 카드 */
+.mf-about-card{
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius-lg);
+  box-shadow: var(--mf-shadow);
+  padding: 48px 48px 36px;
+  backdrop-filter: blur(6px);
+}
+
+/* 헤로 */
+.mf-about-hero{
+  padding-bottom: 8px;
+}
+
+.mf-badge{
+  display: inline-block;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: #385cb1;
+  background: rgba(96,165,250,0.14);
+  border: 1px solid rgba(96,165,250,0.25);
+  padding: 6px 10px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+
+.mf-title{
+  font-weight: 800;
+  font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+  margin-bottom: 10px;
+}
+
+.mf-subtitle{
+  color: var(--mf-muted);
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+/* 구분선 */
+.mf-divider{
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  margin: 28px 0;
+}
+
+/* 문단 */
+.mf-about-section{
+  margin-bottom: 10px;
+}
+
+.mf-lead{
+  font-size: 1.08rem;
+  line-height: 1.75;
+  margin-bottom: 10px;
+}
+
+.mf-text{
+  color: var(--mf-muted);
+  line-height: 1.75;
+  margin-bottom: 0;
+}
+
+.mf-accent{
+  color: var(--mf-accent);
+  font-weight: 600;
+}
+
+/* 기능 그리드 */
+.mf-feature-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.mf-feature{
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius-md);
+  padding: 20px 20px 18px;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.mf-feature:hover{
+  transform: translateY(-2px);
+  border-color: rgba(96,165,250,0.35);
+  background: rgba(255,255,255,0.05);
+}
+
+.mf-feature-icon{
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
+
+.mf-feature-title{
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.mf-feature-text{
+  color: var(--mf-muted);
+  line-height: 1.6;
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+/* 섹션 타이틀 */
+.mf-section-title{
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* 기술 칩 */
+.mf-chip{
+  display: inline-block;
+  margin: 4px 6px 0 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: #385cb1;
+  background: rgba(56,189,248,0.12);
+  border: 1px solid rgba(56,189,248,0.25);
+}
+
+/* 마무리 */
+.mf-closing{
+  margin-top: 22px;
+}
+
+.mf-quote{
+  color: var(--mf-muted);
+  font-style: italic;
+  line-height: 1.6;
+  margin: 4px 0;
+}
+
+/* 반응형 */
+@media (max-width: 992px){
+  .mf-layout-narrow{ width: 92%; }
+  .mf-about-card{ padding: 36px 28px 28px; }
+  .mf-feature-grid{ grid-template-columns: 1fr; }
+}
+
+@media (max-width: 576px){
+  .mf-about-card{ padding: 28px 20px 22px; }
+  .mf-subtitle{ font-size: 0.98rem; }
+}

@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title th:text="${title} ?: 'Template'"></title>
+  <title th:text="${title} ?: 'Mundus Fortunae | 소개'"></title>
 
 	<!-- 공통 CSS -->
   <th:block th:replace="~{fragments/external :: bootstrap_cdn_block}"></th:block>
@@ -14,19 +14,20 @@
   <link rel="stylesheet" th:href="@{/header-footer/css/footer.css}" />
   <link rel="stylesheet" th:href="@{/home/css/home.css}">
   
+  <link rel="stylesheet" th:href="@{/home/css/aboutMyService.css}">
+  
   <!-- 구글 seo 전용 -->
   <th:block th:replace="~{fragments/seo :: seo(
-  ' title : Mundus Fortunae 소개 ',
-  ' desc : 페이지별 요약 설명 (고객센터 안내 페이지)',
-  ' url : https://MundusFortunae.onrender.com'
+  'Mundus Fortunae | 소개',
+  'MundusFortunae 서비스 소개 페이지',
+  'url : https://MundusFortunae.onrender.com ??'
 	)}"></th:block>
-  
 
 	<script th:inline="javascript">
 	  const contextPath = /*[[@{/}]]*/ '';
 		
 	  document.addEventListener('DOMContentLoaded', () => {
-			console.log('로그인 페이지');
+			console.log('서비스 소개 페이지');
 			
 		});
 	  
@@ -39,7 +40,104 @@
 	<div class="d-flex justify-content-center main-content">
 		<div class="card p-4 mt-5">
 			<main>
-			
+				<div class="container">
+		      <div class="mf-about-card">
+		        <!-- 헤드 영역 -->
+		        <div class="mf-about-hero text-center">
+		          <span class="mf-badge">Real-time Game & Social</span>
+		          <h1 class="mf-title">
+		            🌍 Mundus Fortunae
+		          </h1>
+		          <p class="mf-subtitle">
+		            실시간 플레이와 가벼운 운빨(?)의 재미가 <br> 만나는 소셜 미니게임 월드
+		          </p>
+		        </div>
+		
+		        <div class="mf-divider"></div>
+		
+		        <!-- 소개 문단 -->
+		        <section class="mf-about-section">
+		          <p class="mf-lead">
+		            <strong>Mundus Fortunae</strong>는
+		            <span class="mf-accent">실시간 게임</span>과
+		            <span class="mf-accent">채팅 기반 소셜 경험</span>을 중심으로 설계된
+		            미니게임 플랫폼입니다.
+		          </p>
+		          <p class="mf-text">
+		            방 생성 → 참여자 입장 → 진행 상황 브로드캐스트 → 채팅과 로그 공유까지,
+		            한 번의 흐름으로 매끄럽게 이어지는 플레이 경험을 목표로 합니다.
+		            단순한 규칙 속에서도 ‘함께’일 때 더 재밌는 순간을 만들고자 했습니다.
+		          </p>
+		        </section>
+		
+		        <!-- 기능 카드 그리드 -->
+		        <section class="mf-feature-grid">
+		          <div class="mf-feature">
+		            <div class="mf-feature-icon">🎲</div>
+		            <h3 class="mf-feature-title">실시간 미니게임</h3>
+		            <p class="mf-feature-text">
+		              주사위/턴 기반 게임 등 빠르게 즐길 수 있는 룰 중심의
+		              라이트한 게임 구조를 지향합니다.
+		            </p>
+		          </div>
+		
+		          <div class="mf-feature">
+		            <div class="mf-feature-icon">👥</div>
+		            <h3 class="mf-feature-title">방 & 참여자 시스템</h3>
+		            <p class="mf-feature-text">
+		              로비에서 방을 탐색하고,
+		              참여자 목록과 상태를 실시간으로 확인하며
+		              자연스러운 멀티플레이 흐름을 제공합니다.
+		            </p>
+		          </div>
+		
+		          <div class="mf-feature">
+		            <div class="mf-feature-icon">💬</div>
+		            <h3 class="mf-feature-title">채팅 & 게임 로그</h3>
+		            <p class="mf-feature-text">
+		              채팅과 시스템 로그를 분리해
+		              플레이 정보와 대화를 동시에 놓치지 않도록 구성합니다.
+		            </p>
+		          </div>
+		
+		          <div class="mf-feature">
+		            <div class="mf-feature-icon">🔐</div>
+		            <h3 class="mf-feature-title">신뢰 가능한 인증 구조</h3>
+		            <p class="mf-feature-text">
+		              JWT 기반 인증 흐름을 고려해
+		              게임 접근과 사용자 경험을 안정적으로 연결하는 방향을 추구합니다.
+		            </p>
+		          </div>
+		        </section>
+		
+		        <div class="mf-divider"></div>
+		
+		        <!-- 기술 스택 -->
+		        <section class="mf-about-section">
+		          <h2 class="mf-section-title">기술 기반</h2>
+		          <p class="mf-text">
+		            Mundus Fortunae는
+		            <span class="mf-chip">Spring MVC</span>
+		            <span class="mf-chip">Thymeleaf</span>
+		            <span class="mf-chip">WebSocket</span>
+		            <span class="mf-chip">PostgreSQL</span>
+		            <span class="mf-chip">JWT</span>
+		            등 실무 친화적인 구성을 바탕으로
+		            확장 가능한 실시간 서비스 구조를 실험하고 있습니다.
+		          </p>
+		        </section>
+		
+		        <!-- 마무리 카피 -->
+		        <section class="mf-closing text-center">
+		          <p class="mf-quote">
+		            운과 전략 사이, 그리고 사람과 사람 사이에서 생기는 재밌는 순간들.
+		          </p>
+		          <p class="mf-quote">
+		            <strong>Mundus Fortunae</strong>에서 가볍게 접속해 한 판 즐겨보세요.
+		          </p>
+		        </section>
+		      </div>
+		    </div>
 			</main>
 		</div>
 	</div>

@@ -109,4 +109,20 @@ public class HomeController {
         .status(HttpStatus.OK)
         .body(ApiResponse.of(HttpStatus.OK, "로그아웃 처리되었습니다.", body));
   }
+  
+  /**
+   * 사이트 소개 페이지
+   */
+  @GetMapping("/aboutMyService")
+  public String aboutMyService() {
+    return "aboutMyService/aboutMyService";
+  }
+  /**
+   * 컨텍어스 페이지 
+   */
+  @GetMapping("/contactUs")
+  public String contactUs() {
+    return "aboutMyService/contactUs";
+  }
+  
 }

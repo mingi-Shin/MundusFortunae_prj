@@ -1,0 +1,9 @@
+<th:block th:fragment="seo(title, desc, url)">
+  <title th:text="${title}">AccoLearner</title>
+  <meta name="description" th:content="${desc}">
+  
+  <meta property="og:title" th:content="${title}">
+  <meta property="og:description" th:content="${desc}">
+  <meta property="og:url" th:content="${url}">
+  <meta property="og:type" content="website">
+</th:block>
