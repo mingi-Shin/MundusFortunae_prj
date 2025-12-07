@@ -20,7 +20,7 @@ import com.mingisoft.mf.jwt.JwtService;
 import com.mingisoft.mf.jwt.JwtUtil;
 
 @Configuration
-@EnableWebSecurity(debug=true) //개발중 디버깅 
+@EnableWebSecurity(debug=false) //개발중 디버깅 
 public class SecurityConfig {
 
   private final JwtUtil jwtUtil;
