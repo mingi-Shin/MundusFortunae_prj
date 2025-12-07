@@ -1,33 +1,37 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# === Java  Spring 공통 ===
+target
+.class
+.log
+.jar
+.war
+.ear
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
+# === IDE 설정 ===
 .idea
-*.iws
-*.iml
-*.ipr
+.vscode
+.settings
+.classpath
+.project
+.iml
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# === OS 및 기타 ===
+.DS_Store
+Thumbs.db
 
-### VS Code ###
-.vscode/
+# === 환경 파일 ===
+application.properties
+application.yml
+.env
+
+# === 빌드 및 임시 파일 ===
+build
+out
+bin
+
+# === Maven  Gradle ===
+.mvn
+.mvnw
+mvnw.cmd
+.gradle
+gradle
+!gradlewrappergradle-wrapper.jar
