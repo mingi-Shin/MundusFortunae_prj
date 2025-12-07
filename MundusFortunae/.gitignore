@@ -25,11 +25,9 @@ Thumbs.db
 .env
 
 # 기본 설정은 커밋(원한다면)
-!src/main/resources/application.properties
-!src/main/resources/application-.properties
+!src/main/resources/prod-*.properties
 !src/main/resources/application.yml
 
 # 로컬/배포용 비밀 설정만 무시
-src/main/resources/config-*.properties
-src/main/resources/application-*.yml
-!src/main/resources/application-example.properties
+src/main/resources/local-*.properties
+src/main/resources/application.yml
