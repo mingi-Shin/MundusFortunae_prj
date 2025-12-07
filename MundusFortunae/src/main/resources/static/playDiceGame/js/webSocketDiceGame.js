@@ -6,7 +6,7 @@ let gameSocket;
 function connectGameSocket(){
 	const host = window.location.host;
 	const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-	gameSocket = new WebSocket(protocol + host + "/mf/game");
+	gameSocket = new WebSocket(protocol + host + "/game");
 	
 	initGameSocketHandlers();
 }

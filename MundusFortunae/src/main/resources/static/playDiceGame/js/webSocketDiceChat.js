@@ -7,7 +7,7 @@ let roomSeq;
 function connectChatSocket(){
 	const host = window.location.host;
 	const protocol = window.location.protocol === "https://" ? "wss://" : "ws://";
-	chatSocket = new WebSocket(protocol + host + "/mf/chat");
+	chatSocket = new WebSocket(protocol + host + "/chat");
 	
 	roomSeq = document.getElementById("roomInfo").dataset.roomSeq;
 
@@ -27,7 +27,7 @@ function initChatSocketHandlers(){
 	}
 	
 	chatSocket.onopen = () => {
-	  console.log(roomSeq + "번 방 채팅소켓 연결 open!");
+	  //console.log(roomSeq + "번 방 채팅소켓 연결 open!");
 		
 		addPlayerInfoToHandler(); //open한 뒤에 해 
 	};
@@ -40,7 +40,6 @@ function initChatSocketHandlers(){
 		if(type === "addPlayer"){
 			const data = payload.data;
 			const nickname = payload.nickname;
-			console.log("참여 유저 : " + nickname);
 			//ui수정
 			renewalPlayersList(roomSeq, data, data.length);
 			//채팅창 입장 알림
@@ -51,7 +50,6 @@ function initChatSocketHandlers(){
 		if(type === "removePlayer"){
 			const data = payload.data;
 			const nickname = payload.nickname;
-			console.log("퇴장 유저 : " + nickname);
 			//ui수정 
 			renewalPlayersList(roomSeq, data, data.length);
 			//채팅창 퇴장 알림

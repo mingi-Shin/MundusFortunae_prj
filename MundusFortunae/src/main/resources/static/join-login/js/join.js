@@ -30,7 +30,7 @@ function joinUser(){
 		//일단 먼저 아이디, 비밀번호, 이메일, 닉네임 유효값 검사
 		const isAllValid = Object.values(validationState).every(v => v === true); //.every()
 		if (isAllValid) {
-		  console.log("모든 값이 true입니다!");
+		  //console.log("모든 값이 true입니다!");
 		} else {
 		  alert("아직 유효하지 않은 항목이 있습니다.");
 		  return;
@@ -53,9 +53,6 @@ function joinUser(){
 			// 201이든 409든, 서버에서 body를 항상 보내니까 그냥 파싱
 			const result = await res.json().catch(() => null);
 
-			console.log("res:", res);
-			console.log("result:", result);
-			
 			//res.ok => 200, 201, 204, 206… 이런 모든 2xx에 대해 true
 			if (res.ok && result.data) {
 			  // loginId로 로그인 페이지 이동 예시

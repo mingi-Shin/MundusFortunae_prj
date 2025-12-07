@@ -17,7 +17,6 @@ function wireLogout(){
 	
   btn.addEventListener('click', async () => {
     const token = localStorage.getItem('accessToken');
-		console.log(token);
 		
     try {
      const response = await fetch( logoutUrl, {

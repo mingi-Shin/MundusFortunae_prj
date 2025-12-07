@@ -9,7 +9,7 @@ let socket;
 function connectSocket() {
   const host = window.location.host;
   const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-  socket = new WebSocket(protocol + host + "/mf/room");
+  socket = new WebSocket(protocol + host + "/room");
 
   initSocketHandlers();
 }
@@ -24,13 +24,12 @@ function initSocketHandlers() {
   }
 
   socket.onopen = () => {
-    console.log("서버와 소켓 연결 open!");
+    //console.log("서버와 소켓 연결 open!");
   };
 
   socket.onmessage = (event) => {
     // 서버에서 sendMessage()로 보낸 JSON 문자열
     const payload = JSON.parse(event.data);
-    console.log("수신 payload:", payload);
 
     switch (payload.type) {
       case "roomWaitingPeople":
@@ -79,7 +78,6 @@ function updateWaitingPeople(count) {
  * @param {Array} roomList - 방 목록 배열
  */
 function renderRoomList(roomList) {
-  console.log("renderRoomList 호출, roomList:", roomList);
 
   const tbody = document.getElementById("roomListBody");
 
@@ -105,8 +103,6 @@ function renderRoomList(roomList) {
 
   // 3. 방 리스트로 tr 생성해서 추가
   roomList.forEach((room) => {
-    console.log("room 객체:", room);
-
     const playerSize = room.playerList?.length ?? 0;
     const maxPlayer = room.maxPlayerCount ?? 6;
 
@@ -147,7 +143,6 @@ function renderRoomList(roomList) {
  */
 function appendChat(chatData) {
   // 예: { nickname: '열혈전사', message: '안녕' }
-  console.log("chat 메시지 수신:", chatData);
 
   // 추후 채팅 영역이 생기면 여기서 DOM 추가
   // const chatBox = document.getElementById("chatBox");

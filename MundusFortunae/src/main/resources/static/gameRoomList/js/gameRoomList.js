@@ -131,7 +131,6 @@ function createRoom(){
 			const result = await response.json();
 			
 			if(response.ok){
-				console.log(result.message);
 				window.location.href = contextPath + "webSocket/room/" + roomDto.roomSeq;
 				return;
 				
