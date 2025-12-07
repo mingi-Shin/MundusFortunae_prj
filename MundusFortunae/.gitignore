@@ -1,37 +1,34 @@
-# === Java  Spring 공통 ===
-target
-.class
-.log
-.jar
-.war
-.ear
+# === Java / Build ===
+/target/
+/build/
+/out/
+/bin/
+*.class
+*.log
+*.jar
+*.war
+*.ear
 
-# === IDE 설정 ===
-.idea
-.vscode
-.settings
+# === IDE ===
+.idea/
+.vscode/
+.settings/
 .classpath
 .project
-.iml
+*.iml
 
-# === OS 및 기타 ===
+# === OS ===
 .DS_Store
 Thumbs.db
 
-# === 환경 파일 ===
-application.properties
-application.yml
+# === Env / Spring ===
 .env
 
-# === 빌드 및 임시 파일 ===
-build
-out
-bin
+# 기본 설정은 커밋(원한다면)
+!src/main/resources/application.properties
+!src/main/resources/application.yml
 
-# === Maven  Gradle ===
-.mvn
-.mvnw
-mvnw.cmd
-.gradle
-gradle
-!gradlewrappergradle-wrapper.jar
+# 로컬/배포용 비밀 설정만 무시
+src/main/resources/application-*.properties
+src/main/resources/application-*.yml
+!src/main/resources/application-example.properties
