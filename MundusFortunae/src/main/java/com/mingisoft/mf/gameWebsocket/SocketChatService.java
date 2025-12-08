@@ -35,10 +35,12 @@ public class SocketChatService {
                               socketSessionRegistry.getGameRoomSessions().get(roomSeq))
                               .map(List::size)
                               .orElse(0);
-    int playerOrderNumber = count +1;
+    int playerIdx = count;
+    
+    String role = playerIdx == 0 ? "HOST" : "GUEST";
     
     //2.plyerDto로 만들기
-    SocketPlayerDto socketPlayer = new SocketPlayerDto(roomSeq, playerOrderNumber, nickname, 0);
+    SocketPlayerDto socketPlayer = new SocketPlayerDto(roomSeq, role, playerIdx, nickname, 0);
     
     //3.생성된 palyerDto를 session에 등록 
     session.getAttributes().put("playerDto", socketPlayer);
@@ -75,6 +77,10 @@ public class SocketChatService {
   public int getPlayerGameScore(WebSocketSession session) {
     SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
     return playerDto.getGameScore();
+  }
+  public String getPlayerRoll(WebSocketSession session) {
+    SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
+    return playerDto.getRole();
   }
   
   /**

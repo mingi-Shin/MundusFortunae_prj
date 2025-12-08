@@ -36,6 +36,7 @@ public class SocketChatBroadcaster {
     this.socketChatService = socketChatService;
   }
   
+  //플레이어 참가 메서드 
   public void addPlayerBroadcaster(WebSocketSession session, Long roomSeq, String nickname) {
     List<SocketPlayerDto> playerDtoList = socketSessionRegistry.getSocketPlayerDtoList(roomSeq);
     //1. 전달할 정보를 MAP으로 포장 
@@ -71,6 +72,7 @@ public class SocketChatBroadcaster {
     
   }
   
+  // 플레이어 퇴장 메서드 
   public void removePlayerBroadcaster(WebSocketSession session) {
     //1. 퇴장유저 세션에서 닉네임, 방번호 호출 
     String nickname = socketChatService.getPlayerNicknameFromSession(session);

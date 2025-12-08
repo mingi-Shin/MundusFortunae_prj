@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class SocketPlayerDto {
 
   private Long roomSeq;
+  private String role;
   private int playerSeq;
   private String nickname;
   private int gameScore;

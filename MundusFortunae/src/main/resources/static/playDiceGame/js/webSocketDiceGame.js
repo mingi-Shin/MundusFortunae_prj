@@ -21,11 +21,13 @@ function initGameSocketHandlers(){
 	}
 	
 	gameSocket.onopen = () => {
-	  console.log("서버와 채팅소켓 연결 open!");
+	  console.log("서버와 게임 소켓 연결 open!");
+		const myNickname = localStorage.getItem("myNickname");
+		console.log(myNickname);
+		gameSocket.send(JSON.stringify(myNickname));
 	};
 	
 	gameSocket.onmessage = (event) => { //chat 제외 게임만 
-		const myNickname = localStorage.getItem("myNickname");
 		
 	}
 	
@@ -40,3 +42,5 @@ function initGameSocketHandlers(){
 	};
 	
 }
+
+

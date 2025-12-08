@@ -14,13 +14,11 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class WebSocketConfig implements WebSocketConfigurer {
   
   private final SocketRoomHandler socketRoomHandler; //소켓 룸 핸들러
-  private final SocketChatHandler socketChatHandler; //소켓 채팅 핸들러 
-  private final SocketGameHandler socketGameHandler; //소켓 게임 핸들러 
+  private final SocketChatHandler socketChatHandler; //소켓 게임, 채팅 핸들러 
   
-  public WebSocketConfig(SocketRoomHandler socketRoomHandler, SocketChatHandler socketChatHandler, SocketGameHandler socketGameHandler) {
+  public WebSocketConfig(SocketRoomHandler socketRoomHandler, SocketChatHandler socketChatHandler) {
     this.socketRoomHandler = socketRoomHandler; //스프링 : 아 컨테이너에 있는거 찾아 넣어줘야지 (의존성 주입 : DI)
     this.socketChatHandler = socketChatHandler; 
-    this.socketGameHandler = socketGameHandler;
   }
 
   /**
@@ -33,8 +31,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
       .setAllowedOrigins("*"); 
     registry.addHandler(socketChatHandler, "/chat")
       .setAllowedOrigins("*");
-    registry.addHandler(socketGameHandler, "/game")
-      .setAllowedOrigins("*"); //Origin = 프로토콜 + 도메인 + 포트 -> 프론트의 포트가 백엔드와 다를때 의미있는 코드
   }
   
   

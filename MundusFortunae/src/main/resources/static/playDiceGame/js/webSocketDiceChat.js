@@ -14,6 +14,8 @@ function connectChatSocket(){
 	initChatSocketHandlers(); 
 	
 	//sendRoomSeqToHandler(); //메시지 전송은 .onopen() 후로 해야해 
+	
+	enterToMsg();
 
 }
 
@@ -150,47 +152,67 @@ function renewalPlayersList(roomSeq, data, playerCount){
 	
 	const currentBox = document.getElementById("currentPlayerBox");   // 내 정보 영역
 	const listBox = document.getElementById("otherPlayersList");      // 다른 플레이어 목록
+	const gameStartBtnSection = document.querySelector(".game-start-btn-section"); //게임 시작 버튼 (방장만)
 
 	currentBox.innerHTML = "";
 	listBox.innerHTML = "";
+	gameStartBtnSection.innerHTML = "";
+	
+	// ✅ 1) 내가 HOST인지 먼저 계산
+	const me = data.find(p => p.nickname === myNickname);
+	const isMeHost = me && me.role === "HOST";
+	
 
+	// ✅ 2) 플레이어 UI 렌더
 	data.forEach(player => {
+	  const { nickname, playerSeq, gameScore, role } = player;
 
-		const { nickname, playerSeq, gameScore } = player;
-
-		// 나 자신
-		if (nickname === myNickname) {
-
-			currentBox.innerHTML = `
-				<div class="d-flex align-items-center justify-content-between">
-				  <div class="d-flex align-items-center gap-2">
-				    <div class="player-avatar bg-primary">P${playerSeq}</div>
-				    <div>
-				      <div class="fw-bold small">${nickname} (나)</div>
-				      <div class="text-muted" style="font-size: 0.75rem;">점수: ${gameScore}</div>
-				    </div>
-				  </div>
-				</div>
-			`;
-
-		} else {
-			// 다른 플레이어들
-			const div = document.createElement("div");
-			div.className = "p-2 border rounded";
-
-			div.innerHTML = `
-				<div class="d-flex align-items-center gap-2">
-				  <div class="player-avatar bg-secondary">P${playerSeq}</div>
-				  <div>
-				    <div class="fw-bold small">${nickname}</div>
-				    <div class="text-muted" style="font-size: 0.75rem;">점수: ${gameScore}</div>
-				  </div>
-				</div>
-			`;
-
-			listBox.appendChild(div);
-		}
+	  if (nickname === myNickname) {
+	    currentBox.innerHTML = `
+	      <div class="d-flex align-items-center justify-content-between">
+	        <div class="d-flex align-items-center gap-2">
+	          <div class="player-avatar bg-primary">P${playerSeq}</div>
+	          <div>
+	            <div class="fw-bold small">${nickname} (나)</div>
+	            <div class="text-muted" style="font-size: 0.75rem;">점수: ${gameScore}</div>
+	          </div>
+	        </div>
+	      </div>
+	    `;
+	  } else {
+	    const div = document.createElement("div");
+	    div.className = "p-2 border rounded";
+	    div.innerHTML = `
+	      <div class="d-flex align-items-center gap-2">
+	        <div class="player-avatar bg-secondary">P${playerSeq}</div>
+	        <div>
+	          <div class="fw-bold small">${nickname} [${role}]</div>
+	          <div class="text-muted" style="font-size: 0.75rem;">점수: ${gameScore}</div>
+	        </div>
+	      </div>
+	    `;
+	    listBox.appendChild(div);
+	  }
 	});
+
+	// ✅ 3) 버튼은 루프 밖에서 “한 번만” 그리기
+	if (isMeHost) {
+	  gameStartBtnSection.innerHTML = `
+	    <button id="game-start-btn"
+	            class="btn btn-primary btn-lg px-4 px-md-5 shadow-sm"
+	            onclick="startDicegame()">
+	      <i class="bi bi-controller"></i> Game Start!
+	    </button>
+	  `;
+	} else {
+	  gameStartBtnSection.innerHTML = `
+	    <button id="game-start-btn"
+	            class="btn btn-outline-secondary btn-lg px-4 px-md-5 shadow-sm"
+	            disabled>
+	      <i class="bi bi-controller"></i> Game Waiting...
+	    </button>
+	  `;
+	}
 }
 
 /** 채팅창 유저 입장알림 */
@@ -281,11 +303,21 @@ function receiveMsg(nickname, msg){
 
 /* 엔터 누르면 채팅전송 편의기능 */
 function enterToMsg(){
-	document.getElementById("chatInput").addEventListener("keydown", (e) => {
+	document.getElementById("chatInput").addEventListener("keypress", (e) => { //keypress는 레거시이므로 나중에 keydown으로 바꿀것 
 		if(e.key === "Enter"){
+			console.log("누름 : "+ e.key);
 			e.preventDefault();
 			sendMsg();
 		}
 	});
+}
+
+/*--------------------------------------------------------- 게임 관련 함수 ---------------------------------------------------------*/
+function startDicegame() {
+	alert("게임시작");
+	
+	// 1. 유저 순서별로 UI 다르게 그리기 
+	
+	 
 }
 
