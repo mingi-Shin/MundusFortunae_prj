@@ -78,7 +78,6 @@ function updateWaitingPeople(count) {
  * @param {Array} roomList - 방 목록 배열
  */
 function renderRoomList(roomList) {
-
   const tbody = document.getElementById("roomListBody");
 
   if (!tbody) {
@@ -101,33 +100,64 @@ function renderRoomList(roomList) {
     return;
   }
 
+	console.log(roomList);
+	
   // 3. 방 리스트로 tr 생성해서 추가
   roomList.forEach((room) => {
     const playerSize = room.playerList?.length ?? 0;
     const maxPlayer = room.maxPlayerCount ?? 6;
+		
+		const started = room.started;
 
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${room.roomSeq}</td>
-      <td class="text-start">
-        <div class="fw-semibold">${room.title}</div>
-        <div class="small text-muted">방 번호 #${room.roomSeq}</div>
-      </td>
-      <td>
-        <span class="badge bg-secondary">${playerSize}/${maxPlayer}</span>
-      </td>
-      <td>
-        <button type="button"
-                class="btn btn-sm btn-primary joinBtn"
-                data-room-playersize="${playerSize}"
-                data-room-id="${room.roomSeq}"
-                data-room-title="${room.title}"
-                data-bs-toggle="modal"
-                data-bs-target="#joinRoomModal">
-          참여
-        </button>
-      </td>
-    `;
+		//게임시작한 방
+		if(started === true){
+			tr.innerHTML = `
+			  <td>${room.roomSeq}</td>
+			  <td class="text-start">
+			    <div class="fw-semibold">${room.title}</div>
+			    <div class="small text-muted">방장 #${room.host}</div>
+			  </td>
+			  <td>
+			    <span class="badge bg-secondary">${playerSize}/${maxPlayer}</span>
+			  </td>
+			  <td>
+			    <button type="button"
+			            class="btn btn-sm btn-outline-secondary joinBtn"
+			            data-room-playersize="${playerSize}"
+			            data-room-id="${room.roomSeq}"
+			            data-room-title="${room.title}"
+			            data-bs-toggle="modal"
+			            data-bs-target="#joinRoomModal"
+									disabled="disabled">
+			      게임중
+			    </button>
+			  </td>
+			`;
+		} else {
+			//게임 아직 시작 안한 방
+	    tr.innerHTML = `
+	      <td>${room.roomSeq}</td>
+	      <td class="text-start">
+	        <div class="fw-semibold">${room.title}</div>
+	        <div class="small text-muted">방장 #${room.host}</div>
+	      </td>
+	      <td>
+	        <span class="badge bg-secondary">${playerSize}/${maxPlayer}</span>
+	      </td>
+	      <td>
+	        <button type="button"
+	                class="btn btn-sm btn-primary joinBtn"
+	                data-room-playersize="${playerSize}"
+	                data-room-id="${room.roomSeq}"
+	                data-room-title="${room.title}"
+	                data-bs-toggle="modal"
+	                data-bs-target="#joinRoomModal">
+	          참여
+	        </button>
+	      </td>
+	    `;
+		}
 
     tbody.appendChild(tr);
   });

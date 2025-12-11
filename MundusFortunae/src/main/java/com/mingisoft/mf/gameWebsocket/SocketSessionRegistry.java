@@ -1,6 +1,7 @@
 package com.mingisoft.mf.gameWebsocket;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,11 +36,21 @@ public class SocketSessionRegistry { //통신 세션만 관리
   
   //해당 방 세션에서 플레이어들 정보만 뽑기(SocketChatBroadcaster에서 세션은 json으로 변환 불가)
   public List<SocketPlayerDto> getSocketPlayerDtoList(Long roomSeq){
+    // 1. null이 아니라 빈 리스트를 쓰자
+    List <WebSocketSession> sessionList = gameRoomSessions.getOrDefault(roomSeq, Collections.emptyList());
+    
+    // 2. 아무세션 없으면 빈 리스트 리턴
+    if(sessionList.isEmpty()) {
+      return Collections.emptyList();
+    }
+    
+    // 3. 플레이어 리스트 생성 
     List<SocketPlayerDto> players = new ArrayList<SocketPlayerDto>();
-    List <WebSocketSession> sessionList = gameRoomSessions.get(roomSeq);
     for(WebSocketSession ws : sessionList) {
       SocketPlayerDto player = (SocketPlayerDto) ws.getAttributes().get("playerDto");
-      players.add(player);
+      if (player != null) { // 혹시 모를 null 방지
+        players.add(player);
+      }
     }
     return players;
   }

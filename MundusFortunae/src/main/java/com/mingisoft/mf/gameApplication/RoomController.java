@@ -212,7 +212,7 @@ public class RoomController {
     RoomDto roomInfo = roomService.getRoom(Long.valueOf(roomSeq));
     logger.info("접속하는 방 정보 : {}", roomInfo);
     
-    //대기실 브로드캐스트 호출(방 참여인원 표기 업데이트 때문에 )
+    //대기실 브로드캐스트 호출(방 참여인원 표기 업데이트 때문에 ) --> 원래 이렇게 하면 안돼 
     Collection<RoomDto> allRooms  = roomService.getAllRooms();
     socketRoomBroadcaster.sendRoomList(allRooms);
     

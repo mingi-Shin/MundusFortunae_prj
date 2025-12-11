@@ -103,10 +103,20 @@ public class SocketChatHandler extends TextWebSocketHandler {
       if("ready".equals(msg)) { 
         socketGameService.setRoomGameState(roomSeq); //플레이어들 order순서 초기셋팅 
         socketGameBroadcaster.setGamePlayerOrder(session);
+        
+        /**
+         * 원래 이렇게 하면 안되는데.. 처음에 잘못짜서 어쩔수가 없다. 해당방은 게임 시작했다 설정, 참여못함
+         */
+        roomService.getRoom(roomSeq).setStarted(true);
+        logger.info("시작한 방 정보 : {}", roomService.getRoom(roomSeq));
+        Collection<RoomDto> allRooms  = roomService.getAllRooms();
+        logger.info("모든 방 정보 : {}", allRooms);
+        socketRoomBroadcaster.sendRoomList(allRooms);
       }
       
       if("roll".equals(msg)) {
         Long orderNumber = node.path("orderNumber").asLong();
+        logger.info("방금 굴린사람 playerSeq : {}", orderNumber);
         Map <String, Object> diceResult = socketGameService.userRollDice(roomSeq, orderNumber, session);
         socketGameBroadcaster.userRollDice(diceResult, session);
         

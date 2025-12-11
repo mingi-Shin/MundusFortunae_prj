@@ -5,15 +5,20 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
+import com.mingisoft.mf.security.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RoomService {
+
+    private final UserDetailsServiceImpl customUserDetailsService;
   
   private final static Logger logger = LoggerFactory.getLogger(RoomService.class);  
   
@@ -28,6 +33,10 @@ public class RoomService {
   //메모리에 올라갈 방 정보
   //private final Map<Long, RoomDto> rooms = new ConcurrentHashMap<Long, RoomDto>();
   private final Map<Long, RoomDto> rooms = new HashMap<Long, RoomDto>();
+
+    RoomService(UserDetailsServiceImpl customUserDetailsService) {
+        this.customUserDetailsService = customUserDetailsService;
+    }
   
   /*
    * public Long nextRoomNumber() { return roomNumberGenerator.getAndIncrement();
@@ -89,10 +98,12 @@ public class RoomService {
     //4. RoomDto 생성 (builder 사용)
     RoomDto newRoom = RoomDto.builder()
                           .roomSeq(roomNumberGenerator)
+                          .host(nickname)
                           .title(roomTitle)
                           .password(roomPassword)
                           .maxPlayerCount(6) // 기본값 할당중이라 생략도 가능 
                           .playerList(playerList)
+                          .isStarted(false)
                           .build();
     
     //5. 방 메모리에 업로드
@@ -113,9 +124,15 @@ public class RoomService {
   public void addPlayerToRoom(Long roomSeq, String nickname) {
     RoomDto room = this.getRoom(roomSeq);
     
+    Set<Integer> usedSeq = room.getPlayerList().stream().map( P -> P.getPlayerSeq()).collect(Collectors.toSet());
+    int seq = 0;
+    while (usedSeq.contains(seq)) {
+      seq++;
+    }
+    
     PlayerDto newPlayer = new PlayerDto();
     newPlayer.setRoomSeq(roomSeq);
-    newPlayer.setPlayerSeq(room.getPlayerList().size()); //유저번호는 1번부터 시작 
+    newPlayer.setPlayerSeq(seq); //유저번호는 1번부터 시작 
     newPlayer.setNickname(nickname);
     newPlayer.setRole("USER");
     
@@ -139,7 +156,7 @@ public class RoomService {
    */
   public void deleteEmptyRoom(Long roomSeq) {
     if(isEmptyRoom(roomSeq)) {
-      logger.info("빈방 확인, 삭제처리 : {}", roomSeq);
+      logger.info("빈방 확인, 삭제처리 방번호 : {}", roomSeq);
       rooms.remove(roomSeq);
     }
   }

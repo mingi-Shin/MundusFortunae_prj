@@ -4,6 +4,7 @@
 let chatSocket;
 let roomSeq; 
 let myPlayerSeq;
+let gameStarted = false;
 
 function connectChatSocket(){
 	const host = window.location.host;
@@ -48,18 +49,22 @@ function initChatSocketHandlers(){
 				//console.log("nickname : " + payload.nickname  + " / playerSeq : " + playerSeq);
 			}
 			//참여자 목록, 게임버튼 ui수정
-			renewalPlayersList(roomSeq, data, data.length);
+			renewalPlayersListForIn(roomSeq, data, data.length);
 			//채팅창 입장 알림
 			alertPlayerInOutLog(payload.nickname, "in");
 			
 		}
 		//플레이어가 방에서 퇴장했을 때
 		if(type === "removePlayer"){
-			const data = payload.data;
+			const data = payload.data; //data:playerDtoList, nickname:nickname
 			//참여자 목록, 게임버튼 ui수정 
-			renewalPlayersList(roomSeq, data, data.length);
+			renewalPlayersListForOut(roomSeq, data, data.length);
 			//채팅창 퇴장 알림
 			alertPlayerInOutLog(payload.nickname, "out");
+			//중간이탈자 발생, 게임 중지.. 단! 이미 게임을 시작한 후일때만 
+			if(gameStarted === true){
+				stopGame(payload.nickname);
+			}
 			
 		}
 		//채팅메시지 UI  
@@ -72,6 +77,8 @@ function initChatSocketHandlers(){
 		}
 		//게임 준비완료 UI
 		if(type === "gameReady"){
+			gameStarted = true; //게임시작시 방 상태값 변환
+			
 			const gameState = payload.data;
 			const nextTurnNickname = payload.nextTurnNickname;
 			drawGameStartUI(gameState, nextTurnNickname);
@@ -198,7 +205,7 @@ async function removePlayerFromSererRoom(roomSeq, nickname){
 }
 
 /* 참여자에 따른 UI수정 */
-function renewalPlayersList(roomSeq, data, playerCount){
+function renewalPlayersListForIn(roomSeq, data, playerCount){
 	
 	const myNickname = localStorage.getItem("myNickname");
 	document.getElementById("roomInfo").textContent = `${roomSeq}번방 참여자 (${playerCount}/6)`;
@@ -266,6 +273,55 @@ function renewalPlayersList(roomSeq, data, playerCount){
 	    </button>
 	  `;
 	}
+}
+function renewalPlayersListForOut(roomSeq, data, playerCount){
+	
+	const myNickname = localStorage.getItem("myNickname");
+	document.getElementById("roomInfo").textContent = `${roomSeq}번방 참여자 (${playerCount}/6)`;
+	
+	const currentBox = document.getElementById("currentPlayerBox");   // 내 정보 영역
+	const listBox = document.getElementById("otherPlayersList");      // 다른 플레이어 목록
+
+	currentBox.innerHTML = "";
+	listBox.innerHTML = "";
+	
+	// ✅ 1) 내가 HOST인지 먼저 계산
+	const me = data.find(p => p.nickname === myNickname);
+	
+
+	// ✅ 2) 플레이어 UI 렌더
+	data.forEach(player => {
+	  const { nickname, playerSeq, gameScore, role } = player;
+
+	  if (nickname === myNickname) {
+	    currentBox.innerHTML = `
+	      <div class="d-flex align-items-center justify-content-between">
+	        <div class="d-flex align-items-center gap-2">
+	          <div class="player-avatar bg-primary">P${playerSeq}</div>
+	          <div>
+	            <div class="fw-bold small">${nickname} (나)</div>
+	            <div class="text-muted" style="font-size: 0.75rem;">점수: ${gameScore}</div>
+	          </div>
+	        </div>
+	      </div>
+	    `;
+	  } else {
+	    const div = document.createElement("div");
+	    div.className = "p-2 border rounded";
+	    div.innerHTML = `
+	      <div class="d-flex align-items-center gap-2">
+	        <div class="player-avatar bg-secondary">P${playerSeq}</div>
+	        <div>
+	          <div class="fw-bold small">${nickname} [${role}]</div>
+	          <div class="text-muted" style="font-size: 0.75rem;">점수: ${gameScore}</div>
+	        </div>
+	      </div>
+	    `;
+	    listBox.appendChild(div);
+	  }
+	});
+	
+	
 }
 
 /** 채팅창 유저 입장알림 */
@@ -367,7 +423,6 @@ function enterToMsg(){
 /*--------------------------------------------------------- 게임 관련 함수 ---------------------------------------------------------*/
 let gameScore;
 function startDicegame() {
-	alert("게임시작");
 	
 	// 1. 게임시작 핸들러에 알림 
 	const payload = {
@@ -439,11 +494,18 @@ function drawGameStartUI(gameState, nextTurnNickname){
 	
 }
 
-/* 주사위 굴린다 서버전달  */
+/* 주사위 굴리기 버튼 클릭 : 서버전달  */
 function rollDice(btn){
+	//1.다시 못 누르게 막기
+  btn.disabled = true;
+	
+	//2.텍스트 수정
+	btn.innerHTML = `
+	  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+	  주사위를 굴리는 중...
+	`;
+	
 	const orderNumber = btn.dataset.orderNumber; //현재 차례의 유저정보가 담겨잇음 
-	const nickName = btn.dataset.nickName;
-	alert(nickName + "[" + orderNumber + "]" + "가 주사위를 굴렸어요");
 	
 	const payload = {
 				type : "game",
@@ -453,7 +515,6 @@ function rollDice(btn){
 			}
 	const jsonMsg = JSON.stringify(payload);
 	chatSocket.send(jsonMsg);
-	
 }
 
 /* 서버에서 주사위 던진 결과값 받아서 UI 그리기 */
@@ -521,7 +582,7 @@ function showRollingDice(diceA, diceB){
 							class="btn btn-primary btn-lg px-4 px-md-5 shadow-sm"
 							style="pointer-events: none; cursor: default;"
 							aria-disabled="true"   
-				<i class="bi bi-emoji-surprise"></i> 아..? 쿠쿡..그랬나
+				<i class="bi bi-emoji-surprise"></i> 아♡ 행운의여신이여
 			</button>
 		`;
 	}
@@ -536,6 +597,15 @@ function showRollingDice(diceA, diceB){
 								style="pointer-events: none; cursor: default;"
 								aria-disabled="true"  
 					<i class="bi bi-emoji-kiss"></i> 믿고 있었다고 젠장-!!
+				</button>
+			`;
+		} else if(diceA !== 6 && diceB === 6 ){
+			gameStartBtnSection.innerHTML = `
+				<button id="dice-roll-btn" 
+								class="btn btn-primary btn-lg px-4 px-md-5 shadow-sm"
+								style="pointer-events: none; cursor: default;"
+								aria-disabled="true"   
+					<i class="bi bi-emoji-surprise"></i> 아♡ 행운의여신이여
 				</button>
 			`;
 		}
@@ -656,11 +726,29 @@ function gameEnd(){
 	gameStartBtnSection.innerHTML = `
 		<button id="dice-roll-btn" 
 						class="btn btn-primary btn-lg px-4 px-md-5 shadow-sm" 
-						onclick="alert('결과 모달 보기 : socket으로 가져오기')" 
+						onclick="alert('준비중입니다.')" 
 			<i class="bi bi-clipboard-data"></i> 결과보기
 		</button>
 	`;
 	
 	gameTip.textContent = "";
 	gameTip.innerHTML = `<span class="text-dnager">게임이 끝났습니다. 퇴장하셔도 됩니다.</span>`;
+}
+
+/* 이탈자 발생. 게임 중지 */
+function stopGame(nickname){
+
+	const gameStartBtn = document.querySelector(".game-start-btn-section");
+	const gameTip = document.querySelector(".game-tip");
+	gameStartBtn.innerHTML = "";
+	gameStartBtn.innerHTML = `
+	  <button id="dice-roll-btn" 
+	          class="btn btn-danger btn-lg px-4 px-md-5 shadow-sm" 
+						style="pointer-events: none; cursor: default;"
+	    <i class="bi bi-stop-circle"></i> 게임 중지
+	  </button>
+	`;
+
+	gameTip.textContent = "";
+	gameTip.textContent = `${nickname}님이 탈주하여 게임을 중지합니다.`;
 }

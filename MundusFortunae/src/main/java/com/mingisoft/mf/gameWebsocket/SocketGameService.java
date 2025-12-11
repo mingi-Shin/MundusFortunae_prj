@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class SocketGameService {
   
   private static final long NO_HOST = -1L; //사용자가 localStoragee 변조 가능성
-  private static final long NO_NEXT_PLAYER = -1L; //끝 의미의 변수값 
+  private static final int NO_NEXT_PLAYER = -1; //끝 의미의 변수값 
 
   private final static Logger logger = LoggerFactory.getLogger(SocketGameService.class);
   private final SocketGameDiceRoll socketGameDiceRoll;
@@ -49,8 +49,14 @@ public class SocketGameService {
   }
   
   
-  //게임 진행 : 주사위 굴리기 
-  public Map<String, Object> userRollDice(Long roomSeq, Long orderNumber, WebSocketSession session) {
+  /**
+   * 게임 진행 : 주사위 굴리기
+   * @param roomSeq 방번호
+   * @param orderNumber 
+   * @param session
+   * @return
+   */
+  public Map<String, Object> userRollDice(Long roomSeq, Long currentPlayerSeq, WebSocketSession session) {
     // 1. 주사위 굴리기 : 결과 a, b
     Map <String, Object> diceRollResult = socketGameDiceRoll.getResultByDefaultRoll();
     int diceA = (int)diceRollResult.get("diceA");
@@ -61,15 +67,23 @@ public class SocketGameService {
     player.setGameScore(diceA + diceB);
     
     // 3. 다음 순서 번호
-    long nextOrderNumber;
+    int nextOrderNumber;
     // 방 나갔을 경우를 대비해서, +1이 아니라 그 다음 존재하는 유저의 숫자를 찾기
     List <SocketPlayerDto> SocketPlayerDtoList = socketSessionRegistry.getSocketPlayerDtoList(roomSeq);
+    
+    /**
+     * 주의! add/remove를 번복하면 List의 자료는 뒤섞임
+     * 따라서 findFirst()가 바로 다음 큰수를 구하지 못함
+     * sorted()가 필수 !!!
+     */
     nextOrderNumber = SocketPlayerDtoList.stream()
-                        .filter( p -> p.getPlayerSeq() > orderNumber)
-                        .mapToLong(p -> p.getPlayerSeq())
+                        .map(p -> p.getPlayerSeq())
+                        .sorted()
+                        .filter( playerSeq -> playerSeq > currentPlayerSeq)
                         .findFirst()
                         .orElse(NO_NEXT_PLAYER);
     
+    logger.info("다음 주사위 던질 멤버 seq : {}", nextOrderNumber);
     
     //중간 퇴장자를 대비해서 게임방 상황을 매번 갱신 
     socketSessionRegistry.getRoomGameStates().get(roomSeq).setPlayerDtoList(SocketPlayerDtoList);
