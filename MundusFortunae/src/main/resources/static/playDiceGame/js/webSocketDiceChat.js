@@ -75,7 +75,6 @@ function initChatSocketHandlers(){
 			const gameState = payload.data;
 			const nextTurnNickname = payload.nextTurnNickname;
 			drawGameStartUI(gameState, nextTurnNickname);
-			console.log("게임 준비 완료!");
 			
 		}
 		//주사위 굴리고 수신한 메시지
@@ -359,7 +358,6 @@ function receiveMsg(nickname, msg){
 function enterToMsg(){
 	document.getElementById("chatInput").addEventListener("keypress", (e) => { //keypress는 레거시이므로 나중에 keydown으로 바꿀것 
 		if(e.key === "Enter"){
-			console.log("누름 : "+ e.key);
 			e.preventDefault();
 			sendMsg();
 		}
@@ -382,11 +380,6 @@ function startDicegame() {
 }
 
 function drawGameStartUI(gameState, nextTurnNickname){
-	console.log("현재 순서(닉넴) : " + nextTurnNickname );
-	console.log("현재 순서(번호) : [" + gameState.currentTurn + "]번째");
-	console.log("방번호 : " + gameState.roomSeq);
-	console.log("maxTurn : " + gameState.maxTurn);
-	console.log(gameState.playerDtoList);
 
 	if(!Array.isArray(gameState.playerDtoList)){
 		console.log("gameState.playerDtoList가 Array가 아님");
@@ -404,11 +397,10 @@ function drawGameStartUI(gameState, nextTurnNickname){
 	
 	/* 게임버튼 UI 차례에 따라 변화 */	
 	const gameStartBtn = document.querySelector(".game-start-btn-section");
-	console.log(myPlayerSeq);
-	console.log(gameState.currentTurn);
 	
 	if(!gameStartBtn){
 		console.log("gameStartBtn가 없어요!!");
+		return;
 	}
 	
 	//내 차례일 때 
@@ -466,15 +458,8 @@ function rollDice(btn){
 
 /* 서버에서 주사위 던진 결과값 받아서 UI 그리기 */
 function drawGameResultUI(gameState, nextTurnNickname, diceA, diceB){
-	console.log("---------------주사위 던진 결과값 수신---------------");
-	console.log(gameState);
-	console.log(" 다음차례 : " +  nextTurnNickname);
-	console.log(" diceA : " +  diceA);
-	console.log(" diceB: " +  diceB);
-	console.log("---------------------------------------------");
 	
 	showRollingDice(diceA, diceB);
-	
 }
 //클로저 (안쪽 함수가 바깥함수의 변수를 사용중) 활용한 주사위 굴리기 UI
 function showRollingDice(diceA, diceB){
@@ -529,21 +514,21 @@ function showRollingDice(diceA, diceB){
 
 	// 주사위 하나씩 값에따라 UI변경
 	renderDie(dice1, diceA);
-	if(diceA === 6 || diceA === 5 || diceA === 4 || diceA === 3){
+	if(diceA === 6 ){
 		gameStartBtnSection.innerHTML = "";
 		gameStartBtnSection.innerHTML = `
 			<button id="dice-roll-btn" 
 							class="btn btn-primary btn-lg px-4 px-md-5 shadow-sm"
 							style="pointer-events: none; cursor: default;"
 							aria-disabled="true"   
-				<i class="bi bi-emoji-surprise"></i> 아아앗.. 이게?
+				<i class="bi bi-emoji-surprise"></i> 아..? 쿠쿡..그랬나
 			</button>
 		`;
 	}
 	
 	setTimeout(() => {
 		renderDie(dice2, diceB);
-		if((diceA && diceB === 6) || (diceA && diceB === 5) || (diceA && diceB === 4) ||(diceA && diceB === 3) ){
+		if(diceA === 6 && diceB === 6 ){
 			gameStartBtnSection.innerHTML = "";
 			gameStartBtnSection.innerHTML = `
 				<button id="dice-roll-btn" 
