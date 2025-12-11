@@ -8,7 +8,7 @@ let gameStarted = false;
 
 function connectChatSocket(){
 	const host = window.location.host;
-	const protocol = window.location.protocol === "https://" ? "wss://" : "ws://";
+	const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
 	chatSocket = new WebSocket(protocol + host + "/chat");
 	
 	roomSeq = document.getElementById("roomInfo").dataset.roomSeq;
