@@ -35,12 +35,12 @@ public class SocketChatService {
                               socketSessionRegistry.getGameRoomSessions().get(roomSeq))
                               .map(List::size)
                               .orElse(0);
-    int playerIdx = count;
+    int playerSeq = count;
     
-    String role = playerIdx == 0 ? "HOST" : "GUEST";
+    String role = playerSeq == 0 ? "HOST" : "GUEST";
     
     //2.plyerDto로 만들기
-    SocketPlayerDto socketPlayer = new SocketPlayerDto(roomSeq, role, playerIdx, nickname, 0);
+    SocketPlayerDto socketPlayer = new SocketPlayerDto(roomSeq, role, playerSeq, nickname, 0);
     
     //3.생성된 palyerDto를 session에 등록 
     session.getAttributes().put("playerDto", socketPlayer);
@@ -58,38 +58,12 @@ public class SocketChatService {
   }
   
   /**
-   * 세션에서 SocketPlayerDto의 속성 뽑기 4가지 
-   * @param session
-   * @return
-   */
-  public Long getPlayerRoomSeqFromSession(WebSocketSession session) {
-    SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
-    return playerDto.getRoomSeq();
-  }
-  public String getPlayerNicknameFromSession(WebSocketSession session) {
-    SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
-    return playerDto.getNickname();
-  }
-  public int getPlayerSeqFromSession(WebSocketSession session) {
-    SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
-    return playerDto.getPlayerSeq();
-  }
-  public int getPlayerGameScore(WebSocketSession session) {
-    SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
-    return playerDto.getGameScore();
-  }
-  public String getPlayerRoll(WebSocketSession session) {
-    SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
-    return playerDto.getRole();
-  }
-  
-  /**
    * 방번호 입력후 해당 방에서 퇴장 
    * @param session
    * @param roomSeq
    */
   public void removePlayer(WebSocketSession session) {
-    Long roomSeq = getPlayerRoomSeqFromSession(session);
+    Long roomSeq = socketSessionRegistry.getPlayerRoomSeqFromSession(session);
     socketSessionRegistry.getGameRoomSessions().get(roomSeq).remove(session); 
     logger.info("방 퇴장 유저: {}", session.getAttributes().get("playerDto"));
   }

@@ -14,6 +14,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mingisoft.mf.gameApplication.PlayerDto;
 import com.mingisoft.mf.gameWebsocket.SocketPlayerDto;
 import com.mingisoft.mf.gameWebsocket.SocketSessionRegistry;
 
@@ -39,11 +40,17 @@ public class SocketChatBroadcaster {
   //플레이어 참가 메서드 
   public void addPlayerBroadcaster(WebSocketSession session, Long roomSeq, String nickname) {
     List<SocketPlayerDto> playerDtoList = socketSessionRegistry.getSocketPlayerDtoList(roomSeq);
+    int playerSeq = playerDtoList.stream()
+                      .filter(p -> nickname.equals(p.getNickname()))
+                      .mapToInt(p -> p.getPlayerSeq())
+                      .findFirst()
+                      .orElseThrow(() -> new IllegalArgumentException("해당 nickname 없음 : " + nickname));
     //1. 전달할 정보를 MAP으로 포장 
     Map<String, Object> roomPlayersInfo = Map.of(
       "type", "addPlayer",
       "data", playerDtoList,
-      "nickname", nickname
+      "nickname", nickname,
+      "playerSeq", playerSeq
     );
     
     //2.데이터를 JSON으로 변환
@@ -58,13 +65,13 @@ public class SocketChatBroadcaster {
     
     //3.방 유저들에게 브로드캐스트 
     List<WebSocketSession> roomPlayersSession = socketSessionRegistry.getGameRoomSessions().get(roomSeq);
-    for(WebSocketSession s : roomPlayersSession) {
-      if(!s.isOpen()) {
+    for(WebSocketSession ws : roomPlayersSession) {
+      if(!ws.isOpen()) {
         continue; //이미 끊긴 세션은 패스 
       }
       
       try {
-        s.sendMessage(new TextMessage(jsonMsg));
+        ws.sendMessage(new TextMessage(jsonMsg));
       } catch (Exception e) {
         logger.warn("소켓에 sendMessage() 실패 : {}", e.getMessage(), e);
       }
@@ -75,8 +82,8 @@ public class SocketChatBroadcaster {
   // 플레이어 퇴장 메서드 
   public void removePlayerBroadcaster(WebSocketSession session) {
     //1. 퇴장유저 세션에서 닉네임, 방번호 호출 
-    String nickname = socketChatService.getPlayerNicknameFromSession(session);
-    Long roomSeq = socketChatService.getPlayerRoomSeqFromSession(session);
+    String nickname = socketSessionRegistry.getPlayerNicknameFromSession(session);
+    Long roomSeq = socketSessionRegistry.getPlayerRoomSeqFromSession(session);
     
     //2. 갱신된 방의 유저 정보 호출 및 map으로 패키징
     List <SocketPlayerDto>  playerDtoList = socketSessionRegistry.getSocketPlayerDtoList(roomSeq);
@@ -114,8 +121,8 @@ public class SocketChatBroadcaster {
   //채팅창 브로드캐스트
   public void sendChatBroadcaster(WebSocketSession session, String msg) {
     //소켓세션에서 정보 
-    String nickname = socketChatService.getPlayerNicknameFromSession(session);
-    Long roomSeq = socketChatService.getPlayerRoomSeqFromSession(session);
+    String nickname = socketSessionRegistry.getPlayerNicknameFromSession(session);
+    Long roomSeq = socketSessionRegistry.getPlayerRoomSeqFromSession(session);
     
     //데이터 Map으로 패키징
     Map<String, Object> object = Map.of(

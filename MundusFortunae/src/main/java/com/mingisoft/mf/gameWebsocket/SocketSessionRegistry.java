@@ -11,12 +11,17 @@ import org.springframework.web.socket.WebSocketSession;
 @Component
 public class SocketSessionRegistry { //통신 세션만 관리 
 
-  //대기실에 있는 모든 사람의 세션
+  //대기실에 있는 모든 사람의 세션 선언
   //연결된 모든 소켓세션을 저장 (ArrayList는 불안정, CopyOnWriteArrayList<>() 로 바꿔야.. )
   private final List<WebSocketSession> waitingRoomSessions = new ArrayList<WebSocketSession>();
   
-  //map도 불안정함 바꿔야해 (ConcurrentHashMap 로)
+  //방에 있는 사람들 세션 (map도 불안정함 바꿔야해 (ConcurrentHashMap 로)) 선언
   private final Map<Long, List<WebSocketSession>> gameRoomSessions = new HashMap<Long, List<WebSocketSession>>();
+  
+  // 특정 방의 게임상황 객체 (map도 불안정함 바꿔야해 (ConcurrentHashMap 로)) 선언
+  private final Map<Long, RoomGameState> roomGameStates  = new HashMap<Long, RoomGameState>();
+  
+  
   
   //대기방 유저 세션 불러오기 함수 
   public List<WebSocketSession> getWaitingRoomSessions (){
@@ -38,4 +43,41 @@ public class SocketSessionRegistry { //통신 세션만 관리
     }
     return players;
   }
+  
+  //게임방 상황 map 불러오기
+  public Map<Long, RoomGameState> getRoomGameStates(){
+    return roomGameStates;
+  }
+  
+  /**
+   * 세션에서 SocketPlayerDto의 객체자체와 속성 5가지 호출 메서드   
+   * @param session
+   * @return
+   */
+  public SocketPlayerDto getSocketPlayerDtoBySession(WebSocketSession session) {
+    SocketPlayerDto socketPlayerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
+    return socketPlayerDto;
+  }
+  
+  public Long getPlayerRoomSeqFromSession(WebSocketSession session) {
+    SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
+    return playerDto.getRoomSeq();
+  }
+  public String getPlayerNicknameFromSession(WebSocketSession session) {
+    SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
+    return playerDto.getNickname();
+  }
+  public int getPlayerSeqFromSession(WebSocketSession session) {
+    SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
+    return playerDto.getPlayerSeq();
+  }
+  public int getPlayerGameScore(WebSocketSession session) {
+    SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
+    return playerDto.getGameScore();
+  }
+  public String getPlayerRole(WebSocketSession session) {
+    SocketPlayerDto playerDto = (SocketPlayerDto) session.getAttributes().get("playerDto");
+    return playerDto.getRole();
+  }
+  
 }

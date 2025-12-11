@@ -3,6 +3,7 @@ package com.mingisoft.mf.gameWebsocket;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.SocketHandler;
 
 import org.slf4j.Logger;
@@ -32,6 +33,9 @@ public class SocketChatHandler extends TextWebSocketHandler {
   private final ObjectMapper objectMapper;
   private final SocketChatService socketChatService;
   private final SocketSessionRegistry socketSessionRegistry;
+  private final SocketGameService socketGameService;
+  private final SocketGameBroadcaster socketGameBroadcaster;
+  
   
   private final RoomService roomService;
   private final SocketRoomBroadcaster socketRoomBroadcaster;
@@ -39,13 +43,16 @@ public class SocketChatHandler extends TextWebSocketHandler {
   
   
   public SocketChatHandler(SocketChatBroadcaster socketChatBroadcaster, ObjectMapper objectMapper, SocketChatService socketChatService, SocketSessionRegistry socketSessionRegistry
-      , RoomService roomServic, SocketRoomBroadcaster socketRoomBroadcaster) {
+      , RoomService roomServic, SocketRoomBroadcaster socketRoomBroadcaster, SocketGameService socketGameService, SocketGameBroadcaster socketGameBroadcaster) {
     this.objectMapper = objectMapper;
     this.socketChatBroadcaster = socketChatBroadcaster; //스프링 : 아 컨테이너에 있는거 찾아 넣어줘야지 (의존성 주입 : DI)
     this.socketChatService = socketChatService;
     this.socketSessionRegistry = socketSessionRegistry;
+    this.socketGameService = socketGameService;
+    this.socketGameBroadcaster = socketGameBroadcaster;
     this.roomService = roomServic;
     this.socketRoomBroadcaster = socketRoomBroadcaster;
+    
   }
   
   /** 
@@ -62,6 +69,7 @@ public class SocketChatHandler extends TextWebSocketHandler {
     //입구에서 json메시지 파싱해서 필요정보만 전달 
     JsonNode node = objectMapper.readTree(message.getPayload()); //json -> java
     String type = node.path("type").asText(null); //NPE피하기 용도 : 없으면 null반환 
+    
     switch (type) {
     //방참여 메시지 수신
     case "addPlayer": {
@@ -73,17 +81,36 @@ public class SocketChatHandler extends TextWebSocketHandler {
     }
     //방탈퇴 메시지 수신 
     case "removePlayer" : {
-      session.getAttributes().put("manualClose", true);
+      session.getAttributes().put("manualClose", true); //afterConnectionClosed 에서 코드중복실행 방지용 
       
       socketChatService.removePlayer(session); //세션에서 삭제 
       socketChatBroadcaster.removePlayerBroadcaster(session); //퇴장 브로드캐스팅
       break;
     }
     
-    //메시지 수신
+    //채팅 수신
     case "chat" : {
       String msg = node.path("msg").asText();
       socketChatBroadcaster.sendChatBroadcaster(session, msg);
+      
+      break;
+    }
+    //게임 준비 & 주사위굴리기
+    case "game" : {
+      Long roomSeq = node.path("roomSeq").asLong();
+      String msg = node.path("msg").asText();
+      
+      if("ready".equals(msg)) { 
+        socketGameService.setRoomGameState(roomSeq); //플레이어들 order순서 초기셋팅 
+        socketGameBroadcaster.setGamePlayerOrder(session);
+      }
+      
+      if("roll".equals(msg)) {
+        Long orderNumber = node.path("orderNumber").asLong();
+        Map <String, Object> diceResult = socketGameService.userRollDice(roomSeq, orderNumber, session);
+        socketGameBroadcaster.userRollDice(diceResult, session);
+        
+      }
       
       break;
     }
