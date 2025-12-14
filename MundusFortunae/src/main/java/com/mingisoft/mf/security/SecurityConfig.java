@@ -11,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mingisoft.mf.jwt.CookieUtil;
@@ -78,7 +79,44 @@ public class SecurityConfig {
          * hasRole은 내부적으로 ROLE_을 붙여서 비교한다. SecurityContextHolder에 ROLE_이 붙여 있어야 매치 가능 
          */
         // --  좁은 경로 → 넓은 경로 순서 -- 
-          // --- 정적 리소스
+        // --- 정적 리소스
+          .requestMatchers(AntPathRequestMatcher.antMatcher("/resources/**"), 
+                           AntPathRequestMatcher.antMatcher("/css/**"), 
+                           AntPathRequestMatcher.antMatcher("/js/**"), 
+                           AntPathRequestMatcher.antMatcher("/images/**")).permitAll()
+          
+          // --- ADMIN 전용
+          .requestMatchers(AntPathRequestMatcher.antMatcher("/admin/**"), 
+                           AntPathRequestMatcher.antMatcher("/api/admin/**")).hasRole("ADMIN")
+          
+          //--- USER 이상 (글쓰기, 마이페이지 등)
+          .requestMatchers(AntPathRequestMatcher.antMatcher("/board/write"), 
+                           AntPathRequestMatcher.antMatcher("/user/**")).authenticated()
+          
+          //--- USER 이상 API 요청
+          .requestMatchers(AntPathRequestMatcher.antMatcher("/api/boards"), 
+                           AntPathRequestMatcher.antMatcher("/api/user/refreshToken"), 
+                           AntPathRequestMatcher.antMatcher("/api/auth/logout")).authenticated()
+          
+          //--- 모두 접근 가능 (공개 페이지)
+          .requestMatchers(AntPathRequestMatcher.antMatcher("/"), 
+                           AntPathRequestMatcher.antMatcher("/sitemap.xml"), 
+                           AntPathRequestMatcher.antMatcher("/robots.txt"), 
+                           AntPathRequestMatcher.antMatcher("/error/*"), 
+                           AntPathRequestMatcher.antMatcher("/about"), 
+                           AntPathRequestMatcher.antMatcher("/contact"), 
+                           AntPathRequestMatcher.antMatcher("/join"),
+                           AntPathRequestMatcher.antMatcher("/legal/**"), 
+                           AntPathRequestMatcher.antMatcher("/board/*"), 
+                           AntPathRequestMatcher.antMatcher("/board/detail/*"), 
+                           AntPathRequestMatcher.antMatcher("/login/**")).permitAll()
+          
+          //--- 공개 API
+          .requestMatchers(AntPathRequestMatcher.antMatcher("/api/join/**"), 
+                           AntPathRequestMatcher.antMatcher("/api/auth/**"), 
+                           AntPathRequestMatcher.antMatcher("/api/boards/search")).permitAll()
+          
+          .anyRequest().authenticated()
           
       )
       .exceptionHandling(exception -> exception
