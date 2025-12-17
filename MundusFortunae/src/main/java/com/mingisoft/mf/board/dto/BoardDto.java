@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,5 +36,9 @@ public class BoardDto {
       return regDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
   }
+  
+  //파일 (여러개면 List<MultipartFile> 로..)
+  private MultipartFile imageFile;
+  private MultipartFile documentFile;
   
 }

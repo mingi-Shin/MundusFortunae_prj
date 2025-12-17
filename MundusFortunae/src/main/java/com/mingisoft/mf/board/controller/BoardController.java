@@ -3,12 +3,14 @@ package com.mingisoft.mf.board.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -48,7 +50,7 @@ public class BoardController {
     
     model.addAttribute("boardType", "free");
     
-df    
+     //여기 
     model.addAttribute("noticeList", null);
     model.addAttribute("freeList", null);
     
@@ -73,10 +75,30 @@ df
   
   //글쓰기
   @PostMapping("/api/board/new")
-  public ResponseEntity<?> createNewBoard(@AuthenticationPrincipal CustomUserDetails me, @RequestBody BoardDto boardDto,
+  public ResponseEntity<?> createNewBoard(@AuthenticationPrincipal CustomUserDetails me, @ModelAttribute BoardDto boardDto,
       HttpServletRequest request){
     
-    //logger.info("글쓰기 요청 유저(AuthenticationPrincipal) : {}", me);
+    //요청자 정보  
+    logger.info("요청자(CustomUserDetails) 정보 : {}", me);
+    
+    //로그인 풀렸을 경우, 거절 
+    if(me == null) {
+      return ResponseEntity
+              .status(HttpStatus.UNAUTHORIZED)
+              .body(new ErrorResponse().of(HttpStatus.UNAUTHORIZED, "로그인 세션이 만료되었습니다.", request.getRequestURI()));
+    }
+    
+    //문서 첨부 파일이 있는데, 로그인 권한이 부족한 경우(관리자가 아닐때)
+    String doc = boardDto.getDocumentFile().toString();
+    boolean isAdmin = me.getAuthorities().stream().anyMatch( a -> "ROLE_ADMIN".equals(a.getAuthority())); //이게 더 안전 
+    if(doc != null && doc.isBlank()) {
+      if(!isAdmin) {
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
+            .body(new ErrorResponse().of(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.", request.getRequestURI()));
+      }
+    }
+    
     Long userSeq = me.getUserDto().getUserSeq();
     boardDto.setUserSeq(userSeq);
     
@@ -91,7 +113,6 @@ df
                .status(HttpStatus.BAD_REQUEST)
                .body(body);
     }
-    
   }
   
   

@@ -96,6 +96,9 @@ function sendForm(){
 		const title = document.getElementById("title").value.trim();
 		const content = $('#summernote').summernote('code');
 		
+		const imageFile = document.getElementById("imageFile").files?.[0];
+		const documentFile = document.getElementById("documentFile").files?.[0];
+		
 		if(!category || category === null){
 			alert("토픽을 선택해 주세요.");
 			return;
@@ -113,7 +116,9 @@ function sendForm(){
 				body:JSON.stringify({
 					categorySeq:categorySeq,
 					title:title,
-					content:content
+					content:content,
+					imageFile:imageFile,
+					documentFile:documentFile
 				})
 			});
 			
@@ -122,6 +127,13 @@ function sendForm(){
 			if(response.ok && result.data){
 				console.log("게시물 작성 성공, result.data : " + result.data);
 				location.href=contextPath + "board/free";
+				return;
+			} else if(response.status === 401 ){ 		// 비로그인 => 권한없음 
+				alert(result?.message || "로그인이 필요합니다. 다시 로그인해주세요.");
+				location.href = contextPath + "login";
+				return;
+			} else if(response.status === 403){ 		//권한부족 (관리자만)
+				alert(result?.message || "접근 권한이 없습니다.");
 				return;
 			} else {
 				//옵셔널 체이닝(optional chaining) -> null/undefined이면 → 거기서 멈추고 undefined를 반환(에러 안 남)
@@ -134,12 +146,79 @@ function sendForm(){
 			alert("서버와의 통신 중 오류가 발생했습니다.");
 			return;
 		}
-		
-		
-		
-			
 	});
+}
+
+function uploadImageFile(){
+	const file = document.getElementById("imageFile");
+	file.addEventListener("change", (e) => {
+		
+		const input = e.target;
+		const file = input.files?.[0];
+		console.log(file);
+		if(!file) return;
+		
+		//1차 체크 : MIME타입으로 	
+		if(!file.type.startsWith('image/')){
+			alert("이미지 파일만 가능합니다.");
+			input.value = "";
+			return;
+		}
+		
+		//2차 체크 : 확장자 화이트리스트로
+		const allowedExt = ["png", "jpg", "jpeg", "gif", "webp"];
+		const ext = file.name.split(".").pop(); //마지막꺼 뽑아
+		if(!allowedExt.includes(ext)){
+			alert("이미지 파일만 가능합니다.");
+			input.value = "";
+			return;
+		}
+		
+		//3차 체크 : 용량 확인 
+		const maxSize = 10 * 1024 * 1024; //10Mb
+		if(file.size > maxSize){
+			alert("파일 용량은 10MB 이하만 가능합니다.");
+			input.value = "";
+			return;
+		}
+		
+		console.log("OK image:", file.name, file.type, file.size);
+	});
+}
 	
+function uploadDocumentFile(){
+	const file = document.getElementById("documentFile");
+	if(!file){
+		return;
+	}
+	file.addEventListener("change", (e) => {
+		
+		const input = e.target;
+		const file = input.files?.[0];
+		console.log(file);
+		if(!file) return;
+		
+		//문서는 MIME검사 빡셈 통과 -
+		
+		//확장자 화이트 리스트 검사
+		const allowedExt = ["pdf","doc","docx","xls","xlsx","ppt","pptx","txt","hwp"];
+		const ext = file.name.split(".").pop().toLowerCase();
+		if(!allowedExt.includes(ext)){
+			alert("문서형식만 첨부 가능합니다.");
+			input.value = "";
+			return;
+		}
+		
+	  // (선택) 용량 제한 예: 20MB
+	  const maxSize = 20 * 1024 * 1024;
+	  if (file.size > maxSize) {
+	    alert("파일 용량은 20MB 이하만 가능합니다.");
+	    input.value = "";
+	    return;
+	  }
+	  
+	  console.log("OK document:", file.name, file.type, file.size);
+	});
 }
 
 /**
