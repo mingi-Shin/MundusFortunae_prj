@@ -6,21 +6,43 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title th:text="${title} ?: '로그인 | 문두스 포르투나이(Mundus Fortunae)'"></title>
+  <title th:text="${title} ?: '게시물 작성 | 문두스 포르투나이(Mundus Fortunae)'"></title>
 
 	<!-- 공통 CSS -->
   <th:block th:replace="~{fragments/external :: bootstrap_cdn_block}"></th:block>
   <link rel="stylesheet" th:href="@{/header-footer/css/header.css}" />
   <link rel="stylesheet" th:href="@{/header-footer/css/footer.css}" />
   <link rel="stylesheet" th:href="@{/home/css/home.css}">
-
-
-	<script th:src="@{/join-login/js/login.js}"></script>
+  
+  <!-- 구글 seo 전용 -->
+  <th:block th:replace="~{fragments/seo :: seo(
+  ' title : Mundus Fortunae 게시물 작성',
+  ' desc : 공지사항, 자유게시물 작성 페이지',
+  ' url : https://MundusFortunae.onrender.com'
+	)}"></th:block>
 	
+	<!-- Tagify (태그 입력) 오픈소스 JS라이브러리 -->
+	<link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+	
+	<!-- Summernote (위지윅 에디터) -->
+	<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+	  
+	<!-- form.js -->  
+	<script th:src="@{/board/js/form.js}"></script>
+	  
 	<script th:inline="javascript">
 	  const contextPath = /*[[@{/}]]*/ '';
-		
-
+	  document.addEventListener('DOMContentLoaded', () => {
+			console.log('게시판 페이지');
+			
+			useSummernote();
+			textLengthCheck();		
+			sendForm();
+			
+		}); //DOMContentLoaded
 	  
 	</script>	
 </head>
@@ -29,81 +51,58 @@
 	<div th:replace="~{fragments/header :: header}"></div>
 
 	<div class="d-flex justify-content-center main-content">
-		<div class="card p-4 mt-5" style="max-width: 500px;">
+		<div class="card p-4 mt-5">
 			<main>
-				
-				<div class="d-flex justify-content-center " th:if="${newJoin}">
-	  			<h5 th:text="|${newJoin} 님, 가입을 환영합니다.|"></h5>
-				</div>
-				
-				<div class="d-flex justify-content-center " th:if="${invalid}">
-	  			<h5 th:text="|세션이 만료되었습니다. 다시 로그인 해주세요.|"></h5>
-				</div>
-				
-	    	<!-- Logo 와 사이트 소개란 -->
-	    	<div class="d-flex flex-column mb-4">
-	      	<div class="d-flex justify-content-center align-items-center mb-2 ">
-	      		<!--
-	      			모바일 적용 css 
-	      			width: 100% → 부모 div 폭에 맞춰서 줄어듦
-							max-width: 500px → 데스크톱에서 500px 이상은 안 커짐
-							height: auto → 비율 유지
+				<div>
+					<form th:action="@{#}" method="post" id="writeForm">
+					
+						<label class="form-label fw-semibold">토픽</label>
+						<select name="topic" id="category" class="from-select"> 
+							<option value="" selected="selected" disabled="disabled">선택</option>
+							<option value="3">자유게시판</option>
+							<th:block sec:authorize="hasRole('ADMIN')">
+								<option value="1">관리자 게시판(공지사항)</option>
+							</th:block>
+						</select>
+						
+						<!-- 태그 입력
+		        <div class="mb-3">
+		          <label class="form-label fw-semibold">태그</label>
+		          <input id="tagInput" name="tags" class="form-control" placeholder="태그를 입력해주세요.">
+		          <small class="text-muted">내용을 대표하는 태그를 3개 정도 입력해주세요.</small>
+		        </div> 
 						-->
-	      		<img alt="로고" th:src="@{/common_imgs/adventure_img.webp}" style="width:100%; max-width: 500px; height:auto; max-height: 300px;" >
-	      	</div>
-	    		<h2 class="mt-6 text-center font-bold">미지의 세계로 접속중.. </h2>
-	   		</div>
-	   		
-	   		<!-- 소셜 로그인 -->
-	      <div class="text-center">
-	        <div class="mb-2">소셜 계정으로 간편 로그인</div>
-	        <div class="d-flex justify-content-center gap-5 mb-3">
-	          <button class="btn btn-outline-success w-25 me-1 " onclick="alert('소셜로그인 구현중')">N</button>
-	          <button class="btn btn-outline-danger w-25 mx-1" onclick="alert('소셜로그인 구현중')">G</button>
-	        </div>
-      	</div>
-      	
- 	      <!-- 경계선 -->
-				<div class="position-relative my-4">
-				  <div class="d-flex align-items-center justify-content-center">
-				    <hr class="flex-grow-1 border-top border-secondary opacity-40">
-				    <span class="mx-3 text-muted bg-white px-2">
-				      Mundus Fortunae 아이디로 로그인
-				    </span>
-				    <hr class="flex-grow-1 border-top border-secondary opacity-40">
-				  </div>
+						
+	        	<!-- 제목 -->
+		        <div class="mb-3">
+		          <label class="form-label fw-semibold">제목</label>
+		          <input type="text" id="title" class="form-control" placeholder="제목을 입력해주세요." maxlength="50" required>
+		        </div>
+		        
+	          <!-- 본문 -->
+		        <div class="mb-3">
+		          <label class="form-label fw-semibold">본문</label>
+		          <textarea id="summernote"></textarea>
+		          <div class="d-flex justify-content-between">
+			          <small class="text-muted">위지윅 에디터를 이용해 글을 작성할 수 있습니다.</small>
+								<small id="text-length"></small>
+		          </div>
+		        </div>
+		        
+	          <!-- 버튼 영역 -->
+		        <div class="d-flex justify-content-between mt-4">
+		        	<div class="d-flex justify-content-start">
+		        		<button type="button" class="btn btn-light" id="cancel-btn" onclick="cancelWrite()">취소</button>
+		        	</div>
+		        	<div class="d-flex justify-content-end gap-2">
+			          <!-- <button type="button" class="btn btn-outline-secondary" >임시저장</button> -->
+			          <button type="button" class="btn btn-primary" id="submit-btn">등록</button>
+		        	</div>
+		        </div>
+		        
+					</form>
+						
 				</div>
-      	
- 	     	<!-- 로그인 폼 -->
-	      <form th:action="@{#}" method="post" id="login-form">
-	        <div class="mb-3"> 
-	          <input type="text" class="form-control" id="login-id" name="username" placeholder="아이디" required>
-	        </div>
-	        <div class="mb-3">
-	          <input type="password" class="form-control" id="login-pwd" name="password" placeholder="비밀번호" required>
-	          <div id="login-error" class="text-danger mt-1" style="display: none;"></div>
-	        </div>
-	        
-	        <div class="d-flex justify-content-between mb-3">
-<!-- 	          <div class="form-check">
-	            <input type="checkbox" class="form-check-input" id="keep-login">
-	            <label class="form-check-label" for="keep-login">로그인 유지</label>
-	          </div> -->
-	          <div class="form-check">
-	            <input type="checkbox" class="form-check-input" id="save-id">
-	            <label class="form-check-label" for="save-id">아이디 저장</label>
-	          </div>
-	        </div>
-	        
-	        <button type="button" id="login-process-btn" class="btn btn-primary w-100 mb-3">로그인</button>
-	      </form>
-			
-	      <!-- 아이디/비번 찾기 & 회원가입 -->
-	      <div class="d-flex justify-content-center mb-3 gap-2">
-	        <a th:href="@{#}" onclick="alert('비밀번호 변경 기능 구현중')">계정찾기</a>
-	        <span>|</span>
-	        <a th:href="@{/join}" id="join-page" onclick="joinPage()">회원가입</a>
-	      </div>
 			
 			</main>
 		</div>
@@ -179,6 +178,13 @@
 =====================================================
   Thymeleaf 자주 사용하는 문법 정리
 =====================================================
+0. 권한 값
+	<th:block sec:authorize="hasRole('ADMIN')"> </div>
+	<div sec:authorize="isAuthenticated()">AUTH_OK</div>
+	<div sec:authorize="isAnonymous()">ANON</div>
+	<div th:text="${#authentication.authorities}"></div>
+	<div th:text="${#authentication.principal.userDto.nickname}"></div>
+	<div sec:authentication="principal.userDto.nickname"></div>
 
 1. 변수 표현식
    - ${변수명} : 일반 변수 출력

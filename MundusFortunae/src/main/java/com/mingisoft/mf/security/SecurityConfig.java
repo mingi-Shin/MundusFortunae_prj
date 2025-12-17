@@ -80,10 +80,10 @@ public class SecurityConfig {
          */
         // --  좁은 경로 → 넓은 경로 순서 -- 
         // --- 정적 리소스
-          .requestMatchers(AntPathRequestMatcher.antMatcher("/resources/**"), 
-                           AntPathRequestMatcher.antMatcher("/css/**"), 
-                           AntPathRequestMatcher.antMatcher("/js/**"), 
-                           AntPathRequestMatcher.antMatcher("/images/**")).permitAll()
+          .requestMatchers(("**/resources/**"), 
+                           ("**/css/**"), 
+                           ("**/js/**"), 
+                           ("**/images/**")).permitAll()
           
           // --- ADMIN 전용
           .requestMatchers(AntPathRequestMatcher.antMatcher("/admin/**"), 

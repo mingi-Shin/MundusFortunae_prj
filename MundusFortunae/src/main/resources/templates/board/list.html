@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title th:text="${title} ?: 'Template'"></title>
+  <title th:text="${title} ?: '게시판 | 문두스 포르투나이(Mundus Fortunae)'"></title>
 
 	<!-- 공통 CSS -->
   <th:block th:replace="~{fragments/external :: bootstrap_cdn_block}"></th:block>
@@ -16,7 +16,7 @@
   
   <!-- 구글 seo 전용 -->
   <th:block th:replace="~{fragments/seo :: seo(
-  ' title : Mundus Fortunae 소개 ',
+  ' title : Mundus Fortunae 자유게시판',
   ' desc : 페이지별 요약 설명 (고객센터 안내 페이지)',
   ' url : https://MundusFortunae.onrender.com'
 	)}"></th:block>
@@ -26,9 +26,41 @@
 	  const contextPath = /*[[@{/}]]*/ '';
 		
 	  document.addEventListener('DOMContentLoaded', () => {
-			console.log('로그인 페이지');
+			console.log('게시판 페이지');
 			
-		});
+			clickedBoardType();
+			
+			// 2) 클릭했을 때만 이동
+	    document.querySelectorAll('.board-type').forEach(btn => {
+	      btn.addEventListener('click', () => {
+	        const type = btn.dataset.type;
+	        location.href = `${contextPath}board/${type}`;
+	      });
+	    });
+	  
+	  
+	  
+	  
+		}); //document
+		
+	  
+	  function clickedBoardType(){
+		  const boardType = document.getElementById("boardPage").dataset.boardType;
+		  if(!boardType){
+			  console.log("boardType 값 없음");
+			  return;
+		  }
+		  document.querySelectorAll(".board-type").forEach( btn => {
+			  if(btn.dataset.type === boardType){
+				  console.log(boardType + " 클릭");
+				  btn.classList.add('active');
+			  } else {
+				  btn.classList.remove('active');
+			  }
+		  });
+	  }//clickedBoardType
+	  
+
 	  
 	</script>	
 </head>
@@ -39,6 +71,133 @@
 	<div class="d-flex justify-content-center main-content">
 		<div class="card p-4 mt-5">
 			<main>
+			
+				<div class="container mt-4">
+				  <!-- 상단 컨트롤 영역 -->
+				  <div class="card mb-4">
+				    <div class="card-body">
+				      <div class="d-flex justify-content-between align-items-center">
+				        <div class="btn-group" role="group" id="boardPage" th:data-board-type="${boardType}">
+				          <button class="btn btn-light board-type" id="notice-list-btn" data-type="notice">공지사항</button>
+				          <button class="btn btn-light board-type" id="community-list-btn" data-type="free">자유게시판</button>
+				        </div>
+				
+				        <div class="d-flex gap-3">
+				          <div class="btn-group">
+				            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+				              <i class="bi bi-sort-down"></i> 정렬
+				            </button>
+				            <ul class="dropdown-menu">
+				              <li><a class="dropdown-item order-by" href="#">최신순</a></li>
+				              <li><a class="dropdown-item order-by" href="#">추천순</a></li>
+				              <li><a class="dropdown-item order-by" href="#">댓글순</a></li>
+				              <li><a class="dropdown-item order-by" href="#">스크랩순</a></li>
+				              <li><a class="dropdown-item order-by" href="#">조회순</a></li>
+				            </ul>
+				          </div>
+				          <button class="btn btn-primary btn-sm write-new" onclick="location.href='/board/form'">
+				            <i class="bi bi-pencil"></i> 작성하기
+				          </button>
+				        </div>
+				      </div>
+				    </div>
+				  </div>
+				
+				  <!-- 공지사항 테이블 -->
+				  <div th:if="${noticeList != null and !noticeList.isEmpty()}" class="mb-4">
+				    <table class="table table-hover">
+				      <thead class="table-primary">
+				        <tr>
+				          <th scope="col" width="10%">분류</th>
+				          <th scope="col">제목</th>
+				          <th scope="col" width="15%">작성자</th>
+				          <th scope="col" width="15%">작성일</th>
+				          <th scope="col" width="10%">조회</th>
+				        </tr>
+				      </thead>
+				      <tbody>
+				        <tr th:each="notice : ${noticeList}" style="cursor: pointer;"
+				            th:onclick="|location.href='/board/notice/${notice.boardSeq}'|">
+				          <td><span class="badge bg-primary">공지사항</span></td>
+				          <td class="fw-bold" th:text="${notice.title}">제목</td>
+				          <td th:text="${notice.nickname}">작성자</td>
+				          <td th:text="${notice.regDateFormatted}">2024-01-01</td>
+				          <td th:text="${notice.hit}">0</td>
+				        </tr>
+				      </tbody>
+				    </table>
+				  </div>
+				
+				  <!-- 게시물 테이블 -->
+				  <div class="mb-4">
+				    <div th:if="${freeList == null or freeList.isEmpty()}" class="alert alert-secondary text-center" role="alert">
+				      등록된 게시물이 없습니다.
+				    </div>
+				
+				    <table th:if="${freeList != null and !freeList.isEmpty()}" class="table table-hover">
+				      <thead class="table-light">
+				        <tr>
+				          <th scope="col" width="12%">카테고리</th>
+				          <th scope="col">제목</th>
+				          <th scope="col" width="12%">작성자</th>
+				          <th scope="col" width="15%">작성일</th>
+				          <th scope="col" width="8%">조회</th>
+				        </tr>
+				      </thead>
+				      <tbody>
+				        <tr th:each="board : ${freeList}" style="cursor: pointer;"
+				            th:onclick="|location.href='/board/free/detail/${board.boardSeq}'|">
+				          <td>
+				            <small class="text-muted" th:text="${board.categoryName}">카테고리</small>
+				          </td>
+				          <td>
+				            <span class="fw-bold" th:text="${board.title}">제목</span>
+				          </td>
+				          <td>
+				            <small th:text="${board.nickname}">닉네임</small>
+				          </td>
+				          <td>
+				            <small class="text-muted" th:text="${board.regDateFormatted != null ? board.regDateFormatted : '날짜 정보 없음'}">
+				              날짜
+				            </small>
+				          </td>
+				          <td>
+				            <small class="text-muted">
+				              👁 <span th:text="${board.hit}">0</span>
+				            </small>
+				          </td>
+				        </tr>
+				      </tbody>
+				    </table>
+				  </div>
+				
+				  <!-- 페이지네이션 -->
+				  <div class="d-flex justify-content-center mb-4">
+				    <nav>
+				      <ul class="pagination">
+				        <li class="page-item disabled">
+				          <a class="page-link" href="#" tabindex="-1">이전</a>
+				        </li>
+				        <li class="page-item active">
+				          <a class="page-link" href="#">1</a>
+				        </li>
+				        <li class="page-item">
+				          <a class="page-link" href="#">다음</a>
+				        </li>
+				      </ul>
+				    </nav>
+				  </div>
+				
+				  <!-- 검색 영역 -->
+				  <div class="d-flex justify-content-center mb-5">
+				    <div class="input-group" style="max-width: 500px;">
+				      <input type="text" class="form-control" placeholder="게시판 내에서 검색">
+				      <button class="btn btn-outline-secondary" type="button">
+				        🔍
+				      </button>
+				    </div>
+				  </div>
+				</div>
 			
 			</main>
 		</div>
@@ -114,13 +273,6 @@
 =====================================================
   Thymeleaf 자주 사용하는 문법 정리
 =====================================================
-0. 권한 값
-	<th:block sec:authorize="hasRole('ADMIN')"> </div>
-	<div sec:authorize="isAuthenticated()">AUTH_OK</div>
-	<div sec:authorize="isAnonymous()">ANON</div>
-	<div th:text="${#authentication.authorities}"></div>
-	<div th:text="${#authentication.principal.userDto.nickname}"></div>
-	<div sec:authentication="principal.userDto.nickname"></div>
 
 1. 변수 표현식
    - ${변수명} : 일반 변수 출력

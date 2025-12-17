@@ -6,21 +6,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title th:text="${title} ?: '로그인 | 문두스 포르투나이(Mundus Fortunae)'"></title>
+  <title th:text="${title} ?: '게시판 | 문두스 포르투나이(Mundus Fortunae)'"></title>
 
 	<!-- 공통 CSS -->
   <th:block th:replace="~{fragments/external :: bootstrap_cdn_block}"></th:block>
   <link rel="stylesheet" th:href="@{/header-footer/css/header.css}" />
   <link rel="stylesheet" th:href="@{/header-footer/css/footer.css}" />
   <link rel="stylesheet" th:href="@{/home/css/home.css}">
+  
+  <!-- 구글 seo 전용 -->
+  <th:block th:replace="~{fragments/seo :: seo(
+  ' title : Mundus Fortunae 자유게시판',
+  ' desc : 페이지별 요약 설명 (고객센터 안내 페이지)',
+  ' url : https://MundusFortunae.onrender.com'
+	)}"></th:block>
+  
 
-
-	<script th:src="@{/join-login/js/login.js}"></script>
-	
 	<script th:inline="javascript">
 	  const contextPath = /*[[@{/}]]*/ '';
 		
-
+	  document.addEventListener('DOMContentLoaded', () => {
+			console.log('게시판 페이지');
+			
+		});
 	  
 	</script>	
 </head>
@@ -29,81 +37,11 @@
 	<div th:replace="~{fragments/header :: header}"></div>
 
 	<div class="d-flex justify-content-center main-content">
-		<div class="card p-4 mt-5" style="max-width: 500px;">
+		<div class="card p-4 mt-5">
 			<main>
-				
-				<div class="d-flex justify-content-center " th:if="${newJoin}">
-	  			<h5 th:text="|${newJoin} 님, 가입을 환영합니다.|"></h5>
-				</div>
-				
-				<div class="d-flex justify-content-center " th:if="${invalid}">
-	  			<h5 th:text="|세션이 만료되었습니다. 다시 로그인 해주세요.|"></h5>
-				</div>
-				
-	    	<!-- Logo 와 사이트 소개란 -->
-	    	<div class="d-flex flex-column mb-4">
-	      	<div class="d-flex justify-content-center align-items-center mb-2 ">
-	      		<!--
-	      			모바일 적용 css 
-	      			width: 100% → 부모 div 폭에 맞춰서 줄어듦
-							max-width: 500px → 데스크톱에서 500px 이상은 안 커짐
-							height: auto → 비율 유지
-						-->
-	      		<img alt="로고" th:src="@{/common_imgs/adventure_img.webp}" style="width:100%; max-width: 500px; height:auto; max-height: 300px;" >
-	      	</div>
-	    		<h2 class="mt-6 text-center font-bold">미지의 세계로 접속중.. </h2>
-	   		</div>
-	   		
-	   		<!-- 소셜 로그인 -->
-	      <div class="text-center">
-	        <div class="mb-2">소셜 계정으로 간편 로그인</div>
-	        <div class="d-flex justify-content-center gap-5 mb-3">
-	          <button class="btn btn-outline-success w-25 me-1 " onclick="alert('소셜로그인 구현중')">N</button>
-	          <button class="btn btn-outline-danger w-25 mx-1" onclick="alert('소셜로그인 구현중')">G</button>
-	        </div>
-      	</div>
-      	
- 	      <!-- 경계선 -->
-				<div class="position-relative my-4">
-				  <div class="d-flex align-items-center justify-content-center">
-				    <hr class="flex-grow-1 border-top border-secondary opacity-40">
-				    <span class="mx-3 text-muted bg-white px-2">
-				      Mundus Fortunae 아이디로 로그인
-				    </span>
-				    <hr class="flex-grow-1 border-top border-secondary opacity-40">
-				  </div>
-				</div>
-      	
- 	     	<!-- 로그인 폼 -->
-	      <form th:action="@{#}" method="post" id="login-form">
-	        <div class="mb-3"> 
-	          <input type="text" class="form-control" id="login-id" name="username" placeholder="아이디" required>
-	        </div>
-	        <div class="mb-3">
-	          <input type="password" class="form-control" id="login-pwd" name="password" placeholder="비밀번호" required>
-	          <div id="login-error" class="text-danger mt-1" style="display: none;"></div>
-	        </div>
-	        
-	        <div class="d-flex justify-content-between mb-3">
-<!-- 	          <div class="form-check">
-	            <input type="checkbox" class="form-check-input" id="keep-login">
-	            <label class="form-check-label" for="keep-login">로그인 유지</label>
-	          </div> -->
-	          <div class="form-check">
-	            <input type="checkbox" class="form-check-input" id="save-id">
-	            <label class="form-check-label" for="save-id">아이디 저장</label>
-	          </div>
-	        </div>
-	        
-	        <button type="button" id="login-process-btn" class="btn btn-primary w-100 mb-3">로그인</button>
-	      </form>
 			
-	      <!-- 아이디/비번 찾기 & 회원가입 -->
-	      <div class="d-flex justify-content-center mb-3 gap-2">
-	        <a th:href="@{#}" onclick="alert('비밀번호 변경 기능 구현중')">계정찾기</a>
-	        <span>|</span>
-	        <a th:href="@{/join}" id="join-page" onclick="joinPage()">회원가입</a>
-	      </div>
+			
+			
 			
 			</main>
 		</div>

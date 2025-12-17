@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- @Mapper와 패키지명, 인터페이스명 같아야함 -->
+<mapper namespace="com.mingisoft.mf.board.mapper.BoardMapper">
+
+  <!-- 게시물 작성 -->
+  <insert id="insertNewBoard" parameterType="map" useGeneratedKeys="true" keyProperty="boardSeq" keyColumn="board_seq">
+  	INSERT INTO board (category_seq, user_seq, title, content) 
+  	VALUES (#{categorySeq}, #{userSeq}, #{title}, #{content})
+  </insert>
+
+  <!-- 카테고리별 게시물 리스트 조회 -->
+  <select id="selectBoardListByCategory" parameterType="string" resultType="com.mingisoft.mf.board.dto.BoardDto">
+  	SELECT b.*, u.nickname, c.category_name 
+  	FROM board b 
+  		INNER JOIN users u ON b.user_seq = u.user_seq 
+  		INNER JOIN category c ON b.category_seq = c.category_seq
+ 		WHERE c.category_name = #{categeryName}
+  	ORDER BY reg_date DESC
+  </select>
+  
+  <!-- 게시물 상세 조회 -->
+  
+  
+  
+
+  <!-- 최신 공지사항 3개 가져오기 -->
+  <select id="selectLatestThreeNotice" resultType="com.mingisoft.mf.board.dto.BoardDto">
+  	SELECT * FROM board WHERE category_seq = 1 ORDER BY reg_date DESC LIMIT 3
+  </select>
+
+</mapper>

@@ -5,6 +5,7 @@ let chatSocket;
 let roomSeq; 
 let myPlayerSeq;
 let gameStarted = false;
+let gameEnded = false;
 
 function connectChatSocket(){
 	const host = window.location.host;
@@ -61,8 +62,8 @@ function initChatSocketHandlers(){
 			renewalPlayersListForOut(roomSeq, data, data.length);
 			//채팅창 퇴장 알림
 			alertPlayerInOutLog(payload.nickname, "out");
-			//중간이탈자 발생, 게임 중지.. 단! 이미 게임을 시작한 후일때만 
-			if(gameStarted === true){
+			//중간이탈자 발생, 게임 중지.. 단! 이미 게임을 시작한 후 && 마지막 사람이 아직 던지지 않았을 때 
+			if(gameStarted === true && gameEnded === false){
 				stopGame(payload.nickname);
 			}
 			
@@ -107,6 +108,8 @@ function initChatSocketHandlers(){
 				
 			//-1 과 'noBody'는 서버에서, 유저가 모두 다 주사위를 굴렸을 때 내리는 값 
 			} else if(gameState.currentTurn === -1 || nextTurnNickname === "noBody") {
+				gameEnded = true;
+				
 				drawGameResultUI(gameState, nextTurnNickname, diceA, diceB);
 				
 				setTimeout(() => {

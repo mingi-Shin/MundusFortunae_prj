@@ -35,7 +35,7 @@ function wireLogout(){
 			}
 			
 			if(response.ok){
-				alert(result.message + "\n응답코드 : " + result.statusCode);
+				console.log(result.message + "\n응답코드 : " + result.statusCode);
 			}
     } catch (e) {
     	alert('로그아웃 실패 : ' + (e.message || e));

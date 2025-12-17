@@ -1,3 +1,8 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      lang="ko"
+      >
+      
 <header class="site-header" th:fragment="header">
 	<nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top al-navbar">
 		<!-- container-fluid : 부모의 가로폭을 100%로 꽉 채워라, 모바일이든 컴퓨터든 -->
@@ -33,10 +38,10 @@
             		</a>
             	</li>
               <!-- 관리자 전용 메뉴 묶음 -->
-	            <th:block sec:authorize="hasAuthority('ROLE_ADMIN')">
-		            <li><hr class="dropdown-divider"></li>
-		            <li><a class="dropdown-item" th:href="@{/admin/aiCoach}">관리자: AI-Chat</a></li>
-	            </th:block>
+							<li sec:authorize="hasAuthority('ROLE_ADMIN')"><hr class="dropdown-divider"></li>
+							<li sec:authorize="hasAuthority('ROLE_ADMIN')">
+							  <a class="dropdown-item" th:href="@{/admin/aiCoach}">관리자: AI-Chat</a>
+							</li>
 	          </ul>
 	        </li>
 	
@@ -45,13 +50,13 @@
 	          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" >커뮤니티</a>
 	          <ul class="dropdown-menu">
 	            <li>
-	              <a class="dropdown-item d-flex align-items-center justify-content-between" th:href="@{#}" onclick="javascript:alert('현재 준비중입니다.');">
+	              <a class="dropdown-item d-flex align-items-center justify-content-between" th:href="@{/board/notice}" >
 	                공지사항 <span class="badge bg-secondary ms-2"></span>
 	              </a>
 	            </li>
 	            <li><hr class="dropdown-divider"></li>
 	            <li>
-	              <a class="dropdown-item d-flex align-items-center justify-content-between" th:href="@{#}" onclick="javascript:alert('현재 준비중입니다.');">
+	              <a class="dropdown-item d-flex align-items-center justify-content-between" th:href="@{/board/free}" >
 	                자유게시판 <span class="badge bg-secondary ms-2"></span>
 	              </a>
 	            </li>

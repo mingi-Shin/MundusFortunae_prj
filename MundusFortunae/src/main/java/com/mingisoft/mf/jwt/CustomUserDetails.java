@@ -31,14 +31,15 @@ public class CustomUserDetails implements UserDetails {
   private UserDto userDto;
   
   /**
-   * 유저 권한 꺼내기 
+   * 유저 권한 꺼내기 (role이 한개일때)
    */
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-    authorities.add(new SimpleGrantedAuthority(userDto.getRole()));
+    String role = userDto.getRole(); //ROLE_ADMIN 이어야 정상
+    if(role == null) return List.of();
     
-    return authorities;
+    role = role.replace("[", "").replace("]", "").trim(); //[ ] 삭제
+    return List.of(new SimpleGrantedAuthority(role));
   }
 
   /**
