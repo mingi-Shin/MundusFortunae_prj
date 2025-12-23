@@ -104,10 +104,12 @@
 			        <div>
 				        <label >이미지 파일첨부</label>
 				        <input id="imageFile" type="file" accept="image/*">
+				        <small class="text-muted">5MB 이하 파일만 가능합니다.</small>
 			        </div>
 							<div sec:authorize="hasRole('ADMIN')">
 				        <label >문서 파일첨부</label>
 				        <input id="documentFile" type="file" >
+				        <small class="text-muted">10MB 이하 파일만 가능합니다.</small>
 							</div>
 		        </div>
 		        

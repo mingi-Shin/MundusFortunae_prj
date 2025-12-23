@@ -96,8 +96,8 @@ function sendForm(){
 		const title = document.getElementById("title").value.trim();
 		const content = $('#summernote').summernote('code');
 		
-		const imageFile = document.getElementById("imageFile").files?.[0];
-		const documentFile = document.getElementById("documentFile").files?.[0];
+		const imageFile = document.getElementById("imageFile")?.files?.[0] ?? null;
+		const documentFile = document.getElementById("documentFile")?.files?.[0] ?? null;
 		
 		if(!category || category === null){
 			alert("토픽을 선택해 주세요.");
@@ -109,23 +109,29 @@ function sendForm(){
 			return;
 		}
 		
+		/* 첨부파일이 있다면, FormData로 보내는게 정석 */
+		const fd = new FormData;
+		fd.append("categorySeq", categorySeq);
+		fd.append("title", title);
+		fd.append("content", content);
+		if(imageFile){
+			fd.append("imageFile", imageFile);
+		}
+		if(documentFile){
+			fd.append("documentFile", documentFile);
+		}
+		
 		try {
 			const response = await fetch (contextPath + "api/board/new", {
 				method:"POST",
-				headers:{"Content-Type":"application/json"},
-				body:JSON.stringify({
-					categorySeq:categorySeq,
-					title:title,
-					content:content,
-					imageFile:imageFile,
-					documentFile:documentFile
-				})
+				//headers:{"Content-Type":"application/json"}, //Content-Type 지정 X, (브라우저가 boundary 포함 자동 설정)
+				body:fd
 			});
 			
 			const result = await response.json();
 			
-			if(response.ok && result.data){
-				console.log("게시물 작성 성공, result.data : " + result.data);
+			if(response.ok ){  
+				//alert("게시물 작성 성공, result.data : " + result.data); // 3
 				location.href=contextPath + "board/free";
 				return;
 			} else if(response.status === 401 ){ 		// 비로그인 => 권한없음 
@@ -133,7 +139,10 @@ function sendForm(){
 				location.href = contextPath + "login";
 				return;
 			} else if(response.status === 403){ 		//권한부족 (관리자만)
-				alert(result?.message || "접근 권한이 없습니다.");
+				alert(result?.message || "공지사항 작성에 접근 권한이 없습니다.");
+				return;
+			} else if(response.status === 413){			//413이 나면 스프링이 보통 JSON이 아니라 기본 에러 HTML을 내려줘
+				alert("파일 용량이 너무 큽니다. 업로드 제한을 확인해주세요.");
 				return;
 			} else {
 				//옵셔널 체이닝(optional chaining) -> null/undefined이면 → 거기서 멈추고 undefined를 반환(에러 안 남)
@@ -175,9 +184,9 @@ function uploadImageFile(){
 		}
 		
 		//3차 체크 : 용량 확인 
-		const maxSize = 10 * 1024 * 1024; //10Mb
+		const maxSize = 5 * 1024 * 1024; //5Mb
 		if(file.size > maxSize){
-			alert("파일 용량은 10MB 이하만 가능합니다.");
+			alert("파일 용량은 5MB 이하만 가능합니다.");
 			input.value = "";
 			return;
 		}
@@ -204,15 +213,15 @@ function uploadDocumentFile(){
 		const allowedExt = ["pdf","doc","docx","xls","xlsx","ppt","pptx","txt","hwp"];
 		const ext = file.name.split(".").pop().toLowerCase();
 		if(!allowedExt.includes(ext)){
-			alert("문서형식만 첨부 가능합니다.");
+			alert("문서형식 파일만 첨부 가능합니다.");
 			input.value = "";
 			return;
 		}
 		
-	  // (선택) 용량 제한 예: 20MB
-	  const maxSize = 20 * 1024 * 1024;
+	  // (선택) 용량 제한 예: 10MB
+	  const maxSize = 10 * 1024 * 1024;
 	  if (file.size > maxSize) {
-	    alert("파일 용량은 20MB 이하만 가능합니다.");
+	    alert("파일 용량은 10MB 이하만 가능합니다.");
 	    input.value = "";
 	    return;
 	  }

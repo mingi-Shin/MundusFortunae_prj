@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.mingisoft.mf.api.ApiResponse;
 import com.mingisoft.mf.api.ErrorResponse;
@@ -74,6 +75,7 @@ public class BoardController {
   }
   
   //글쓰기
+  @PreAuthorize("isAuthenticated()")
   @PostMapping("/api/board/new")
   public ResponseEntity<?> createNewBoard(@AuthenticationPrincipal CustomUserDetails me, @ModelAttribute BoardDto boardDto,
       HttpServletRequest request){
@@ -89,9 +91,10 @@ public class BoardController {
     }
     
     //문서 첨부 파일이 있는데, 로그인 권한이 부족한 경우(관리자가 아닐때)
-    String doc = boardDto.getDocumentFile().toString();
-    boolean isAdmin = me.getAuthorities().stream().anyMatch( a -> "ROLE_ADMIN".equals(a.getAuthority())); //이게 더 안전 
-    if(doc != null && doc.isBlank()) {
+    MultipartFile doc = boardDto.getDocumentFile();
+    if(doc != null && !doc.isEmpty()) {
+      boolean isAdmin = me.getAuthorities().stream().anyMatch( a -> "ROLE_ADMIN".equals(a.getAuthority())); //이게 더 안전 
+      
       if(!isAdmin) {
         return ResponseEntity
             .status(HttpStatus.FORBIDDEN)
@@ -103,8 +106,9 @@ public class BoardController {
     boardDto.setUserSeq(userSeq);
     
     try {
-      boardService.createNewBoard(boardDto);
-      return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(boardDto));
+      Long boardSeq = boardService.createNewBoard(boardDto);
+      ApiResponse<Long> res = ApiResponse.of(HttpStatus.CREATED, "게시물 작성 성공", boardSeq);
+      return ResponseEntity.status(HttpStatus.CREATED).body(res);
       
     } catch (Exception e) {
       logger.warn("글작성 요청 오류 : {}", e.getMessage(), e);

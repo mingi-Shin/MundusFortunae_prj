@@ -1,0 +1,2 @@
+extends JpaRepository 로 인터페이스를 만들면 
+@Repository를 안 붙여도 스프링이 자동으로 빈으로 등록해서 컨테이너가 관리.

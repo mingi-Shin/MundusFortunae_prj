@@ -4,10 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.mingisoft.mf.board.Entity.BoardAttachmentEntity;
 import com.mingisoft.mf.board.Entity.BoardCategoryEntity;
 import com.mingisoft.mf.board.Entity.BoardEntity;
 import com.mingisoft.mf.board.dto.BoardDto;
 import com.mingisoft.mf.board.mapper.BoardMapper;
+import com.mingisoft.mf.board.repository.BoardAttachmentRepository;
 import com.mingisoft.mf.board.repository.BoardCategoryRepository;
 import com.mingisoft.mf.board.repository.BoardRepository;
 import com.mingisoft.mf.jwt.CustomUserDetails;
@@ -30,29 +32,30 @@ public class BoardService {
   private final BoardRepository boardRepository;
   private final BoardCategoryRepository categoryRepository;
   private final UserRepository userRepository;
+  private final BoardAttachmentRepository attchRepository;
   private final BoardMapper boardMapper;
   
   @Transactional // save/update/delete에 반드시 
-  public void createNewBoard(BoardDto boardDto) {
+  public Long createNewBoard(BoardDto boardDto) {
     //getReferenceById()는 DB에서 바로 가져오는 게 아니라 ‘가짜 대리인(프록시)’을 먼저 준다
 /**
-JPA에서 왜 엔티티를 넣게 되어있나???
-boardEntity.setUser(userEntity) 형태로 객체를 넣게 해둔 건 객체 지향적으로 모델링하기 위해서예요.
-
-JPA는 boardEntity.setCategory(...)에 카테고리 엔티티 객체를 넣게 설계돼 있어요.
-하지만 이건 “객체 지향 모델” 때문에 그런 거고, 실제 저장할 때는 결국 그 엔티티의 ID만 꺼내서 FK로 넣습니다.
-getReferenceById()가 하는 일 = “ID만 가진 가짜 카테고리(프록시)”
-getReferenceById(3)은 이렇게 이해하면 됩니다:
-“category_seq=3을 가리키는 표지판(참조) 하나 줄게”
-“카테고리의 상세 정보(name 등)가 필요해지면 그때 DB에서 가져올게”
-그래서 boardEntity.setCategory(categoryProxy)는 완전 OK예요.
-왜냐면 글 저장엔 ID만 있으면 되니까요.
-그럼 언제 문제가 되냐?
-프록시는 “상세 정보가 필요할 때” DB 조회를 합니다. 예를 들어:
-categoryEntity.getName() 같은 필드 접근
-logger.info("{}", categoryEntity)가 내부적으로 toString() 하면서 필드를 건드림
-컨트롤러에서 JSON 응답으로 엔티티를 그대로 내려서 직렬화가 필드를 건드림
-이런 순간에 DB 조회가 발생하고, 그때 트랜잭션/세션이 닫혀있으면 예외가 터질 수 있어요.
+  JPA에서 왜 엔티티를 넣게 되어있나???
+  boardEntity.setUser(userEntity) 형태로 객체를 넣게 해둔 건 객체 지향적으로 모델링하기 위해서예요.
+  
+  JPA는 boardEntity.setCategory(...)에 카테고리 엔티티 객체를 넣게 설계돼 있어요.
+  하지만 이건 “객체 지향 모델” 때문에 그런 거고, 실제 저장할 때는 결국 그 엔티티의 ID만 꺼내서 FK로 넣습니다.
+  getReferenceById()가 하는 일 = “ID만 가진 가짜 카테고리(프록시)”
+  getReferenceById(3)은 이렇게 이해하면 됩니다:
+  “category_seq=3을 가리키는 표지판(참조) 하나 줄게”
+  “카테고리의 상세 정보(name 등)가 필요해지면 그때 DB에서 가져올게”
+  그래서 boardEntity.setCategory(categoryProxy)는 완전 OK예요.
+  왜냐면 글 저장엔 ID만 있으면 되니까요.
+  그럼 언제 문제가 되냐?
+  프록시는 “상세 정보가 필요할 때” DB 조회를 합니다. 예를 들어:
+  categoryEntity.getName() 같은 필드 접근
+  logger.info("{}", categoryEntity)가 내부적으로 toString() 하면서 필드를 건드림
+  컨트롤러에서 JSON 응답으로 엔티티를 그대로 내려서 직렬화가 필드를 건드림
+  이런 순간에 DB 조회가 발생하고, 그때 트랜잭션/세션이 닫혀있으면 예외가 터질 수 있어요.
 */
     BoardCategoryEntity categoryEntity =  categoryRepository.getReferenceById(boardDto.getCategorySeq());
     logger.info("categorySeq={}", boardDto.getCategorySeq());
@@ -65,10 +68,60 @@ logger.info("{}", categoryEntity)가 내부적으로 toString() 하면서 필드
     boardEntity.setUser(userEntity);
     boardEntity.setTitle(boardDto.getTitle());
     boardEntity.setContent(boardDto.getContent());
-    
     logger.info("boardEntity : {}", boardEntity);
     
-    boardRepository.save(boardEntity);
+    //1.게시물 테이블 작성
+    BoardEntity result = boardRepository.save(boardEntity);
+    
+    //2.첨부파일 테이블 작성
+    Long boardSeq = result.getBoardSeq();
+    //2-1. 이미지 파일 (모두)
+    if(!boardDto.getImageFile().isEmpty()) {
+      BoardAttachmentEntity attEntity = new BoardAttachmentEntity();
+      
+      BoardEntity board = boardRepository.getReferenceById(boardSeq);
+      attEntity.setBoardEntity(board);
+      
+      attEntity.setOriginName(boardDto.getImageFile().getOriginalFilename());
+      attEntity.setStoredName(boardDto.getUserSeq() + "_" + boardSeq + "_" + String.valueOf(System.currentTimeMillis()));
+      attEntity.setStorageKey("Image Test Storage");//저장경로 
+      attEntity.setContentType(boardDto.getImageFile().getContentType());
+      attEntity.setFileExt(getExtFromFile(boardDto.getImageFile().getOriginalFilename()));
+      attEntity.setFileSize(boardDto.getImageFile().getSize());
+      attEntity.setCreatedBy(boardDto.getUserSeq());
+       
+      BoardAttachmentEntity attachImage = attchRepository.save(attEntity);
+      logger.info("Image AttachmentSeq() : {}", attachImage.getAttachmentSeq());
+    }
+    
+    //2-2. 문서 파일 (관리자만)
+    if(!boardDto.getDocumentFile().isEmpty()) {
+      BoardAttachmentEntity attEntity = new BoardAttachmentEntity();
+      
+      BoardEntity board = boardRepository.getReferenceById(boardSeq);
+      attEntity.setBoardEntity(board);
+      
+      attEntity.setOriginName(boardDto.getDocumentFile().getOriginalFilename());
+      attEntity.setStoredName(boardDto.getUserSeq() + "_" + String.valueOf(System.currentTimeMillis()));
+      attEntity.setStorageKey("Doc Test Storage");//저장경로 
+      attEntity.setContentType(boardDto.getDocumentFile().getContentType());
+      attEntity.setFileExt(getExtFromFile(boardDto.getDocumentFile().getOriginalFilename()));
+      attEntity.setFileSize(boardDto.getDocumentFile().getSize());
+      attEntity.setCreatedBy(boardDto.getUserSeq());
+      
+      BoardAttachmentEntity attachDoc = attchRepository.save(attEntity);
+      logger.info("Doc AttachmentSeq() : {}", attachDoc.getAttachmentSeq());
+    }
+   
+    return boardSeq;
+    
+  }
+  
+  //ext 이름 꺼내기 
+  private String getExtFromFile(String fileName) {
+    int dot = fileName.lastIndexOf(".");
+    String ext = fileName.substring(dot+1);
+    return ext;
   }
   
   
