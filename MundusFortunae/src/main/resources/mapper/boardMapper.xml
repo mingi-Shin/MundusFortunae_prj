@@ -5,27 +5,33 @@
 <!-- @Mapper와 패키지명, 인터페이스명 같아야함 -->
 <mapper namespace="com.mingisoft.mf.board.mapper.BoardMapper">
 
-  <!-- 게시물 작성 -->
-  <insert id="insertNewBoard" parameterType="map" useGeneratedKeys="true" keyProperty="boardSeq" keyColumn="board_seq">
-  	INSERT INTO board (category_seq, user_seq, title, content) 
-  	VALUES (#{categorySeq}, #{userSeq}, #{title}, #{content})
-  </insert>
-
   <!-- 카테고리별 게시물 리스트 조회 -->
-  <select id="selectBoardListByCategory" parameterType="string" resultType="com.mingisoft.mf.board.dto.BoardDto">
+  <select id="selectBoardListByCategorySeq" parameterType="Long" resultType="com.mingisoft.mf.board.dto.BoardDto">
   	SELECT b.*, u.nickname, c.category_name 
   	FROM board b 
   		INNER JOIN users u ON b.user_seq = u.user_seq 
   		INNER JOIN category c ON b.category_seq = c.category_seq
- 		WHERE c.category_name = #{categeryName}
+ 		WHERE c.category_seq = #{categorySeq}
   	ORDER BY reg_date DESC
   </select>
   
   <!-- 게시물 상세 조회 -->
+  <select id="selectBoardDetailByBoardSeq" parameterType="Long" resultType="com.mingisoft.mf.board.dto.BoardDto">
+  	SELECT b.board_seq , c.category_name , u.nickname , u.user_seq , b.title , b.content , b.hit , b.reg_date , b.modify_date 
+		FROM board b 
+		JOIN category c ON b.category_seq = c.category_seq 
+		JOIN users u ON b.user_seq = u.user_seq 
+		WHERE b.board_seq = #{boardSeq}
+  </select>
   
+  <!-- 첨부파일 가져오기 -->
+  <select id="selectAttachmentsByBoardSeq" parameterType="Long" resultType="com.mingisoft.mf.board.dto.MultipartFileDto">
+		SELECT b.board_seq, ba.attachment_seq, ba.stored_name, ba.content_type, ba.origin_name, ba.storage_key 
+		FROM board b 
+		JOIN board_attachment ba ON b.board_seq = ba.board_seq 
+		WHERE b.board_seq = #{boardSeq} AND ba.is_deleted = false;
+  </select>
   
-  
-
   <!-- 최신 공지사항 3개 가져오기 -->
   <select id="selectLatestThreeNotice" resultType="com.mingisoft.mf.board.dto.BoardDto">
   	SELECT * FROM board WHERE category_seq = 1 ORDER BY reg_date DESC LIMIT 3

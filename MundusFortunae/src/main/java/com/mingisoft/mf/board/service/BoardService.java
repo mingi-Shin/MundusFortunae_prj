@@ -1,5 +1,9 @@
 package com.mingisoft.mf.board.service;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.ibatis.javassist.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -8,10 +12,12 @@ import com.mingisoft.mf.board.Entity.BoardAttachmentEntity;
 import com.mingisoft.mf.board.Entity.BoardCategoryEntity;
 import com.mingisoft.mf.board.Entity.BoardEntity;
 import com.mingisoft.mf.board.dto.BoardDto;
+import com.mingisoft.mf.board.dto.MultipartFileDto;
 import com.mingisoft.mf.board.mapper.BoardMapper;
 import com.mingisoft.mf.board.repository.BoardAttachmentRepository;
 import com.mingisoft.mf.board.repository.BoardCategoryRepository;
 import com.mingisoft.mf.board.repository.BoardRepository;
+import com.mingisoft.mf.exception.BoardNotFoundException;
 import com.mingisoft.mf.jwt.CustomUserDetails;
 import com.mingisoft.mf.user.UserEntity;
 import com.mingisoft.mf.user.UserRepository;
@@ -57,6 +63,8 @@ public class BoardService {
   컨트롤러에서 JSON 응답으로 엔티티를 그대로 내려서 직렬화가 필드를 건드림
   이런 순간에 DB 조회가 발생하고, 그때 트랜잭션/세션이 닫혀있으면 예외가 터질 수 있어요.
 */
+
+    //1.게시물 테이블 작성
     BoardCategoryEntity categoryEntity =  categoryRepository.getReferenceById(boardDto.getCategorySeq());
     logger.info("categorySeq={}", boardDto.getCategorySeq());
     
@@ -70,8 +78,9 @@ public class BoardService {
     boardEntity.setContent(boardDto.getContent());
     logger.info("boardEntity : {}", boardEntity);
     
-    //1.게시물 테이블 작성
     BoardEntity result = boardRepository.save(boardEntity);
+    
+//-------------------------------------------------------------------------------------------------------------------
     
     //2.첨부파일 테이블 작성
     Long boardSeq = result.getBoardSeq();
@@ -123,6 +132,42 @@ public class BoardService {
     String ext = fileName.substring(dot+1);
     return ext;
   }
+  
+  /**
+   * 게시물 자세히 조회
+   */
+  @Transactional
+  public BoardDto getOneBoardByBoardSeq(Long boardSeq) {
+    if(boardSeq == null) throw new IllegalArgumentException("boardSeq is null");
+    
+    BoardDto board = boardMapper.selectBoardDetailByBoardSeq(boardSeq);
+    //클릭햇는데 글이 그새 사라졌을때
+    if(board == null) throw BoardNotFoundException.forNoBoard(boardSeq); // RuntimeExeption 
+    
+    //조회수 증가 
+    int updated = boardRepository.viewHitPlus(boardSeq);
+    //클릭햇는데 글이 그새 사라졌을때
+    if(updated == 0) throw BoardNotFoundException.forNoBoard(boardSeq);
+    
+    //--------------------------------테스트 : 에러코드 몇을 내보내나 
+    if(updated == 1) throw BoardNotFoundException.forNoBoard(boardSeq);
+    
+    return board;
+  }
+  
+  /**
+   * 게시물 조회 : 첨부파일들 가져오기 (서비스는 null 금지, 빈거라면 empty 주기)
+   */
+  public List<MultipartFileDto> getBoardFilesByBoardSeq(Long boardSeq) {
+    
+    if(boardSeq == null) throw new IllegalArgumentException("boardSeq is null");
+    
+    List<MultipartFileDto> fileList = boardMapper.selectAttachmentsByBoardSeq(boardSeq);
+    
+    return fileList == null ? Collections.emptyList() : fileList;
+  }
+  
+  
   
   
 }

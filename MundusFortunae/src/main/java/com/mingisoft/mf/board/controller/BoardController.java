@@ -1,5 +1,7 @@
 package com.mingisoft.mf.board.controller;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +22,7 @@ import com.mingisoft.mf.api.ApiResponse;
 import com.mingisoft.mf.api.ErrorResponse;
 import com.mingisoft.mf.board.Entity.BoardEntity;
 import com.mingisoft.mf.board.dto.BoardDto;
+import com.mingisoft.mf.board.dto.MultipartFileDto;
 import com.mingisoft.mf.board.repository.BoardRepository;
 import com.mingisoft.mf.board.service.BoardService;
 import com.mingisoft.mf.jwt.CustomUserDetails;
@@ -58,6 +62,39 @@ public class BoardController {
     return "board/list";
   }
   
+  //게시물 상세보기 요청 
+  @PreAuthorize("isAuthenticated()") //메서드가 실행되기 “직전”에 Spring Security가 권한을 검사하게 만드는 메서드 보안(annotation)
+  @GetMapping("/board/detail/{boardSeq}")
+  public String getOneBoardByBoardSeq(@PathVariable Long boardSeq, @AuthenticationPrincipal CustomUserDetails me, Model model) {
+    
+    logger.info("me.getAuthorities : {}", me.getAuthorities());
+    
+    // 1. 게시물 컨텐츠
+    BoardDto board = boardService.getOneBoardByBoardSeq(boardSeq);
+    if(board != null) {
+      model.addAttribute("board", board);
+    }
+    
+    // 2. 게시물 첨부파일
+    List<MultipartFileDto> files = boardService.getBoardFilesByBoardSeq(boardSeq);
+    model.addAttribute("files", files);
+    
+    //내가 쓴 글을 "수정", "삭제" 버튼 생성
+    boolean isAdmin = me.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    boolean isMine = me.getUserSeq().equals(board.getUserSeq());
+    
+    if(isAdmin || isMine) {
+      model.addAttribute("isEditable", true);
+    }
+    
+    //게시물 제목
+    String title = board.getTitle() + " | 문두스 포르투나이(Mundus Fortunae)";
+    model.addAttribute("title", title);
+    
+    return "board/detail";
+  }
+  
+  
   //form 페이지 이동 
   /**
    * 아래와 같은 종류가 있다. 
@@ -87,7 +124,7 @@ public class BoardController {
     if(me == null) {
       return ResponseEntity
               .status(HttpStatus.UNAUTHORIZED)
-              .body(new ErrorResponse().of(HttpStatus.UNAUTHORIZED, "로그인 세션이 만료되었습니다.", request.getRequestURI()));
+              .body(ErrorResponse.of(HttpStatus.UNAUTHORIZED, "로그인 세션이 만료되었습니다.", request.getRequestURI()));
     }
     
     //문서 첨부 파일이 있는데, 로그인 권한이 부족한 경우(관리자가 아닐때)
@@ -98,7 +135,7 @@ public class BoardController {
       if(!isAdmin) {
         return ResponseEntity
             .status(HttpStatus.FORBIDDEN)
-            .body(new ErrorResponse().of(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.", request.getRequestURI()));
+            .body(ErrorResponse.of(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.", request.getRequestURI()));
       }
     }
     
@@ -112,7 +149,7 @@ public class BoardController {
       
     } catch (Exception e) {
       logger.warn("글작성 요청 오류 : {}", e.getMessage(), e);
-      ErrorResponse body = new ErrorResponse().of(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
+      ErrorResponse body = ErrorResponse.of(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
       return ResponseEntity
                .status(HttpStatus.BAD_REQUEST)
                .body(body);

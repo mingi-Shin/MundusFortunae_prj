@@ -64,8 +64,8 @@
 							<!-- 카테고리 -->
 							<div class="mb-3">
 								<label class="form-label fw-semibold" for="category">토픽</label><br>
-								<select name="topic" id="category" class="from-select "> 
-									<option value="" selected="selected" disabled="disabled">선택</option>
+								<select name="topic" id="category" class="form-select "> 
+									<option th:selected="selected" disabled="disabled">선택</option>
 									<option value="3">자유게시판</option>
 									<th:block sec:authorize="hasRole('ADMIN')">
 										<option value="1">관리자 게시판(공지사항)</option>
@@ -134,7 +134,7 @@
   
   <footer class="footer-content bg-light py-4 mt-5">
     <div class="container text-center text-muted">
-      <p>&copy; 2024 MundusFortunae. All rights reserved.</p>
+      <p>&copy; 2026 MundusFortunae. All rights reserved.</p>
     </div>
   </footer>
 
