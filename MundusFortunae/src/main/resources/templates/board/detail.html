@@ -65,14 +65,28 @@
 			          <input type="text" id="title" class="form-control" th:text="${board.title ?: '제목없음'}">
 			        </div>
 			        
+			        <!-- 글정보 -->
+							<div class="mb-3 d-flex align-items-center gap-2">
+							  <span th:text="${board.nickname}"></span>
+							  <span class="text-muted">·</span>
+							  <span th:text="${board.regDateFormatted}"></span>
+							  <span class="text-muted">·</span>
+							  <span th:text="${board.hit}"></span>
+							</div>
+			        
 		        	<!-- 첨부파일 -->
-			        <div class="mb-3">
-			        	<th:block th:if="${not #lists.isEmpty(files)}">
-			        		
-			        	</th:block>
-			        	<th:block th:if="${not #lists.isEmpty(files)}">
-			        	
-			        	</th:block>
+			        <div class="mb-3">	
+			        	<ul>
+				        	<th:block th:if="${ #lists.isEmpty(files)}">
+				        		<li th:each="item : ${files}">
+				        			<span>첨부파일: </span><span th:text="${item.originName}"></span>
+				        		</li>
+				        	</th:block>
+				        	
+				        	<th:block th:if="${not #lists.isEmpty(files)}">
+				        		<li>첨부파일이 존재하지 않습니다.</li>
+				        	</th:block>
+			        	</ul>
 			        </div>
 			        
 							<!-- 태그 입력
@@ -95,28 +109,13 @@
 		          </div>
 		        </div>
 		        
-		        <!-- 파일 첨부 -->
-		        <div class="d-flex flext-column">
-			        <div>
-				        <label >이미지 파일첨부</label>
-				        <input id="imageFile" type="file" accept="image/*">
-				        <small class="text-muted">5MB 이하 파일만 가능합니다.</small>
-			        </div>
-							<div sec:authorize="hasRole('ADMIN')">
-				        <label >문서 파일첨부</label>
-				        <input id="documentFile" type="file" >
-				        <small class="text-muted">10MB 이하 파일만 가능합니다.</small>
-							</div>
-		        </div>
-		        
 	          <!-- 버튼 영역 -->
 		        <div class="d-flex justify-content-between mt-4">
 		        	<div class="d-flex justify-content-start">
-		        		<button type="button" class="btn btn-light" id="cancel-btn" onclick="cancelWrite()">취소</button>
+		        		<button type="button" class="btn btn-light" id="cancel-btn" onclick="cancelWrite()">수정</button>
 		        	</div>
 		        	<div class="d-flex justify-content-end gap-2">
-			          <!-- <button type="button" class="btn btn-outline-secondary" >임시저장</button> -->
-			          <button type="button" class="btn btn-primary" id="submit-btn">등록</button>
+			          <button type="button" class="btn btn-primary" id="submit-btn">삭제</button>
 		        	</div>
 		        </div>
 		        
@@ -299,7 +298,7 @@
         th:class="${stat.odd} ? 'odd' : 'even'">
       <a th:href="@{/post/{id}(id=${post.id})}" 
          th:text="${post.title}">제목</a>
-      <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}"></span>
+      <span th:text="${#temporals.format(board.regDate, 'yyyy-MM-dd HH:mm')}"></span>
     </li>
   </ul>
 </div>

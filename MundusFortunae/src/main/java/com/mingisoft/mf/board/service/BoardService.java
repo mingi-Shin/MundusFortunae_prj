@@ -7,6 +7,7 @@ import org.apache.ibatis.javassist.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.mingisoft.mf.board.Entity.BoardAttachmentEntity;
 import com.mingisoft.mf.board.Entity.BoardCategoryEntity;
@@ -40,6 +41,31 @@ public class BoardService {
   private final UserRepository userRepository;
   private final BoardAttachmentRepository attchRepository;
   private final BoardMapper boardMapper;
+  
+  /**
+   * 게시물 리스트 조회 
+   * @param categorySeq
+   */
+  public List<BoardDto> getBoardListByCategorySeq(Long categorySeq){
+    
+    List<BoardDto> boardList = boardMapper.selectBoardListByCategorySeq(categorySeq);
+    if(boardList == null) {
+      boardList = Collections.emptyList();
+    }
+    return boardList;
+  }
+  
+  /**
+   * 공지 게시물 3개 가져오기 
+   */
+  public List<BoardDto> getNoticeBoardThree(){
+    
+    List<BoardDto> boardList = boardMapper.selectLatestThreeNotice();
+    if(boardList == null) {
+      boardList = Collections.emptyList();
+    }
+    return boardList;
+  }
   
   @Transactional // save/update/delete에 반드시 
   public Long createNewBoard(BoardDto boardDto) {
@@ -84,8 +110,9 @@ public class BoardService {
     
     //2.첨부파일 테이블 작성
     Long boardSeq = result.getBoardSeq();
+    MultipartFile image = boardDto.getImageFile();
     //2-1. 이미지 파일 (모두)
-    if(!boardDto.getImageFile().isEmpty()) {
+    if(image != null && !image.isEmpty()) {
       BoardAttachmentEntity attEntity = new BoardAttachmentEntity();
       
       BoardEntity board = boardRepository.getReferenceById(boardSeq);
@@ -98,13 +125,15 @@ public class BoardService {
       attEntity.setFileExt(getExtFromFile(boardDto.getImageFile().getOriginalFilename()));
       attEntity.setFileSize(boardDto.getImageFile().getSize());
       attEntity.setCreatedBy(boardDto.getUserSeq());
+      attEntity.setFileType("img");
        
       BoardAttachmentEntity attachImage = attchRepository.save(attEntity);
       logger.info("Image AttachmentSeq() : {}", attachImage.getAttachmentSeq());
     }
     
     //2-2. 문서 파일 (관리자만)
-    if(!boardDto.getDocumentFile().isEmpty()) {
+    MultipartFile doc = boardDto.getDocumentFile();
+    if(doc != null && !doc.isEmpty()) {
       BoardAttachmentEntity attEntity = new BoardAttachmentEntity();
       
       BoardEntity board = boardRepository.getReferenceById(boardSeq);
@@ -117,6 +146,7 @@ public class BoardService {
       attEntity.setFileExt(getExtFromFile(boardDto.getDocumentFile().getOriginalFilename()));
       attEntity.setFileSize(boardDto.getDocumentFile().getSize());
       attEntity.setCreatedBy(boardDto.getUserSeq());
+      attEntity.setFileType("doc");
       
       BoardAttachmentEntity attachDoc = attchRepository.save(attEntity);
       logger.info("Doc AttachmentSeq() : {}", attachDoc.getAttachmentSeq());
@@ -150,7 +180,7 @@ public class BoardService {
     if(updated == 0) throw BoardNotFoundException.forNoBoard(boardSeq);
     
     //--------------------------------테스트 : 에러코드 몇을 내보내나 
-    if(updated == 1) throw BoardNotFoundException.forNoBoard(boardSeq);
+    if(updated == 1) throw BoardNotFoundException.forNoBoard(boardSeq); -여기 글로벌 Exception 로직 만들어줘야해 
     
     return board;
   }

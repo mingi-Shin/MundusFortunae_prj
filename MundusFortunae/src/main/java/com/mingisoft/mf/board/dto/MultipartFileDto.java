@@ -18,6 +18,7 @@ public class MultipartFileDto {
   private String contentType;
   private String originName;
   private String storageKey;
+  private String fileType;
   
   private LocalDateTime createdAt;
   

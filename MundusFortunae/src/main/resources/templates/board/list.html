@@ -117,7 +117,7 @@
 				      </thead>
 				      <tbody>
 				        <tr th:each="notice : ${noticeList}" style="cursor: pointer;"
-				            th:onclick="|location.href='/board/notice/${notice.boardSeq}'|">
+				            th:onclick="|location.href='/board/detail/${notice.boardSeq}'|">
 				          <td><span class="badge bg-primary">공지사항</span></td>
 				          <td class="fw-bold" th:text="${notice.title}">제목</td>
 				          <td th:text="${notice.nickname}">작성자</td>
@@ -130,45 +130,48 @@
 				
 				  <!-- 게시물 테이블 -->
 				  <div class="mb-4">
-				    <div th:if="${freeList == null or freeList.isEmpty()}" class="alert alert-secondary text-center" role="alert">
-				      등록된 게시물이 없습니다.
-				    </div>
-				
-				    <table th:if="${freeList != null and !freeList.isEmpty()}" class="table table-hover">
-				      <thead class="table-light">
-				        <tr>
-				          <th scope="col" width="12%">카테고리</th>
-				          <th scope="col">제목</th>
-				          <th scope="col" width="12%">작성자</th>
-				          <th scope="col" width="15%">작성일</th>
-				          <th scope="col" width="8%">조회</th>
-				        </tr>
-				      </thead>
-				      <tbody>
-				        <tr th:each="board : ${freeList}" style="cursor: pointer;"
-				            th:onclick="|location.href='/board/free/detail/${board.boardSeq}'|">
-				          <td>
-				            <small class="text-muted" th:text="${board.categoryName}">카테고리</small>
-				          </td>
-				          <td>
-				            <span class="fw-bold" th:text="${board.title}">제목</span>
-				          </td>
-				          <td>
-				            <small th:text="${board.nickname}">닉네임</small>
-				          </td>
-				          <td>
-				            <small class="text-muted" th:text="${board.regDateFormatted != null ? board.regDateFormatted : '날짜 정보 없음'}">
-				              날짜
-				            </small>
-				          </td>
-				          <td>
-				            <small class="text-muted">
-				              👁 <span th:text="${board.hit}">0</span>
-				            </small>
-				          </td>
-				        </tr>
-				      </tbody>
-				    </table>
+				  	<th:block th:if="${boardType == 'free'}">
+					    <div th:if="${freeList == null or freeList.isEmpty()}" class="alert alert-secondary text-center" role="alert">
+					      등록된 게시물이 없습니다.
+					    </div>
+					    
+					    <table th:if="${freeList != null and !freeList.isEmpty()}" class="table table-hover">
+					      <thead class="table-light">
+					        <tr>
+					          <th scope="col" width="12%">카테고리</th>
+					          <th scope="col">제목</th>
+					          <th scope="col" width="12%">작성자</th>
+					          <th scope="col" width="15%">작성일</th>
+					          <th scope="col" width="8%">조회</th>
+					        </tr>
+					      </thead>
+					      <tbody>
+					        <tr th:each="board : ${freeList}" style="cursor: pointer;"
+					            th:onclick="|location.href='/board/detail/${board.boardSeq}'|">
+					          <td>
+					            <small class="text-muted" th:text="${board.categoryName}">카테고리</small>
+					          </td>
+					          <td>
+					            <span class="fw-bold" th:text="${board.title}">제목</span>
+					          </td>
+					          <td>
+					            <small th:text="${board.nickname}">닉네임</small>
+					          </td>
+					          <td>
+					            <small class="text-muted" th:text="${board.regDateFormatted != null ? board.regDateFormatted : '날짜 정보 없음'}">
+					              날짜
+					            </small>
+					          </td>
+					          <td>
+					            <small class="text-muted">
+					              👁 <span th:text="${board.hit}">0</span>
+					            </small>
+					          </td>
+					        </tr>
+					      </tbody>
+					    </table>
+					    
+				  	</th:block>
 				  </div>
 				
 				  <!-- 페이지네이션 -->

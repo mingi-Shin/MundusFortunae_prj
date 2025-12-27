@@ -47,6 +47,9 @@ public class BoardAttachmentEntity {
   @Column(name = "file_size", nullable = false ) // bytes
   private Long fileSize;
   
+  @Column(name = "file_type", nullable = false) // img || doc
+  private String fileType;
+  
   /**
    * 새 엔티티 만들고 아무것도 안 넣어도 Java에서 0/false로 들어감 (가장 안전)
    */

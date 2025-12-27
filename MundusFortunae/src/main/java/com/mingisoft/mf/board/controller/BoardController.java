@@ -43,8 +43,11 @@ public class BoardController {
   @GetMapping("/board/notice")
   public String getNoticeList(Model model) {
     
+    Long categorySeq = 1L;
+    List<BoardDto> boardList = boardService.getBoardListByCategorySeq(categorySeq);
+    
     model.addAttribute("boardType", "notice");
-    model.addAttribute("noticeList", null);
+    model.addAttribute("noticeList", boardList);
     
     return "board/list";
   }
@@ -53,11 +56,15 @@ public class BoardController {
   @GetMapping("/board/free")
   public String getFreeList(Model model) {
     
+    Long categorySeq = 3L;
+    List<BoardDto> boardList = boardService.getBoardListByCategorySeq(categorySeq);
+    List<BoardDto> boardNotice3 = boardService.getNoticeBoardThree();
+    
     model.addAttribute("boardType", "free");
     
-     //여기 
-    model.addAttribute("noticeList", null);
-    model.addAttribute("freeList", null);
+    //여기 
+    model.addAttribute("noticeList", boardNotice3);
+    model.addAttribute("freeList", boardList);
     
     return "board/list";
   }
@@ -67,7 +74,7 @@ public class BoardController {
   @GetMapping("/board/detail/{boardSeq}")
   public String getOneBoardByBoardSeq(@PathVariable Long boardSeq, @AuthenticationPrincipal CustomUserDetails me, Model model) {
     
-    logger.info("me.getAuthorities : {}", me.getAuthorities());
+    logger.info("요청자, me.getAuthorities : {}", me.getAuthorities());
     
     // 1. 게시물 컨텐츠
     BoardDto board = boardService.getOneBoardByBoardSeq(boardSeq);
@@ -79,7 +86,7 @@ public class BoardController {
     List<MultipartFileDto> files = boardService.getBoardFilesByBoardSeq(boardSeq);
     model.addAttribute("files", files);
     
-    //내가 쓴 글을 "수정", "삭제" 버튼 생성
+    // 3. 내가 쓴 글을 "수정", "삭제" 버튼 생성
     boolean isAdmin = me.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
     boolean isMine = me.getUserSeq().equals(board.getUserSeq());
     
