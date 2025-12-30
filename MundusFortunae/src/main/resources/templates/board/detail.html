@@ -3,138 +3,157 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title th:text="${title} ?: '게시물 | 문두스 포르투나이(Mundus Fortunae)'"></title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<!-- 공통 CSS -->
+  <!-- ✅ Elvis는 ${ } 안에서 -->
+  <title th:text="${title ?: '게시물 | 문두스 포르투나이(Mundus Fortunae)'}">게시물</title>
+
+  <!-- 공통 CSS -->
   <th:block th:replace="~{fragments/external :: bootstrap_cdn_block}"></th:block>
   <link rel="stylesheet" th:href="@{/header-footer/css/header.css}" />
   <link rel="stylesheet" th:href="@{/header-footer/css/footer.css}" />
-  <link rel="stylesheet" th:href="@{/home/css/home.css}">
-  
-  <!-- 구글 seo 전용 -->
+  <link rel="stylesheet" th:href="@{/home/css/home.css}" />
+
+  <!-- SEO (선택) -->
   <th:block th:replace="~{fragments/seo :: seo(
-  ' title : Mundus Fortunae 자유게시판',
-  ' desc : 페이지별 요약 설명 (고객센터 안내 페이지)',
-  ' url : https://MundusFortunae.onrender.com'
-	)}"></th:block>
-  
+      'title : Mundus Fortunae 자유게시판',
+      'desc : 페이지별 요약 설명',
+      'url : https://MundusFortunae.onrender.com'
+  )}"></th:block>
 
-	<script th:inline="javascript">
-	  const contextPath = /*[[@{/}]]*/ '';
-		
-	  document.addEventListener('DOMContentLoaded', () => {
-			console.log('게시물 조회');
-			
-		});
-	  
-	</script>	
+  <style>
+    /* 본문 HTML(위지윅 결과) 표시용 최소 스타일 */
+    .post-content img { max-width: 100%; height: auto; }
+    .post-content pre { white-space: pre-wrap; }
+  </style>
 </head>
-<body>
-	<!-- 공통 헤더 -->
-	<div th:replace="~{fragments/header :: header}"></div>
 
-	<div class="d-flex justify-content-center main-content">
-		<div class="card p-4 mt-5">
-			<main>
-			
-				<div>
-					<form th:action="@{#}" method="post" id="writeForm">
-					
-						<div class="d-flex justify-content-start flex-column">
-							<!-- 카테고리 -->
-							<div class="mb-3">
-								<label class="form-label fw-semibold" for="category">토픽</label><br>
-								<select id="category" class="form-select" disabled>
-									<option value="1" th:selected="${board.categorySeq == 1}">공지사항</option>
-									<option value="3" th:selected="${board.categorySeq == 3}">자유게시판</option>
-									
-									<th:block th:switch="${board.categorySeq}">
-										<option th:case="2" value="2" selected>건의사항</option>
-										<option th:case="4" value="4" selected>공략게시판</option>
-									</th:block>
-									
-								</select>
-							</div>
-							
-		        	<!-- 제목 -->
-			        <div class="mb-3">
-			          <label class="form-label fw-semibold" for="title">제목</label>
-			          <input type="text" id="title" class="form-control" th:text="${board.title ?: '제목없음'}">
-			        </div>
-			        
-			        <!-- 글정보 -->
-							<div class="mb-3 d-flex align-items-center gap-2">
-							  <span th:text="${board.nickname}"></span>
-							  <span class="text-muted">·</span>
-							  <span th:text="${board.regDateFormatted}"></span>
-							  <span class="text-muted">·</span>
-							  <span th:text="${board.hit}"></span>
-							</div>
-			        
-		        	<!-- 첨부파일 -->
-			        <div class="mb-3">	
-			        	<ul>
-				        	<th:block th:if="${ #lists.isEmpty(files)}">
-				        		<li th:each="item : ${files}">
-				        			<span>첨부파일: </span><span th:text="${item.originName}"></span>
-				        		</li>
-				        	</th:block>
-				        	
-				        	<th:block th:if="${not #lists.isEmpty(files)}">
-				        		<li>첨부파일이 존재하지 않습니다.</li>
-				        	</th:block>
-			        	</ul>
-			        </div>
-			        
-							<!-- 태그 입력
-			        <div class="mb-3">
-			          <label class="form-label fw-semibold">태그</label>
-			          <input id="tagInput" name="tags" class="form-control" placeholder="태그를 입력해주세요.">
-			          <small class="text-muted">내용을 대표하는 태그를 3개 정도 입력해주세요.</small>
-			        </div> 
-							-->
-						</div>
-					
-		        
-	          <!-- 본문 -->
-		        <div class="mb-3">
-		          <label class="form-label fw-semibold">본문</label>
-		          <textarea id="summernote" th:utext="${board.content}"></textarea>
-		          <div class="d-flex justify-content-between">
-			          <small class="text-muted">위지윅 에디터를 이용해 글을 작성할 수 있습니다.</small>
-								<small id="text-length"></small>
-		          </div>
-		        </div>
-		        
-	          <!-- 버튼 영역 -->
-		        <div class="d-flex justify-content-between mt-4">
-		        	<div class="d-flex justify-content-start">
-		        		<button type="button" class="btn btn-light" id="cancel-btn" onclick="cancelWrite()">수정</button>
-		        	</div>
-		        	<div class="d-flex justify-content-end gap-2">
-			          <button type="button" class="btn btn-primary" id="submit-btn">삭제</button>
-		        	</div>
-		        </div>
-		        
-					</form>
-						
-				</div>			
-			
-			</main>
-		</div>
-	</div>
-  
+<body>
+  <!-- 공통 헤더 -->
+  <div th:replace="~{fragments/header :: header}"></div>
+
+  <!-- ✅ 모바일 반응형: container + 여백은 화면 크기별로 자연스럽게 -->
+  <main class="container py-4">
+    <!-- ✅ 모바일 반응형: 큰 화면에서만 좌우 여백/폭 제한 (가독성 ↑) -->
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-9"><!-- ✅ 모바일(12칸) / 데스크탑(9칸) -->
+
+        <!-- 상단 네비/뒤로가기 -->
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <!-- JS 없이 href로 끝내는 게 실무적으로 깔끔 -->
+          <a class="btn btn-outline-secondary btn-sm"
+             th:href="${backUrl ?: '/board/free'}">
+            <i class="bi bi-arrow-left"></i> 목록
+          </a>
+
+          <!-- 카테고리 배지 -->
+          <span class="badge text-bg-light border"
+                th:text="${board.categorySeq == 1 ? '공지사항' :
+                         board.categorySeq == 2 ? '건의사항' :
+                         board.categorySeq == 3 ? '자유게시판' :
+                         board.categorySeq == 4 ? '공략게시판' : '게시판'}">
+            게시판
+          </span>
+        </div>
+
+        <!-- 게시물 카드 -->
+        <article class="card shadow-sm">
+          <div class="card-body p-3 p-md-4">
+            <!-- ✅ 모바일 반응형: p-3(모바일) / p-md-4(태블릿 이상 여백 확대) -->
+
+            <!-- 제목 -->
+            <h1 class="h4 fw-bold mb-2" th:text="${board.title ?: '제목없음'}">제목</h1>
+
+            <!-- 작성자/날짜/조회수 -->
+            <!-- ✅ 모바일 반응형: 작게 보여도 줄바꿈/정렬이 자연스럽도록 flex-wrap -->
+            <div class="d-flex flex-wrap align-items-center gap-2 text-muted small mb-3">
+              <span class="fw-semibold text-dark" th:text="${board.nickname}">작성자</span>
+              <span>·</span>
+              <span th:text="${board.regDateFormatted}">2025-12-28</span>
+              <span>·</span>
+              <span>조회</span>
+              <span class="fw-semibold" th:text="${board.hit}">0</span>
+            </div>
+
+            <hr class="my-3" />
+
+            <!-- 본문 (읽기 화면은 textarea 대신 div로) -->
+            <div class="post-content" th:utext="${board.content}">
+              본문 내용
+            </div>
+
+            <!-- 첨부파일 -->
+            <div class="mt-4">
+              <div class="fw-semibold mb-2">
+                <i class="bi bi-paperclip"></i> 첨부파일
+              </div>
+
+              <!-- ✅ 기존 코드에서 if가 뒤집혀 있었음: "비어있지 않을 때" 반복 -->
+              <ul class="list-group" th:if="${!#lists.isEmpty(files)}">
+                <li class="list-group-item d-flex justify-content-between align-items-center"
+                    th:each="item : ${files}">
+                  <span class="text-truncate" th:text="${item.originName}">file.png</span>
+
+                  <!-- 다운로드 URL은 프로젝트에 맞게 교체 -->
+                  <a class="btn btn-outline-primary btn-sm"
+                     th:href="@{/board/file/download/{id}(id=${item.attachmentSeq})}">
+                    다운로드
+                  </a>
+                </li>
+              </ul>
+
+              <div class="text-muted small" th:if="${#lists.isEmpty(files)}">
+                첨부파일이 존재하지 않습니다.
+              </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <!-- 버튼 영역 -->
+            <!-- ✅ 모바일 반응형: 모바일은 d-grid로 버튼이 세로로 꽉 차고, md 이상은 가로 정렬 -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <!-- ✅ 모바일 반응형: d-grid(모바일) / d-md-flex(태블릿 이상) -->
+
+              <a class="btn btn-outline-secondary"
+                 th:href="${backUrl ?: '/board/free'}">
+                목록으로
+              </a>
+
+              <!-- 수정/삭제: 권한 있을 때만 -->
+              <a class="btn btn-outline-dark"
+                 th:if="${isEditable}"
+                 th:href="@{/board/edit/{boardSeq}(boardSeq=${board.boardSeq})}">
+                수정
+              </a>
+
+              <form th:if="${isEditable}"
+                    th:action="@{/board/delete/{boardSeq}(boardSeq=${board.boardSeq})}"
+                    method="post" class="m-0">
+                <!-- CSRF 사용 중이면 토큰 필요 -->
+                <!-- <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> -->
+                <button type="submit" class="btn btn-danger"
+                        onclick="return confirm('정말 삭제할까요?');">
+                  삭제
+                </button>
+              </form>
+            </div>
+
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </main>
+
   <footer class="footer-content bg-light py-4 mt-5">
     <div class="container text-center text-muted">
-      <p>&copy; 2026 MundusFortunae. All rights reserved.</p>
+      <p class="mb-0">&copy; 2026 MundusFortunae. All rights reserved.</p>
     </div>
   </footer>
-
 </body>
 </html>
+
 
 <!-- 
 주요 부트스트랩 클래스 정리:

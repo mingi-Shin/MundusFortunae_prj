@@ -8,7 +8,7 @@ public class BoardNotFoundException extends BusinessException {
 
   public static BoardNotFoundException forNoBoard(Long boardSeq) {
     String boardSeqStr = String.valueOf(boardSeq);
-    return new BoardNotFoundException("존재하지 않는 게시물입니다 : " + boardSeqStr);
+    return new BoardNotFoundException("해당 게시물을 찾을 수 없습니다 : (" + boardSeqStr + ")");
   }
 
   

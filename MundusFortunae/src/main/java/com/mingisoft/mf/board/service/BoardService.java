@@ -176,11 +176,11 @@ public class BoardService {
     
     //조회수 증가 
     int updated = boardRepository.viewHitPlus(boardSeq);
-    //클릭햇는데 글이 그새 사라졌을때
+    //클릭햇는데 글이 그새 사라졌을때 에러처리 
     if(updated == 0) throw BoardNotFoundException.forNoBoard(boardSeq);
     
     //--------------------------------테스트 : 에러코드 몇을 내보내나 
-    if(updated == 1) throw BoardNotFoundException.forNoBoard(boardSeq); -여기 글로벌 Exception 로직 만들어줘야해 
+    //if(updated == 1) throw BoardNotFoundException.forNoBoard(boardSeq); 
     
     return board;
   }
