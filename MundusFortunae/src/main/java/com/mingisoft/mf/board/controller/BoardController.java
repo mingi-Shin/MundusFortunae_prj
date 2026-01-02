@@ -163,6 +163,24 @@ public class BoardController {
     }
   }
   
+  //글삭제
+  @PreAuthorize("isAuthenticated()")
+  @PostMapping("/board/delete/{boardSeq}")
+  public String deleteBoard(@AuthenticationPrincipal CustomUserDetails me, @PathVariable Long boardSeq) {
+    
+    logger.info("me.getUserDto().getRole() : {}", me.getUserDto().getRole()); //ROLE_ADMIN
+    
+    // 권한 확인
+    BoardDto board = boardService.getOneBoardByBoardSeq(boardSeq);
+    
+    if("notice".equals(board.getCategoryName()) && "ROLE_ADMIN".equals(me.getUserDto().getRole())) {
+      삭제 --
+      boardService.
+    }
+    
+    
+    return "";
+  }
   
   
   

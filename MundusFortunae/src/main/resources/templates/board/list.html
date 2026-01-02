@@ -22,6 +22,81 @@
     ' url : https://MundusFortunae.onrender.com'
   )}"></th:block>
 
+  <style>
+    /* ✅ 테이블 반응형 개선 */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* ✅ 992px 이상에서 테이블이 부모를 넘지 않도록 */
+    @media (min-width: 992px) {
+      .table {
+        table-layout: fixed;
+        width: 100%;
+      }
+      
+      /* 공지사항 테이블 컬럼 너비 조정 */
+      .notice-table th:nth-child(1),
+      .notice-table td:nth-child(1) { width: 12%; }
+      .notice-table th:nth-child(2),
+      .notice-table td:nth-child(2) { width: 40%; }
+      .notice-table th:nth-child(3),
+      .notice-table td:nth-child(3) { width: 15%; }
+      .notice-table th:nth-child(4),
+      .notice-table td:nth-child(4) { width: 20%; }
+      .notice-table th:nth-child(5),
+      .notice-table td:nth-child(5) { width: 13%; }
+      
+      /* 자유게시판 테이블 컬럼 너비 조정 */
+      .free-table th:nth-child(1),
+      .free-table td:nth-child(1) { width: 15%; }
+      .free-table th:nth-child(2),
+      .free-table td:nth-child(2) { width: 37%; }
+      .free-table th:nth-child(3),
+      .free-table td:nth-child(3) { width: 15%; }
+      .free-table th:nth-child(4),
+      .free-table td:nth-child(4) { width: 20%; }
+      .free-table th:nth-child(5),
+      .free-table td:nth-child(5) { width: 13%; }
+    }
+    
+    /* ✅ md 화면(768px~991px)에서의 컬럼 너비 */
+    @media (min-width: 768px) and (max-width: 991px) {
+      .table {
+        table-layout: fixed;
+        width: 100%;
+      }
+      
+      .notice-table th:nth-child(1),
+      .notice-table td:nth-child(1) { width: 15%; }
+      .notice-table th:nth-child(2),
+      .notice-table td:nth-child(2) { width: 55%; }
+      .notice-table th:nth-child(3),
+      .notice-table td:nth-child(3) { width: 18%; }
+      .notice-table th:nth-child(5),
+      .notice-table td:nth-child(5) { width: 12%; }
+      
+      .free-table th:nth-child(1),
+      .free-table td:nth-child(1) { width: 18%; }
+      .free-table th:nth-child(2),
+      .free-table td:nth-child(2) { width: 52%; }
+      .free-table th:nth-child(3),
+      .free-table td:nth-child(3) { width: 18%; }
+      .free-table th:nth-child(5),
+      .free-table td:nth-child(5) { width: 12%; }
+    }
+    
+    /* ✅ 텍스트가 넘칠 경우 말줄임 처리 : 이거 꽤 중요  
+    	줄 바꾸지 마라 -> 넘치는 부분은 자르겟다 -> 잘리는 지점에 ...을 붙여라  
+    */
+    .text-truncate-custom {
+      white-space: nowrap;
+      overflow: hidden; 
+      text-overflow: ellipsis;
+    }
+  </style>
+
   <script th:inline="javascript">
     const contextPath = /*[[@{/}]]*/ '';
 
@@ -111,15 +186,15 @@
             <div th:if="${noticeList != null and !noticeList.isEmpty()}" class="mb-4">
               <!-- ✅ (모바일 반응형) 테이블은 반드시 table-responsive로 감싸서 가로 스크롤 허용 -->
               <div class="table-responsive"><!-- ✅ 모바일에서 테이블 가로 스크롤 -->
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0 notice-table">
                   <thead class="table-primary">
                     <tr>
-                      <th scope="col" class="text-center" style="min-width: 90px;">분류</th>
-                      <th scope="col" class="text-center" style="min-width: 260px;">제목</th>
+                      <th scope="col" class="text-center">분류</th>
+                      <th scope="col" class="text-center">제목</th>
                       <!-- ✅ (모바일 반응형) 작은 화면에서 숨김: md 이상에서만 표시 -->
-                      <th scope="col" class="text-center d-none d-md-table-cell" style="min-width: 120px;">작성자</th>
-                      <th scope="col" class="text-center d-none d-lg-table-cell" style="min-width: 140px;">작성일</th>
-                      <th scope="col" class="text-center d-none d-md-table-cell" style="min-width: 80px;">조회</th>
+                      <th scope="col" class="text-center d-none d-md-table-cell">작성자</th>
+                      <th scope="col" class="text-center d-none d-lg-table-cell">작성일</th>
+                      <th scope="col" class="text-center d-none d-md-table-cell">조회</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -128,7 +203,7 @@
                       <td class="text-center"><span class="badge bg-primary">공지사항</span></td>
                       <td class="fw-bold">
                         <!-- ✅ (모바일 반응형) 제목이 길면 줄바꿈/말줄임을 위해 text-truncate + block -->
-                        <div class="text-truncate" style="max-width: 100%;" th:text="${notice.title}">제목</div>
+                        <div class="text-truncate-custom" th:text="${notice.title}">제목</div>
                         <!-- ✅ (모바일 반응형) 모바일에서는 추가 메타를 한 줄로 아래에 표시 -->
                         <div class="small text-muted d-md-none">
                           <span th:text="${notice.nickname}">작성자</span>
@@ -140,7 +215,9 @@
                       </td>
 
                       <!-- md 이상에서만 보이는 컬럼들 -->
-                      <td class="text-center d-none d-md-table-cell" th:text="${notice.nickname}">작성자</td>
+                      <td class="text-center d-none d-md-table-cell">
+                        <span class="text-truncate-custom d-inline-block" style="max-width: 100%;" th:text="${notice.nickname}">작성자</span>
+                      </td>
                       <td class="text-center d-none d-lg-table-cell" th:text="${notice.regDateFormatted}">2024-01-01</td>
                       <td class="text-center d-none d-md-table-cell" th:text="${notice.hit}">0</td>
                     </tr>
@@ -159,25 +236,25 @@
 
                 <div th:if="${freeList != null and !freeList.isEmpty()}" class="table-responsive">
                   <!-- ✅ (모바일 반응형) 가로 스크롤 허용 + 작은 화면에서는 컬럼 숨김 -->
-                  <table class="table table-hover align-middle mb-0">
+                  <table class="table table-hover align-middle mb-0 free-table">
                     <thead class="table-light">
                       <tr>
-                        <th scope="col" style="min-width: 120px;">카테고리</th>
-                        <th scope="col" style="min-width: 280px;">제목</th>
-                        <th scope="col" class="d-none d-md-table-cell" style="min-width: 120px;">작성자</th>
-                        <th scope="col" class="d-none d-lg-table-cell" style="min-width: 140px;">작성일</th>
-                        <th scope="col" class="d-none d-md-table-cell" style="min-width: 80px;">조회</th>
+                        <th scope="col">카테고리</th>
+                        <th scope="col">제목</th>
+                        <th scope="col" class="d-none d-md-table-cell">작성자</th>
+                        <th scope="col" class="d-none d-lg-table-cell">작성일</th>
+                        <th scope="col" class="d-none d-md-table-cell">조회</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr th:each="board : ${freeList}" style="cursor: pointer;"
                           th:onclick="|location.href='@{/board/detail/{id}(id=${board.boardSeq})}'|">
                         <td>
-                          <small class="text-muted" th:text="${board.categoryName}">카테고리</small>
+                          <small class="text-muted text-truncate-custom d-inline-block" style="max-width: 100%;" th:text="${board.categoryName}">카테고리</small>
                         </td>
 
                         <td>
-                          <div class="fw-bold text-truncate" style="max-width: 100%;" th:text="${board.title}">제목</div>
+                          <div class="fw-bold text-truncate-custom" th:text="${board.title}">제목</div>
 
                           <!-- ✅ (모바일 반응형) 모바일에서만 메타정보를 제목 아래에 표시 -->
                           <div class="small text-muted d-md-none">
@@ -191,7 +268,7 @@
 
                         <!-- md 이상에서만 보이는 컬럼들 -->
                         <td class="d-none d-md-table-cell">
-                          <small th:text="${board.nickname}">닉네임</small>
+                          <small class="text-truncate-custom d-inline-block" style="max-width: 100%;" th:text="${board.nickname}">닉네임</small>
                         </td>
                         <td class="d-none d-lg-table-cell">
                           <small class="text-muted"
@@ -253,7 +330,6 @@
   </footer>
 </body>
 </html>
-
 
 <!-- 
 주요 부트스트랩 클래스 정리:

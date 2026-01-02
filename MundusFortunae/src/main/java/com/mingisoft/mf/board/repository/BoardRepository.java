@@ -15,4 +15,5 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
   public int viewHitPlus(@Param("boardSeq") Long boardSeq);
   
   
+  
 }
