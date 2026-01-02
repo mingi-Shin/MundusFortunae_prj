@@ -51,4 +51,7 @@ public class BoardEntity {
   @Column(name = "modify_date")
   private LocalDateTime modifyDate;
   
+  @Column(name = "is_deleted")
+  private boolean isDeleted;
+  
 }

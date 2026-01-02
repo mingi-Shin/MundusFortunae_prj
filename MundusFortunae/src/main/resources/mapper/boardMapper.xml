@@ -11,7 +11,7 @@
   	FROM board b 
   		INNER JOIN users u ON b.user_seq = u.user_seq 
   		INNER JOIN category c ON b.category_seq = c.category_seq
- 		WHERE c.category_seq = #{categorySeq}
+ 		WHERE c.category_seq = #{categorySeq} AND b.is_deleted = false
   	ORDER BY reg_date DESC
   </select>
   
@@ -34,7 +34,7 @@
   
   <!-- 최신 공지사항 3개 가져오기 -->
   <select id="selectLatestThreeNotice" resultType="com.mingisoft.mf.board.dto.BoardDto">
-  	SELECT * FROM board WHERE category_seq = 1 ORDER BY reg_date DESC LIMIT 3
+  	SELECT * FROM board WHERE category_seq = 1 AND is_deleted = false ORDER BY reg_date DESC LIMIT 3
   </select>
 
 </mapper>

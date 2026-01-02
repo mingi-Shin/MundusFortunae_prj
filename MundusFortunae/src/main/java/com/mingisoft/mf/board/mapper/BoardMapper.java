@@ -28,4 +28,6 @@ public interface BoardMapper {
   //공지사항 최신 3개 조회
   public List<BoardDto> selectLatestThreeNotice();
   
+  
+  
 }

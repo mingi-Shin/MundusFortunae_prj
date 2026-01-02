@@ -40,7 +40,7 @@
               <!-- 관리자 전용 메뉴 묶음 -->
 							<li sec:authorize="hasAuthority('ROLE_ADMIN')"><hr class="dropdown-divider"></li>
 							<li sec:authorize="hasAuthority('ROLE_ADMIN')">
-							  <a class="dropdown-item" th:href="@{/admin/aiCoach}">관리자: AI-Chat</a>
+							  <a class="dropdown-item" th:href="@{/admin/filePractice}">관리자: file 연습</a>
 							</li>
 	          </ul>
 	        </li>

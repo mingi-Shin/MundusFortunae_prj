@@ -128,7 +128,7 @@ public class JwtFilter extends OncePerRequestFilter {
     // 1순위: Authorization 헤더 (나중에 React/Vue 같은 SPA 붙여도 기존 구조 그대로 재사용 가능)
     String header = request.getHeader("Authorization");
     if (header != null && header.startsWith("Bearer ")) {
-        logger.info("-- Header의 Authorization에서 access 토큰 발견 --");
+        logger.info("-- 1차시도, Header의 Authorization에서 access 토큰 발견 --");
         return header.substring(7);
     }
 

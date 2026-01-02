@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class HomeController {
 
 
-  Logger logger = LoggerFactory.getLogger(HomeController.class);
+  private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
   
   private final String title;
   private final JwtService jwtService;
