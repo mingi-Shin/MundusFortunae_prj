@@ -1,5 +1,6 @@
 package com.mingisoft.mf.board.controller;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import com.mingisoft.mf.board.dto.BoardDto;
 import com.mingisoft.mf.board.dto.MultipartFileDto;
 import com.mingisoft.mf.board.repository.BoardRepository;
 import com.mingisoft.mf.board.service.BoardService;
+import com.mingisoft.mf.exception.BoardNotFoundException;
 import com.mingisoft.mf.jwt.CustomUserDetails;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -163,24 +165,85 @@ public class BoardController {
     }
   }
   
-  //글삭제
+  //게시물 삭제
   @PreAuthorize("isAuthenticated()")
   @PostMapping("/board/delete/{boardSeq}")
-  public String deleteBoard(@AuthenticationPrincipal CustomUserDetails me, @PathVariable Long boardSeq) {
+  public String deleteBoard(@AuthenticationPrincipal CustomUserDetails me, @PathVariable Long boardSeq) throws AccessDeniedException {
     
-    logger.info("me.getUserDto().getRole() : {}", me.getUserDto().getRole()); //ROLE_ADMIN
+    //logger.info("me.getUserDto().getRole() : {}", me.getUserDto().getRole()); //ROLE_ADMIN
     
-    // 권한 확인
-    BoardDto board = boardService.getOneBoardByBoardSeq(boardSeq);
-    
-    if("notice".equals(board.getCategoryName()) && "ROLE_ADMIN".equals(me.getUserDto().getRole())) {
-      삭제 --
-      boardService.
+    //파라미터에서 거르지만, 일단 방어적인 로직 
+    if(boardSeq == null) {
+      throw BoardNotFoundException.forNoBoard(boardSeq); //@ControllerAdvice -> 404
     }
     
+    //존재 여부 먼저 확인 
+    BoardDto board = boardService.getOneBoardByBoardSeq(boardSeq);
     
-    return "";
+    //공지사항 -> ADMIN 여부 
+    if("notice".equals(board.getCategoryName()) && !"ROLE_ADMIN".equals(me.getUserDto().getRole())) {
+      throw new AccessDeniedException("공지사항 삭제 권한이 존재하지 않습니다.");
+    }
+    
+    //free -> userSeq 일치여부 
+    if(board.getUserSeq() != me.getUserSeq()) {
+      throw new AccessDeniedException("삭제 권한이 존재하지 않습니다.");
+    }
+    
+    boardService.deleteBoardByBoardSeq(boardSeq);
+    
+    return "redirect:/board/free";
   }
+  
+  /**
+   * 게시물 수정폼 이동
+   * @throws AccessDeniedException 
+   */
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/board/edit/{boardSeq}")
+  public String editBoard(@AuthenticationPrincipal CustomUserDetails me, @PathVariable Long boardSeq, Model model) throws AccessDeniedException {
+    
+    BoardDto board = boardService.getOneBoardByBoardSeq(boardSeq);
+    
+    //isAdmin || isMine
+    boolean isAdmin = "ROLE_ADMIN".equals(me.getUserDto().getRole());
+    boolean isMine = board.getUserSeq().equals(me.getUserSeq());
+    
+    if (!isAdmin && !isMine) {
+      throw new AccessDeniedException("게시물 수정 권한이 없습니다.");
+    }
+    
+    //게시물 
+    model.addAttribute("board", board);
+      
+    //첨부 파일
+    List<MultipartFileDto> files = boardService.getBoardFilesByBoardSeq(boardSeq); // emptyList ~ 2개 
+    //이미지 
+    MultipartFileDto imgFile = files.stream()
+                                .filter(file -> "img".equals(file.getFileType()))
+                                .findFirst()
+                                .orElse(null);
+    
+    if(imgFile != null) {
+      model.addAttribute("imgFile", imgFile);
+    }
+    //문서
+    MultipartFileDto docFile = files.stream()
+                                .filter(file -> "doc".equals(file.getFileType()))
+                                //리스트라면, toList(); 만 해도 됨 
+                                .findFirst()
+                                .orElse(null);
+    if(docFile != null) {
+      model.addAttribute("docFile", docFile);
+    }
+    
+    model.addAttribute("files", files);
+    
+    return "board/edit";
+    
+  }
+  
+  
   
   
   

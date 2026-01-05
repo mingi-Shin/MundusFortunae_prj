@@ -1,6 +1,7 @@
 package com.mingisoft.mf.exception;
 
 import java.net.BindException;
+import java.nio.file.AccessDeniedException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,17 @@ public class GlobalExcepttionHandler {
   
   private static final Logger logger = LoggerFactory.getLogger(GlobalExcepttionHandler.class);
 
+  //403
+  @ExceptionHandler({AccessDeniedException.class})
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public String handleAccessDenied(Exception ex, HttpServletResponse response, Model model) {
+    
+    logger.warn("Access Denied", ex); // 스택트레이스 포함
+    model.addAttribute("message", ex.getMessage());
+    return "error/403";
+  }
+  
+  
   //404
   @ExceptionHandler({BoardNotFoundException.class})
   @ResponseStatus(HttpStatus.NOT_FOUND)

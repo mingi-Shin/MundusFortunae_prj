@@ -168,7 +168,7 @@ public class BoardService {
    */
   @Transactional
   public BoardDto getOneBoardByBoardSeq(Long boardSeq) {
-    if(boardSeq == null) throw new IllegalArgumentException("boardSeq is null");
+    if(boardSeq == null) throw BoardNotFoundException.forNoBoard(boardSeq);
     
     BoardDto board = boardMapper.selectBoardDetailByBoardSeq(boardSeq);
     //클릭햇는데 글이 그새 사라졌을때
@@ -197,7 +197,12 @@ public class BoardService {
     return fileList == null ? Collections.emptyList() : fileList;
   }
   
-  
+  @Transactional
+  public void deleteBoardByBoardSeq(Long boardSeq) {
+    
+    boardRepository.deleteById(boardSeq);
+    //공지사항이라면 BoardDeleteLog를 테이블에서 관리해도 좋음 
+  }
   
   
 }
