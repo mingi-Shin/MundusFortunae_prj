@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title th:text="${title} ?: '게시물 작성 | 문두스 포르투나이(Mundus Fortunae)'"></title>
+  <title th:text="${title ?: '게시물 작성 | 문두스 포르투나이(Mundus Fortunae)'}"></title>
 
 	<!-- 공통 CSS -->
   <th:block th:replace="~{fragments/external :: bootstrap_cdn_block}"></th:block>
@@ -31,12 +31,12 @@
 	<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 	  
 	<!-- form.js -->  
-	<script th:src="@{/board/js/form.js}"></script>
+	<script th:src="@{/board/js/edit.js}"></script>
 	  
 	<script th:inline="javascript">
 	  const contextPath = /*[[@{/}]]*/ '';
 	  document.addEventListener('DOMContentLoaded', () => {
-			console.log('게시판 페이지');
+			console.log('게시판 수정 페이지');
 			
 			useSummernote();
 			textLengthCheck();		
@@ -47,6 +47,14 @@
 			
 		}); //DOMContentLoaded
 		
+		function deleteOriginImgFile(){
+			
+			document.getElementById('imgFile-div').style.display = 'none';
+			
+			document.getElementById('input-imgFile-div').style.display = 'block';
+			
+			document.getElementById('origin-imageFile').value = null;
+		}
 	  
 	</script>	
 </head>
@@ -54,7 +62,7 @@
 	<!-- 공통 헤더 -->
 	<div th:replace="~{fragments/header :: header}"></div>
 
-	<div class="d-flex justify-content-center main-content">
+	<div class="d-flex justify-content-center main-content align-items-baseline">
 		<div class="card p-4 mt-5">
 			<main>
 				<div>
@@ -65,7 +73,7 @@
 							<div class="mb-3">
 								<label class="form-label fw-semibold" for="category">토픽</label><br>
 								<select name="topic" id="category" class="form-select "> 
-									<option th:selected="selected" disabled="disabled">선택</option>
+									<option th:selected="selected" disabled="disabled" value="">선택</option>
 									<option value="3">자유게시판</option>
 									<th:block sec:authorize="hasRole('ADMIN')">
 										<option value="1">관리자 게시판(공지사항)</option>
@@ -92,7 +100,7 @@
 	          <!-- 본문 -->
 		        <div class="mb-3">
 		          <label class="form-label fw-semibold">본문</label>
-		          <textarea id="summernote" th:text="${board.content}"></textarea>
+		          <textarea id="summernote" th:utext="${board.content}"></textarea>
 		          <div class="d-flex justify-content-between">
 			          <small class="text-muted">위지윅 에디터를 이용해 글을 작성할 수 있습니다.</small>
 								<small id="text-length"></small>
@@ -100,15 +108,36 @@
 		        </div>
 		        
 		        <!-- 파일 첨부 -->
-		        <div class="d-flex flext-column">
-			        <div>
+		        <div class="d-flex flext-column justify-content-between ">
+		        
+			        <div th:if="${imgFile != null}">
 				        <label >이미지 파일첨부</label>
-				        <input id="imageFile" type="file" accept="image/*" >
-				        <small class="text-muted">5MB 이하 파일만 가능합니다.</small>
+				        <div id="imgFile-div">
+				        	<input id="origin-imageFile" th:value="${imgFile.originName}" hidden>
+				        	<span>첨부파일 : </span>
+				        	<span th:text="${imgFile.originName ?: '첨부파일 오류'}"></span>
+				        	<span><i class="bi bi-x-square" role="button" id="delete-img-btn" onclick="deleteOriginImgFile()"></i></span>
+				        </div>
+				        <div id="input-imgFile-div" style="display: none">
+					        <input id="imageFile" type="file" accept="image/*" > <br>
+					        <small class="text-muted">5MB 이하 파일만 가능합니다.</small>
+				        </div>
 			        </div>
+			        
+			        <div th:if="${imgFile == null}">
+				        <label >이미지 파일첨부</label>
+				        <div id="input-imgFile-div" style="display: none">
+					        <input id="imageFile" type="file" accept="image/*" > <br>
+					        <small class="text-muted">5MB 이하 파일만 가능합니다.</small>
+				        </div>
+				        
+			        </div>
+			        
+			        
+			        
 							<div sec:authorize="hasRole('ADMIN')">
 				        <label >문서 파일첨부</label>
-				        <input id="documentFile" type="file" >
+				        <input id="documentFile" type="file"> <br>
 				        <small class="text-muted">10MB 이하 파일만 가능합니다.</small>
 							</div>
 		        </div>
@@ -120,7 +149,8 @@
 		        	</div>
 		        	<div class="d-flex justify-content-end gap-2">
 			          <!-- <button type="button" class="btn btn-outline-secondary" >임시저장</button> -->
-			          <button type="button" class="btn btn-primary" id="submit-btn">등록</button>
+			          <input id="board-seq" th:value=${board.boardSeq} hidden>
+			          <button type="button" class="btn btn-primary" id="edit-btn">등록</button>
 		        	</div>
 		        </div>
 		        
