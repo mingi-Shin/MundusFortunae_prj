@@ -26,7 +26,7 @@
   
   <!-- 첨부파일 가져오기 -->
   <select id="selectAttachmentsByBoardSeq" parameterType="Long" resultType="com.mingisoft.mf.board.dto.MultipartFileDto">
-		SELECT b.board_seq, ba.attachment_seq, ba.stored_name, ba.content_type, ba.origin_name, ba.storage_key 
+		SELECT b.board_seq, ba.attachment_seq, ba.stored_name, ba.content_type, ba.origin_name, ba.storage_key, ba.file_type 
 		FROM board b 
 		JOIN board_attachment ba ON b.board_seq = ba.board_seq 
 		WHERE b.board_seq = #{boardSeq} AND ba.is_deleted = false;

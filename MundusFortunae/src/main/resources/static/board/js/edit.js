@@ -84,7 +84,7 @@ function cancelWrite(){
 
 //글쓰기 전송 요청
 function sendForm(){
-	const submitBtn = document.getElementById('submit-btn');
+	const submitBtn = document.getElementById('edit-btn');
 	if(!submitBtn){
 		console.log("submitBtn 없음	");
 		return;
@@ -98,6 +98,12 @@ function sendForm(){
 		
 		const imageFile = document.getElementById("imageFile")?.files?.[0] ?? null;
 		const documentFile = document.getElementById("documentFile")?.files?.[0] ?? null;
+		
+		const boardSeq = document.getElementById('board-seq').value;
+		
+		const originImageFile = document.getElementById('origin-imageFile').value;
+		
+		console.log(categorySeq);
 		
 		if(!categorySeq ){
 			alert("토픽을 선택해 주세요.");
@@ -120,11 +126,17 @@ function sendForm(){
 		if(documentFile){
 			fd.append("documentFile", documentFile);
 		}
+		fd.append("originImageFile", originImageFile);
+		
+		console.log("fetch URL =", contextPath + "board/edit/" + boardSeq);
 		
 		try {
-			const response = await fetch (contextPath + "api/board/new", {
+			const response = await fetch (contextPath + "board/edit/" + boardSeq , {
 				method:"POST",
-				//headers:{"Content-Type":"application/json"}, //Content-Type 지정 X, (브라우저가 boundary 포함 자동 설정)
+				headers:{
+					//"Content-Type":"application/json",
+					"Authorization":"Bearer " + localStorage.getItem('accessToken')
+				}, 
 				body:fd
 			});
 			

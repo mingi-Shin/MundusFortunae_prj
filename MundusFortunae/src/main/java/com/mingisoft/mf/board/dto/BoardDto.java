@@ -25,6 +25,8 @@ public class BoardDto {
   private LocalDateTime modifyDate; //수정날짜
   private List<String> tags; //태그 (현재미지원)
   
+  private String originImageFile; //수정할때 필요한 변수 
+  
   private String nickname; //닉네임
   private String categoryName; //카테고리이름 
   

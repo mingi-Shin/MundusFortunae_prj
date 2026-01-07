@@ -1,6 +1,7 @@
 package com.mingisoft.mf.board.service;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.ibatis.javassist.NotFoundException;
@@ -39,7 +40,7 @@ public class BoardService {
   private final BoardRepository boardRepository;
   private final BoardCategoryRepository categoryRepository;
   private final UserRepository userRepository;
-  private final BoardAttachmentRepository attchRepository;
+  private final BoardAttachmentRepository attachRepository;
   private final BoardMapper boardMapper;
   
   /**
@@ -67,6 +68,11 @@ public class BoardService {
     return boardList;
   }
   
+  /**
+   * 새로운 게시물 작성 
+   * @param boardDto
+   * @return
+   */
   @Transactional // save/update/delete에 반드시 
   public Long createNewBoard(BoardDto boardDto) {
     //getReferenceById()는 DB에서 바로 가져오는 게 아니라 ‘가짜 대리인(프록시)’을 먼저 준다
@@ -127,7 +133,7 @@ public class BoardService {
       attEntity.setCreatedBy(boardDto.getUserSeq());
       attEntity.setFileType("img");
        
-      BoardAttachmentEntity attachImage = attchRepository.save(attEntity);
+      BoardAttachmentEntity attachImage = attachRepository.save(attEntity);
       logger.info("Image AttachmentSeq() : {}", attachImage.getAttachmentSeq());
     }
     
@@ -148,15 +154,101 @@ public class BoardService {
       attEntity.setCreatedBy(boardDto.getUserSeq());
       attEntity.setFileType("doc");
       
-      BoardAttachmentEntity attachDoc = attchRepository.save(attEntity);
+      BoardAttachmentEntity attachDoc = attachRepository.save(attEntity);
       logger.info("Doc AttachmentSeq() : {}", attachDoc.getAttachmentSeq());
     }
    
     return boardSeq;
     
   }
+
+  /**
+   * 게시물 업데이트 메서드
+   * @param boardDto
+   * @return
+   */
+  @Transactional
+  public Long updateOneBoard(BoardDto boardDto) {
+    
+    //originImageFile 이 존재 O -> board_attachment 테이블 수정 x
+    boolean hasOriginImageFile = boardDto.getOriginImageFile() != null && !boardDto.getOriginImageFile().isBlank();
+    boolean hasImageFile = boardDto.getImageFile() != null;
+    
+
+    
+    //1.게시물 테이블 수정
+    BoardCategoryEntity categoryEntity =  categoryRepository.getReferenceById(boardDto.getCategorySeq());
+    logger.info("categorySeq={}", boardDto.getCategorySeq());
+    
+    UserEntity userEntity = userRepository.getReferenceById(boardDto.getUserSeq());
+    logger.info("userSeq={}", boardDto.getUserSeq());
+    
+    BoardEntity boardEntity = boardRepository.findById(boardDto.getBoardSeq())
+                                .orElseThrow(() -> BoardNotFoundException.forNoBoard(boardDto.getBoardSeq()));
+    
+    boardEntity.setTitle(boardDto.getTitle());
+    boardEntity.setContent(boardDto.getContent());
+    boardEntity.setCategory(categoryEntity);
+    
+    logger.info("boardEntity : {}", boardEntity);
+    
+    /**
+     * UPDATE는 save()가 필요없다.
+     */
+    //BoardEntity result = boardRepository.save(boardEntity);
+    
+//-------------------------------------------------------------------------------------------------------------------
+    
+    // 1. originImageFile 이 존재 O 
+    if(hasOriginImageFile) {
+      //board_attachment 수정 없음
+    }
+    
+    // 2. originImageFile 이 존재 X && imageFile이 존재 X 
+    if(!hasOriginImageFile && !hasImageFile) {
+      //기존 이미지 파일 삭제
+      attachRepository.deleteByBoardEntity_BoardSeqAndFileType(boardDto.getBoardSeq(), "img");
+    }
+    
+    
+    // 3. originImageFile 이 존재 X && imageFile이 존재 O 
+    if(!hasOriginImageFile && hasImageFile) {
+      //기존 이미지 파일 삭제 후에 새로운 이미지 파일 저장 
+      attachRepository.deleteByBoardEntity_BoardSeqAndFileType(boardDto.getBoardSeq(), "img");
+      
+      MultipartFile image = boardDto.getImageFile();
+      if(image != null && !image.isEmpty()) {
+        BoardAttachmentEntity attEntity = new BoardAttachmentEntity();
+        
+        BoardEntity board = boardRepository.getReferenceById(boardDto.getBoardSeq());
+        attEntity.setBoardEntity(board);
+        
+        attEntity.setOriginName(boardDto.getImageFile().getOriginalFilename());
+        attEntity.setStoredName(boardDto.getUserSeq() + "_" + boardDto.getBoardSeq() + "_" + String.valueOf(System.currentTimeMillis()));
+        attEntity.setStorageKey("Image Test Storage");//저장경로 
+        attEntity.setContentType(boardDto.getImageFile().getContentType());
+        attEntity.setFileExt(getExtFromFile(boardDto.getImageFile().getOriginalFilename()));
+        attEntity.setFileSize(boardDto.getImageFile().getSize());
+        attEntity.setCreatedBy(boardDto.getUserSeq());
+        attEntity.setFileType("img");
+         
+        BoardAttachmentEntity attachImage = attachRepository.save(attEntity);
+        logger.info("Image AttachmentSeq() : {}", attachImage.getAttachmentSeq());
+      }
+    }
+    
+//-------------------------------------------------------------------------------------------------------------------
+    
+    
+    return boardDto.getBoardSeq();
+    
+  }
   
-  //ext 이름 꺼내기 
+  /**
+   * ext 이름 꺼내기 
+   * @param fileName
+   * @return ext
+   */
   private String getExtFromFile(String fileName) {
     int dot = fileName.lastIndexOf(".");
     String ext = fileName.substring(dot+1);

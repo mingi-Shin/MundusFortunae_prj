@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,5 +54,10 @@ public class BoardEntity {
   
   @Column(name = "is_deleted")
   private boolean isDeleted;
+  
+  @PreUpdate //“이 엔티티가 DB에 UPDATE 되기 직전에, 이 메서드를 자동으로 실행해라”
+  private void preUpdate() {
+    this.modifyDate = LocalDateTime.now();
+  }
   
 }

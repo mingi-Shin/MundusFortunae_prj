@@ -167,7 +167,7 @@ public class BoardController {
   
   //게시물 삭제
   @PreAuthorize("isAuthenticated()")
-  @PostMapping("/board/delete/{boardSeq}")
+  @PostMapping("/api/board/delete/{boardSeq}")
   public String deleteBoard(@AuthenticationPrincipal CustomUserDetails me, @PathVariable Long boardSeq) throws AccessDeniedException {
     
     //logger.info("me.getUserDto().getRole() : {}", me.getUserDto().getRole()); //ROLE_ADMIN
@@ -239,9 +239,57 @@ public class BoardController {
     
     model.addAttribute("files", files);
     
+    logger.info("첨부파일 존재함? img : {}, doc : {}", imgFile, docFile);  
     return "board/edit";
     
   }
+  
+  @PreAuthorize("isAuthenticated()")
+  @PostMapping("/board/edit/{boardSeq}")
+  public ResponseEntity<?> updateOneBoard(@AuthenticationPrincipal CustomUserDetails me, @ModelAttribute BoardDto boardDto,
+      @PathVariable Long boardSeq, HttpServletRequest request){
+    
+    //수정 게시물 정보  
+    logger.info("수정 요청 게시물 boardSeq : {}", boardSeq);
+    boardDto.setBoardSeq(boardSeq);
+    
+    //로그인 풀렸을 경우, 거절 
+    if(me == null) {
+      return ResponseEntity
+              .status(HttpStatus.UNAUTHORIZED)
+              .body(ErrorResponse.of(HttpStatus.UNAUTHORIZED, "로그인 세션이 만료되었습니다.", request.getRequestURI()));
+    }
+    
+    //문서 첨부 파일이 있는데, 로그인 권한이 부족한 경우(관리자가 아닐때)
+    MultipartFile doc = boardDto.getDocumentFile();
+    if(doc != null && !doc.isEmpty()) {
+      boolean isAdmin = me.getAuthorities().stream().anyMatch( a -> "ROLE_ADMIN".equals(a.getAuthority())); //이게 더 안전 
+      
+      if(!isAdmin) {
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
+            .body(ErrorResponse.of(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.", request.getRequestURI()));
+      }
+    }
+    
+    Long userSeq = me.getUserDto().getUserSeq();
+    boardDto.setUserSeq(userSeq);
+    
+    try {
+      Long updataBoardSeq = boardService.updateOneBoard(boardDto);
+      ApiResponse<Long> res = ApiResponse.of(HttpStatus.CREATED, "게시물 수정 성공", updataBoardSeq);
+      return ResponseEntity.status(HttpStatus.CREATED).body(res);
+      
+    } catch (Exception e) {
+      logger.warn("게시물 수정 요청 오류 : {}", e.getMessage(), e);
+      ErrorResponse body = ErrorResponse.of(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
+      return ResponseEntity
+               .status(HttpStatus.BAD_REQUEST)
+               .body(body);
+    }
+  }
+  
+  
   
   
   
