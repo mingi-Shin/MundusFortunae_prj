@@ -19,10 +19,12 @@ public class UserService {
   private final Logger logger = LoggerFactory.getLogger(UserService.class);
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder encoder;
+  private final UserMapper userMapper;
   
-  public UserService(UserRepository userRepository, BCryptPasswordEncoder encoder) {
+  public UserService(UserRepository userRepository, BCryptPasswordEncoder encoder, UserMapper userMapper) {
     this.userRepository = userRepository;
     this.encoder = encoder;
+    this.userMapper = userMapper;
   }
   
   /**
@@ -89,6 +91,14 @@ public class UserService {
     }
     
     return userList;
+  }
+  
+  
+  /**
+   *  활동중인 토탈 유저수 
+   */
+  public Long selectTotalUserCount() {
+    return userMapper.selectTotalUserCount();
   }
   
 }

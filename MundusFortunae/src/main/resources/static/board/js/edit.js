@@ -101,9 +101,11 @@ function sendForm(){
 		
 		const boardSeq = document.getElementById('board-seq').value;
 		
-		const originImageFile = document.getElementById('origin-imageFile').value;
+		// 존재하면 value를 가져오고, 없으면 그냥 undefined를 반환 -> 값이 undefined 또는 null이면 빈 문자열로 대체
+		const originImageFile = document.getElementById('origin-imageFile')?.value ?? '';
 		
-		console.log(categorySeq);
+		// 관리자 전용 문서 첨부파일 
+		const originDocFile = document.getElementById('origin-docFile')?.value ?? '';
 		
 		if(!categorySeq ){
 			alert("토픽을 선택해 주세요.");
@@ -127,8 +129,7 @@ function sendForm(){
 			fd.append("documentFile", documentFile);
 		}
 		fd.append("originImageFile", originImageFile);
-		
-		console.log("fetch URL =", contextPath + "board/edit/" + boardSeq);
+		fd.append("originDocFile", originDocFile);
 		
 		try {
 			const response = await fetch (contextPath + "board/edit/" + boardSeq , {
@@ -240,6 +241,30 @@ function uploadDocumentFile(){
 	  
 	  console.log("OK document:", file.name, file.type, file.size);
 	});
+}
+
+function deleteOriginImgFile(){
+	
+	const imgFileDiv = document.getElementById('imgFile-div'); 
+	if(imgFileDiv){
+		imgFileDiv.style.display = 'none';
+	}
+	
+	document.getElementById('input-imgFile-div').style.display = 'block';
+	
+	document.getElementById('origin-imageFile').value = null;
+}
+
+function deleteOriginDocFile(){
+	
+	const docFileDiv = document.getElementById('docFile-div');
+	if(docFileDiv){
+		docFileDiv.style.display = 'none';
+	}
+	
+	document.getElementById('input-docFile-div').style.display = 'block';
+	
+	document.getElementById('origin-docFile').value = null;
 }
 
 /**

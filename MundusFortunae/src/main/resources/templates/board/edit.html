@@ -35,6 +35,7 @@
 	  
 	<script th:inline="javascript">
 	  const contextPath = /*[[@{/}]]*/ '';
+	  
 	  document.addEventListener('DOMContentLoaded', () => {
 			console.log('게시판 수정 페이지');
 			
@@ -45,17 +46,11 @@
 			uploadImageFile();
 			uploadDocumentFile();
 			
+			deleteOriginImgFile();
+			deleteOriginDocFile();
+			
 		}); //DOMContentLoaded
 		
-		function deleteOriginImgFile(){
-			
-			document.getElementById('imgFile-div').style.display = 'none';
-			
-			document.getElementById('input-imgFile-div').style.display = 'block';
-			
-			document.getElementById('origin-imageFile').value = null;
-		}
-	  
 	</script>	
 </head>
 <body>
@@ -111,7 +106,7 @@
 		        <div class="d-flex flext-column justify-content-between ">
 		        
 			        <div th:if="${imgFile != null}">
-				        <label >이미지 파일첨부</label>
+				        <label >이미지파일 첨부</label>
 				        <div id="imgFile-div">
 				        	<input id="origin-imageFile" th:value="${imgFile.originName}" hidden>
 				        	<span>첨부파일 : </span>
@@ -133,12 +128,28 @@
 				        
 			        </div>
 			        
-			        
-			        
 							<div sec:authorize="hasRole('ADMIN')">
-				        <label >문서 파일첨부</label>
-				        <input id="documentFile" type="file"> <br>
-				        <small class="text-muted">10MB 이하 파일만 가능합니다.</small>
+								
+								<div th:if="${docFile != null}">
+									<label >문서파일 첨부</label>
+									<div id="docFile-div">
+			        			<input id="origin-docFile" th:value="${docFile.originName}" hidden>
+					        	<span>첨부파일 : </span>
+					        	<span th:text="${docFile.originName ?: '첨부파일 오류'}"></span>
+					        	<span><i class="bi bi-x-square" role="button" id="delete-doc-btn" onclick="deleteOriginDocFile()"></i></span>
+									</div>
+									<div id="input-docFile-div" style="display: none">
+						        <input id="documentFile" type="file"> <br>
+						        <small class="text-muted">10MB 이하 파일만 가능합니다.</small>
+									</div>
+									
+								</div>
+								<div th:if="${docFile == null}">
+					        <label >문서 파일첨부</label>
+					        <input id="documentFile" type="file"> <br>
+					        <small class="text-muted">10MB 이하 파일만 가능합니다.</small>
+								</div>
+							
 							</div>
 		        </div>
 		        

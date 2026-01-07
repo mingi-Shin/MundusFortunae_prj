@@ -250,7 +250,7 @@
                       <tr th:each="board : ${freeList}" style="cursor: pointer;"
                           th:onclick="|location.href='@{/board/detail/{id}(id=${board.boardSeq})}'|">
                         <td>
-                          <small class="text-muted text-truncate-custom d-inline-block" style="max-width: 100%;" th:text="${board.categoryName}">카테고리</small>
+                          <small class="text-muted text-truncate-custom d-inline-block" style="max-width: 100%;" th:text="${board.categoryName =='community' ? '자유게시판' : board.categoryName}">카테고리</small>
                         </td>
 
                         <td>
@@ -293,15 +293,36 @@
             <div class="d-flex justify-content-center mb-4">
               <nav aria-label="페이지네이션">
                 <ul class="pagination pagination-sm mb-0"><!-- ✅ 모바일에서 더 작게 -->
-                  <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">이전</a>
-                  </li>
-                  <li class="page-item active">
-                    <a class="page-link" href="#">1</a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">다음</a>
-                  </li>
+                
+								  <!-- 이전 -->
+								  <li class="page-item" th:classappend="${!pageDto.hasPrev} ? 'disabled'">
+								    <a class="page-link"
+								       th:if="${pageDto.hasPrev}"
+								       th:href="@{/board/{type}(type=${boardType}, page=${pageDto.startPage - 1})}">
+								      이전
+								    </a>
+								    <span class="page-link" th:unless="${pageDto.hasPrev}">이전</span>
+								  </li>
+								
+								  <!-- 페이지 번호 -->
+								  <li class="page-item"
+								      th:each="i : ${#numbers.sequence(pageDto.startPage, pageDto.endPage)}"
+								      th:classappend="${i == pageDto.page} ? 'active'">
+								    <a class="page-link"
+								       th:href="@{/board/{type}(type=${boardType}, page=${i})}"
+								       th:text="${i}">
+								    </a>
+								  </li>
+								
+								  <!-- 다음 -->
+								  <li class="page-item" th:classappend="${!pageDto.hasNext} ? 'disabled'">
+								    <a class="page-link"
+								       th:if="${pageDto.hasNext}"
+								       th:href="@{/board/{type}(type=${boardType}, page=${pageDto.endPage + 1})}">
+								      다음
+								    </a>
+								    <span class="page-link" th:unless="${pageDto.hasNext}">다음</span>
+								  </li>
                 </ul>
               </nav>
             </div>
@@ -312,7 +333,7 @@
               <div class="input-group w-100 w-md-auto" style="max-width: 520px;">
                 <!-- ✅ 모바일 w-100 / 데스크탑에서는 max-width로 가독성 -->
                 <input type="text" class="form-control" placeholder="게시판 내에서 검색">
-                <button class="btn btn-outline-secondary" type="button">🔍</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="alert ('준비 중입니다.')">🔍</button>
               </div>
             </div>
 

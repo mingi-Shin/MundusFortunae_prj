@@ -5,14 +5,20 @@
 <!-- @Mapper와 패키지명, 인터페이스명 같아야함 -->
 <mapper namespace="com.mingisoft.mf.board.mapper.BoardMapper">
 
-  <!-- 카테고리별 게시물 리스트 조회 -->
-  <select id="selectBoardListByCategorySeq" parameterType="Long" resultType="com.mingisoft.mf.board.dto.BoardDto">
+  <!-- 카테고리별 게시물 리스트 조회 (category_seq) + 페이지네이션 (size, offset) 자동 bounding -->
+  <select id="selectBoardListByCategorySeq" resultType="com.mingisoft.mf.board.dto.BoardDto">
   	SELECT b.*, u.nickname, c.category_name 
   	FROM board b 
   		INNER JOIN users u ON b.user_seq = u.user_seq 
   		INNER JOIN category c ON b.category_seq = c.category_seq
  		WHERE c.category_seq = #{categorySeq} AND b.is_deleted = false
   	ORDER BY reg_date DESC
+  	LIMIT #{size} OFFSET #{offset}
+  </select>
+  
+  <!-- 카테고리별 총게시물 개수 -->
+  <select id="selectCountBoardByCategorySeq" parameterType="long" resultType="long">
+  	SELECT COUNT(*) FROM board WHERE category_seq = #{categorySeq}
   </select>
   
   <!-- 게시물 상세 조회 -->
@@ -29,12 +35,34 @@
 		SELECT b.board_seq, ba.attachment_seq, ba.stored_name, ba.content_type, ba.origin_name, ba.storage_key, ba.file_type 
 		FROM board b 
 		JOIN board_attachment ba ON b.board_seq = ba.board_seq 
-		WHERE b.board_seq = #{boardSeq} AND ba.is_deleted = false;
+		WHERE b.board_seq = #{boardSeq} AND ba.is_deleted = false
   </select>
   
   <!-- 최신 공지사항 3개 가져오기 -->
   <select id="selectLatestThreeNotice" resultType="com.mingisoft.mf.board.dto.BoardDto">
-  	SELECT * FROM board WHERE category_seq = 1 AND is_deleted = false ORDER BY reg_date DESC LIMIT 3
+   	SELECT b.*, u.nickname, c.category_name 
+  	FROM board b 
+  		INNER JOIN users u ON b.user_seq = u.user_seq 
+  		INNER JOIN category c ON b.category_seq = c.category_seq
+ 		WHERE c.category_seq = 1 AND b.is_deleted = false
+  	ORDER BY reg_date DESC
+  	LIMIT 3
   </select>
+  
+  <!-- 총 게시물 갯수 -->
+  <select id="countTotalBoards" resultType="Long">
+  	SELECT COUNT(*) FROM board
+  </select>
+  
+  <!-- 금일 게시물 갯수 -->
+  <select id="countTodayNewBoards" resultType="Long">
+  	<![CDATA[
+	    SELECT COUNT(*)
+	    FROM board
+	    WHERE reg_date >= CURRENT_DATE
+	      AND reg_date < CURRENT_DATE + INTERVAL '1 day'
+  	]]>
+  </select>
+  
 
 </mapper>

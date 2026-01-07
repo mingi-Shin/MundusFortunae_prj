@@ -2,7 +2,9 @@ package com.mingisoft.mf.board.service;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.javassist.NotFoundException;
 import org.slf4j.Logger;
@@ -15,6 +17,7 @@ import com.mingisoft.mf.board.Entity.BoardCategoryEntity;
 import com.mingisoft.mf.board.Entity.BoardEntity;
 import com.mingisoft.mf.board.dto.BoardDto;
 import com.mingisoft.mf.board.dto.MultipartFileDto;
+import com.mingisoft.mf.board.dto.PagenationDto;
 import com.mingisoft.mf.board.mapper.BoardMapper;
 import com.mingisoft.mf.board.repository.BoardAttachmentRepository;
 import com.mingisoft.mf.board.repository.BoardCategoryRepository;
@@ -43,17 +46,38 @@ public class BoardService {
   private final BoardAttachmentRepository attachRepository;
   private final BoardMapper boardMapper;
   
+  //총 게시물 수
+  public Long countTotalBoards() {
+    return boardMapper.countTotalBoards();
+  }
+  
+  //금일 게시물 수 
+  public Long countTodayLong() {
+    return boardMapper.countTodayNewBoards();
+  }
+  
   /**
    * 게시물 리스트 조회 
    * @param categorySeq
    */
-  public List<BoardDto> getBoardListByCategorySeq(Long categorySeq){
+  public Map<String, Object> getBoardListByCategorySeq(Long categorySeq, int page){
     
-    List<BoardDto> boardList = boardMapper.selectBoardListByCategorySeq(categorySeq);
+    // 해당 카테고리의 총 게시글 수 가져오고 
+    Long countTotalBoards = boardMapper.selectCountBoardByCategorySeq(categorySeq);
+    
+    // 카테고리 번호, 현재 페이지, 페이지당 게시물 수(고정), 총게시물수 
+    PagenationDto pageDto = new PagenationDto(categorySeq, page, 5, countTotalBoards);
+    
+    List<BoardDto> boardList = boardMapper.selectBoardListByCategorySeq(pageDto);
     if(boardList == null) {
       boardList = Collections.emptyList();
     }
-    return boardList;
+    
+    Map<String, Object> boardMap = new HashMap<String, Object>();
+    boardMap.put("pageDto", pageDto);
+    boardMap.put("boardList", boardList);
+    
+    return boardMap;
   }
   
   /**
@@ -170,12 +194,6 @@ public class BoardService {
   @Transactional
   public Long updateOneBoard(BoardDto boardDto) {
     
-    //originImageFile 이 존재 O -> board_attachment 테이블 수정 x
-    boolean hasOriginImageFile = boardDto.getOriginImageFile() != null && !boardDto.getOriginImageFile().isBlank();
-    boolean hasImageFile = boardDto.getImageFile() != null;
-    
-
-    
     //1.게시물 테이블 수정
     BoardCategoryEntity categoryEntity =  categoryRepository.getReferenceById(boardDto.getCategorySeq());
     logger.info("categorySeq={}", boardDto.getCategorySeq());
@@ -199,20 +217,25 @@ public class BoardService {
     
 //-------------------------------------------------------------------------------------------------------------------
     
+    
+    //originImageFile 이 존재 O -> board_attachment 테이블 수정 x
+    boolean hasOriginImageFile = boardDto.getOriginImageFile() != null && !boardDto.getOriginImageFile().isBlank(); // ""도 안됨 
+    boolean hasNewImageFile = boardDto.getImageFile() != null;
+
     // 1. originImageFile 이 존재 O 
     if(hasOriginImageFile) {
       //board_attachment 수정 없음
     }
     
     // 2. originImageFile 이 존재 X && imageFile이 존재 X 
-    if(!hasOriginImageFile && !hasImageFile) {
+    if(!hasOriginImageFile && !hasNewImageFile) {
       //기존 이미지 파일 삭제
       attachRepository.deleteByBoardEntity_BoardSeqAndFileType(boardDto.getBoardSeq(), "img");
     }
     
     
     // 3. originImageFile 이 존재 X && imageFile이 존재 O 
-    if(!hasOriginImageFile && hasImageFile) {
+    if(!hasOriginImageFile && hasNewImageFile) {
       //기존 이미지 파일 삭제 후에 새로운 이미지 파일 저장 
       attachRepository.deleteByBoardEntity_BoardSeqAndFileType(boardDto.getBoardSeq(), "img");
       
@@ -239,9 +262,49 @@ public class BoardService {
     
 //-------------------------------------------------------------------------------------------------------------------
     
+    // originDocFile이 존재 O -> board_attachment 테이블 수정 x
+    boolean hasOriginDocFile = boardDto.getOriginDocFile() != null && !boardDto.getOriginDocFile().isBlank();
+    boolean hasNewDocFile = boardDto.getDocumentFile() != null;
+    
+    
+    // 1. originDocFile 이 존재 O 
+    if(hasOriginDocFile) {
+      //board_attachment 수정 없음
+    }
+    
+    // 2. originDocFile 이 존재 X && hasNewDocFile이 존재 X 
+    if(!hasOriginDocFile && !hasNewDocFile) {
+      //기존 이미지 파일 삭제
+      attachRepository.deleteByBoardEntity_BoardSeqAndFileType(boardDto.getBoardSeq(), "doc");
+    }
+    
+    // 3. originDocFile 이 존재 X && hasNewDocFile이 존재 O 
+    if(!hasOriginDocFile && hasNewDocFile) {
+      //기존 문서 파일 삭제 후에 새로운 문서 파일 저장 
+      attachRepository.deleteByBoardEntity_BoardSeqAndFileType(boardDto.getBoardSeq(), "doc");
+      
+      MultipartFile doc = boardDto.getDocumentFile();
+      if(doc != null && !doc.isEmpty()) {
+        BoardAttachmentEntity attEntity = new BoardAttachmentEntity();
+        
+        BoardEntity board = boardRepository.getReferenceById(boardDto.getBoardSeq());
+        attEntity.setBoardEntity(board);
+        
+        attEntity.setOriginName(boardDto.getDocumentFile().getOriginalFilename());
+        attEntity.setStoredName(boardDto.getUserSeq() + "_" + boardDto.getBoardSeq() + "_" + String.valueOf(System.currentTimeMillis()));
+        attEntity.setStorageKey("Image Test Storage");//저장경로 
+        attEntity.setContentType(boardDto.getDocumentFile().getContentType());
+        attEntity.setFileExt(getExtFromFile(boardDto.getDocumentFile().getOriginalFilename()));
+        attEntity.setFileSize(boardDto.getDocumentFile().getSize());
+        attEntity.setCreatedBy(boardDto.getUserSeq());
+        attEntity.setFileType("doc");
+         
+        BoardAttachmentEntity attachDoc = attachRepository.save(attEntity);
+        logger.info("Doc AttachmentSeq() : {}", attachDoc.getAttachmentSeq());
+      }
+    }
     
     return boardDto.getBoardSeq();
-    
   }
   
   /**

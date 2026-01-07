@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.mingisoft.mf.board.dto.BoardDto;
 import com.mingisoft.mf.board.dto.MultipartFileDto;
+import com.mingisoft.mf.board.dto.PagenationDto;
 import com.mingisoft.mf.board.dto.BoardDto;
 
 /**
@@ -16,8 +17,11 @@ import com.mingisoft.mf.board.dto.BoardDto;
 public interface BoardMapper {
   
   
-  //카테고리별 게시물 리스트 조회
-  public List<BoardDto> selectBoardListByCategorySeq(Long categorySeq);
+  //카테고리별 게시물 리스트 조회 + 페이지네이션 매개변수 추가 
+  public List<BoardDto> selectBoardListByCategorySeq(PagenationDto pagenationDto);
+  
+  //카테고리별 게시물 총 개수 
+  public Long selectCountBoardByCategorySeq(Long categorySeq);
   
   //게시물 상세 조회
   public BoardDto selectBoardDetailByBoardSeq(Long boardSeq);
@@ -28,6 +32,11 @@ public interface BoardMapper {
   //공지사항 최신 3개 조회
   public List<BoardDto> selectLatestThreeNotice();
   
+  //총 게시물 갯수
+  public Long countTotalBoards();
+  
+  //금일 게시물 갯수 
+  public Long countTodayNewBoards();
   
   
 }

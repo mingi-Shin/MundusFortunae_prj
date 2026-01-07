@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.mingisoft.mf.api.ApiResponse;
+import com.mingisoft.mf.board.service.BoardService;
 import com.mingisoft.mf.gameApplication.RoomService;
 import com.mingisoft.mf.jwt.CookieUtil;
 import com.mingisoft.mf.jwt.JwtService;
+import com.mingisoft.mf.user.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,15 +35,27 @@ public class HomeController {
   private final String title;
   private final JwtService jwtService;
   private final CookieUtil cookieUtil;
+  private final BoardService boardService;
+  private final UserService userService;
   
-  public HomeController(JwtService jwtService, CookieUtil cookieUtil) {
+  public HomeController(JwtService jwtService, CookieUtil cookieUtil, BoardService boardService, UserService userService) {
     this.title = "MundusFortunae - All That Destiny";
     this.jwtService = jwtService;
     this.cookieUtil = cookieUtil;
+    this.boardService = boardService;
+    this.userService = userService;
   }
   
   @GetMapping("/")
   public String mainPage(Model model) { //@AuthenticationPrincipal CustomUser userInfo
+    
+    Long todayBoardCount = boardService.countTodayLong();
+    Long totalBoardCount = boardService.countTotalBoards();
+    long totalUsercount = userService.selectTotalUserCount();
+    
+    model.addAttribute("todayBoardCount", todayBoardCount);
+    model.addAttribute("totalBoardCount", totalBoardCount);
+    model.addAttribute("totalUsercount", totalUsercount);
     
     model.addAttribute("title", title);
     

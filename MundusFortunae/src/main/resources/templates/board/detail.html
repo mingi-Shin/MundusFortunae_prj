@@ -27,6 +27,11 @@
     .post-content img { max-width: 100%; height: auto; }
     .post-content pre { white-space: pre-wrap; }
   </style>
+  
+  <script th:inline="javascript">
+  	const contextPath = /*[[@{/}]]*/ '';
+
+  </script>
 </head>
 
 <body>
@@ -102,8 +107,9 @@
 	                  <span class="text-truncate" th:text="${item.originName}">file.png</span>
 	
 	                  <!-- 다운로드 URL은 프로젝트에 맞게 교체 -->
+	                  <!-- th:href="@{/board/file/download/{id}(id=${item.attachmentSeq})}" -->
 	                  <a class="btn btn-outline-primary btn-sm"
-	                     th:href="@{/board/file/download/{id}(id=${item.attachmentSeq})}">
+	                     onclick="alert('다운로드 기능은 추후 공개됩니다.')">
 	                    다운로드
 	                  </a>
 	                </li>

@@ -2,6 +2,7 @@ package com.mingisoft.mf.board.controller;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.mingisoft.mf.api.ApiResponse;
@@ -24,6 +26,7 @@ import com.mingisoft.mf.api.ErrorResponse;
 import com.mingisoft.mf.board.Entity.BoardEntity;
 import com.mingisoft.mf.board.dto.BoardDto;
 import com.mingisoft.mf.board.dto.MultipartFileDto;
+import com.mingisoft.mf.board.dto.PagenationDto;
 import com.mingisoft.mf.board.repository.BoardRepository;
 import com.mingisoft.mf.board.service.BoardService;
 import com.mingisoft.mf.exception.BoardNotFoundException;
@@ -43,23 +46,31 @@ public class BoardController {
   
   //공지사항 
   @GetMapping("/board/notice")
-  public String getNoticeList(Model model) {
+  public String getNoticeList(Model model, @RequestParam(defaultValue = "1") int page ) {
     
     Long categorySeq = 1L;
-    List<BoardDto> boardList = boardService.getBoardListByCategorySeq(categorySeq);
+    Map<String, Object> boardMap = boardService.getBoardListByCategorySeq(categorySeq, page);
+    
+    List<BoardDto> boardList = (List<BoardDto>) boardMap.get("boardList");
+    PagenationDto pageDto = (PagenationDto) boardMap.get("pageDto");
     
     model.addAttribute("boardType", "notice");
     model.addAttribute("noticeList", boardList);
+    model.addAttribute("pageDto", pageDto);
     
     return "board/list";
   }
   
   //자유게시판
   @GetMapping("/board/free")
-  public String getFreeList(Model model) {
+  public String getFreeList(Model model, @RequestParam(defaultValue = "1") int page ) {
     
     Long categorySeq = 3L;
-    List<BoardDto> boardList = boardService.getBoardListByCategorySeq(categorySeq);
+    Map<String, Object> boardMap = boardService.getBoardListByCategorySeq(categorySeq, page);
+    
+    List<BoardDto> boardList = (List<BoardDto>) boardMap.get("boardList");
+    PagenationDto pageDto = (PagenationDto) boardMap.get("pageDto");
+    
     List<BoardDto> boardNotice3 = boardService.getNoticeBoardThree();
     
     model.addAttribute("boardType", "free");
@@ -67,6 +78,7 @@ public class BoardController {
     //여기 
     model.addAttribute("noticeList", boardNotice3);
     model.addAttribute("freeList", boardList);
+    model.addAttribute("pageDto", pageDto);
     
     return "board/list";
   }
