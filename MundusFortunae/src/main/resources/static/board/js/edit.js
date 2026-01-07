@@ -177,7 +177,7 @@ function uploadImageFile(){
 		
 		const input = e.target;
 		const file = input.files?.[0];
-		console.log(file);
+		//console.log(file);
 		if(!file) return;
 		
 		//1차 체크 : MIME타입으로 	
@@ -204,7 +204,7 @@ function uploadImageFile(){
 			return;
 		}
 		
-		console.log("OK image:", file.name, file.type, file.size);
+		//console.log("OK image:", file.name, file.type, file.size);
 	});
 }
 	
@@ -217,7 +217,7 @@ function uploadDocumentFile(){
 		
 		const input = e.target;
 		const file = input.files?.[0];
-		console.log(file);
+		//console.log(file);
 		if(!file) return;
 		
 		//문서는 MIME검사 빡셈 통과 -
@@ -239,7 +239,7 @@ function uploadDocumentFile(){
 	    return;
 	  }
 	  
-	  console.log("OK document:", file.name, file.type, file.size);
+	  //console.log("OK document:", file.name, file.type, file.size);
 	});
 }
 
