@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title th:text="${title} ?: 'Template'"></title>
+  <title th:text="${title ?: 'Template'}"></title>
 
 	<!-- 공통 CSS -->
   <th:block th:replace="~{fragments/external :: bootstrap_cdn_block}"></th:block>
@@ -28,104 +28,7 @@
 	  document.addEventListener('DOMContentLoaded', () => {
 			console.log('로그인 페이지');
 			
-			createFile();
-			
-			createFolder();
-			
-			
-			
-			
 		});
-	  
-	  function createFile(){
-		  const createBtn = document.getElementById('create-file-btn');
-		 	if(!createBtn){
-		 		console.log("파일 생성 버튼이 존재하지 않습니다.");
-		 		return;
-		 	}
-		 	
-		 	createBtn.addEventListener('click', async (e) => {
-		 		e.preventDefault();
-		 		
-		 		const resultSpan = document.getElementById('file-create-result');
-		 		if(!resultSpan){
-			 		console.log("파일 생성 결과 공간 존재하지 않습니다.");
-			 		return;
-		 		}
-		 		
-		 		try {
-		 			const response = await fetch(contextPath + "admin/createFile", {
-		 				method : "POST",
-		 				headers : {
-		 					"Content-Type" : "application/json",
-		 					"Authorization" : "Bearer " + localStorage.getItem("accessToken")
-		 				}
-		 				
-		 			});
-		 			
-		 			const result = await response.json();
-		 			
-		 			if(response.ok){
-		 				console.log(result);
-		 				resultSpan.textContent = result.message + " / " + result.data;
-		 			} else {
-		 				resultSpan.textContent = result.message + " / " + result.code;
-		 			}
-		 		} catch(e) {
-		 			console.error("통신 오류:", e);
-		 			alert("서버와의 통신 중 오류가 발생했습니다.");
-		 		}
-		 	});
-		 	
-	  } //createFile
-	  
-	  function createFolder(){
-		  const createBtn = document.getElementById('create-folder-btn');
-		 	if(!createBtn){
-		 		console.log("폴더 생성 버튼이 존재하지 않습니다.");
-		 		return;
-		 	}
-		 	
-		 	createBtn.addEventListener('click', async (e) => {
-		 		e.preventDefault();
-		 		
-		 		const resultSpan = document.getElementById('folder-create-result');
-		 		if(!resultSpan){
-			 		console.log("폴더 생성 결과 공간 존재하지 않습니다.");
-			 		return;
-		 		}
-		 		
-		 		try {
-		 			const response = await fetch(contextPath + "admin/createDir", {
-		 				method : "POST",
-		 				headers : {
-		 					"Content-Type" : "application/json",
-		 					"Authorization" : "Bearer " + localStorage.getItem("accessToken")
-		 				}
-		 				
-		 			});
-		 			
-		 			const result = await response.json();
-		 			
-		 			if(response.ok){
-		 				console.log(result);
-		 				resultSpan.textContent = result.message + " / " + result.data;
-		 			} else {
-		 				resultSpan.textContent = result.message + " / " + result.code;
-		 			}
-		 		} catch(e) {
-		 			console.error("통신 오류:", e);
-		 			alert("서버와의 통신 중 오류가 발생했습니다.");
-		 		}
-		 	});
-		 	
-	  } //createFolder
-	  
-	  
-	  
-	  
-	  
-	  
 	  
 	</script>	
 </head>
@@ -136,35 +39,6 @@
 	<div class="d-flex justify-content-center main-content">
 		<div class="card p-4 mt-5">
 			<main>
-			
-			<table class="table table-striped table-bordered">
-				<thead>
-					<tr>
-						<th class="text-center" style="min-width: 60px;">버튼</th>
-						<th class="text-center" style="min-width: 400px;">결과 메시지</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td class="create-btn-td d-flex justify-content-center align-items-center" >
-							<button id="create-file-btn" class="btn btn-primary">파일생성</button>
-						</td>
-						<td class="align-middle">
-							<span id="file-create-result"></span>
-						</td>
-					</tr>
-					
-					<tr>
-						<td class="create-btn-td d-flex justify-content-center align-items-center" >
-							<button id="create-folder-btn" class="btn btn-primary">폴더생성</button>
-						</td>
-						<td class="align-middle">
-							<span id="folder-create-result"></span>
-						</td>
-					</tr>
-					
-				</tbody>
-			</table>
 			
 			</main>
 		</div>

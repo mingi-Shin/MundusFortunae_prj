@@ -42,6 +42,10 @@
 							<li sec:authorize="hasAuthority('ROLE_ADMIN')">
 							  <a class="dropdown-item" th:href="@{/admin/filePractice}">관리자: file 연습</a>
 							</li>
+							<li sec:authorize="hasRole('ADMIN')"><hr class="dropdown-divider"> </li>
+							<li>
+								<a class="dropdown-item" th:href="@{/admin/project2main}">프로젝트2 테스트</a>
+							</li>
 	          </ul>
 	        </li>
 	
