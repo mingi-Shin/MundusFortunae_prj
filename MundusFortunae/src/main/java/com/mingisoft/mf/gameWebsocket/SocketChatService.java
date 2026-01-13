@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -53,9 +54,9 @@ public class SocketChatService {
     session.getAttributes().put("playerDto", socketPlayer);
     
     //4.생성된 플레이어 세션을 해당 방 세션에 등록 
-    List <WebSocketSession> roomPlayers = socketSessionRegistry.getGameRoomSessions().get(roomSeq); //방 가져오기 
+    CopyOnWriteArrayList<WebSocketSession> roomPlayers = socketSessionRegistry.getGameRoomSessions().get(roomSeq); //방 가져오기 
     if(roomPlayers == null) {
-      roomPlayers = new ArrayList<WebSocketSession>(); //방 숫자에 맞는 룸세션이 없을 때 (방장은 없을듯?)
+      roomPlayers = new CopyOnWriteArrayList<WebSocketSession>(); //방 숫자에 맞는 룸세션이 없을 때 (방장은 없을듯?)
       roomPlayers.add(session);
       socketSessionRegistry.getGameRoomSessions().put(roomSeq, roomPlayers); //방에 플레이어 리스트 등록 
       

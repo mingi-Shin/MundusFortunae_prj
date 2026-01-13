@@ -88,6 +88,10 @@ public class SocketRoomBroadcaster {
    * 방 리스트 갱신 메서드 
    */
   public void sendRoomList(Collection<RoomDto> roomList) {
+    
+    //JSON 직렬화용 스냅샷 생성 = ConcurrentModificationException, 동시성 문제 방지 
+    //List<RoomDto> snapshot = List.copyOf(roomList); -> 더 많이 터지네 
+    
     //데이터를 JSON으로 변환해줘야 sendMessage의 매개변수로 대입 가능 (자바 <-> JSON : objectMapper.writeValueAsString(), JSON.parse() 
     // 1. 클라이언트와 약속한 프로토콜 형태로 포장
     Map<String, Object> roomListMap = Map.of(
