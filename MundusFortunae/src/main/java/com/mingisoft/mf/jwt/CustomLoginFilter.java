@@ -71,7 +71,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     }
     
     try {
-      // .readValue() -> JSON을 Java객체(LoginRequestDTO)로 변환 / JSON 파싱 = .getInputStream() -> HTTP요청 바디 읽기
+      // .readValue() -> JSON을 Java객체(LoginRequestDTO)로 변환 && JSON 파싱 = .getInputStream() -> HTTP요청 바디 읽기
       LoginRequestDto loginRequestVo = objectMapper.readValue(request.getInputStream(), LoginRequestDto.class);
       String username = loginRequestVo.getUsername();
       String password = loginRequestVo.getPassword();
@@ -87,7 +87,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
       //Authentication (인터페이스) -> UsernamePasswordAuthenticationToken (구체 클래스)
       Authentication authToken = new UsernamePasswordAuthenticationToken(username, password);
       
-      logger.info("로그인 시도 정보(아직 인증 안 됨 (authenticated == false)) = 생성된 Authentication 토큰: {}", authToken);
+      logger.info("로그인 '시도' 정보(아직 인증 안 됨 (authenticated == false)) = 생성된 Authentication 토큰: {}", authToken);
       
       /** -------------------- .authenticate(authToken); -------------------
        * AuthenticationManager가 등록된 AuthenticationProvider들에게 토큰을 던짐
@@ -95,15 +95,17 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
           DaoAuthenticationProvider가:
           UserDetailsService로 DB에서 사용자 조회
           PasswordEncoder.matches(입력비번, DB비번) 검사
+          
           검증에 성공하면 새로운 Authentication 객체를 만들어서 리턴해 줌
           (여기엔 DB 기준 UserDetails, 권한 목록, 기타 정보가 다 들어있음)
+          
           실패하면 BadCredentialsException, UsernameNotFoundException 같은 예외를 던짐
           그래서 authentication 변수에 들어오는 건:
           이제 authenticated = true 상태인
           “검증 완료된 사용자 정보”라고 보면 돼.  */
       Authentication authentication = this.getAuthenticationManager().authenticate(authToken); //필터에서 상속받았음 
       
-      logger.info("인증 성공 - principal: {}, authorities: {}",
+      logger.info(" '인증' 성공 - principal: {}, authorities: {}",
           authentication.getName(),
           authentication.getAuthorities());
       
@@ -127,7 +129,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     try {
       CustomUserDetails customUser  = (CustomUserDetails) authResult.getPrincipal();
       
-      // 1) SecurityContext 채우기
+      // 1) SecurityContexHolder 초기화 
       SecurityContext context = SecurityContextHolder.createEmptyContext();
       context.setAuthentication(authResult);
       SecurityContextHolder.setContext(context);

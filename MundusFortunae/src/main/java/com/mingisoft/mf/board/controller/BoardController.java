@@ -84,7 +84,7 @@ public class BoardController {
   }
   
   //게시물 상세보기 요청 
-  @PreAuthorize("isAuthenticated()") //메서드가 실행되기 “직전”에 Spring Security가 권한을 검사하게 만드는 메서드 보안(annotation)
+  @PreAuthorize("isAuthenticated()") //메서드가 실행되기 “직전”에 Spring Security가 권한을 검사하게 만드는 메서드 보안(annotation) -> 권한x : AccessDeniedException
   @GetMapping("/board/detail/{boardSeq}")
   public String getOneBoardByBoardSeq(@PathVariable Long boardSeq, @AuthenticationPrincipal CustomUserDetails me, Model model) {
     
