@@ -29,7 +29,7 @@ URL : [https://mundusfortunae-prj.onrender.com/](https://mundusfortunae-prj.onre
 | [📌 소개](#-소개) |
 | [🌟 주요 기능](#-주요-기능) |
 | [🔐 인증 및 보안](#-인증-및-보안) |
-| [🧠 설계 의사결정](#-설계-의사결정) |
+| [🧠 설계 의사결정](#-설계-의사과정) |
 | [🛠 시스템 아키텍처](#-시스템-아키텍처) |
 | [🗂️ 데이터베이스 ERD](#erd) |
 | [🔍 테스트 도구](#-테스트-도구) |
@@ -52,23 +52,54 @@ WebSocket 기반 실시간 통신 경험이 없는 상태에서
 현재도 구조 개선과 리팩토링을 중심으로 지속적으로 발전 중입니다.
 
 ---
-## 🌟 주요 기능
-✨️ 사용자 인증 기반 회원가입 및 로그인  
+## 🌟 주요 기능 (사용자 관점에서, 설명x)
+✨️ 사용자 인증 기반 회원가입 및 로그인 ✨️ 
 
-✨️ 인증 사용자 기반 게시물 작성 및 수정  
+✨️ 인증 사용자 기반 게시물 작성 및 수정 ✨️ 
 
-✨️ 실시간 보드게임 방 생성 및 참여  
+✨️ 실시간 보드게임 방 생성 및 참여 ✨️ 
 
-✨️ 게임 참여자 상태의 실시간 동기화
+✨️ 게임 참여자 상태의 실시간 동기화 ✨️
 
 ---
 ## 🔐 인증 및 보안
 
+✨️ LoginFilter ✨️
+
+0. UsernameAuthenticationFilter 클래스 상속
+1. 로그인 요청 처리
+2. Access/Refresh Token 발급
+3. Refresh Token DB 저장
+4. SecurityContextHolder 초기화 
+   
+✨️ JWTFilter ✨️
+
+0. 요청마다 Access Token 추출
+1. 토큰 검증
+2. Claims 기반으로Authentication 생성
+3. 인증 및 SecurityContextHolder 초기화
+4. Refresh Token Rotation 기반 재발급 및 DB갱신
+
+✨️ 보안 ✨️
+
+<strong>프론트엔드(UI계층)</strong>
+
+Thymeleaf의 Spring Security(sec 문법)을 활용하여,
+SecurityContext에 설정된 정보를 기준으로 
+UI요소를 조건부로 렌더링하여 사용자 권한에 따른 화면 제어를 수행합니다. 
+
+<strong>컨트롤러(서버계층)</strong>
+
+Controller레벨에서는 @PreAuthorize를 통해 
+SecurityContextHolder에 저장된 Authentication을 기반으로 
+메서드 실행 전 인가 검증을 수행합니다. 
+또한 @AuthenticationPincipal을 활용하여
+인증된 사용자 정보를 받아 비즈니스 로직에 활용합니다.
+
 ---
-## 🧠 설계 의사결정
+## 🧠 설계 의사과정
 
-
-#### ✨️ JWT 로그인 ✨️
+#### ✨️ JWT의 완전한 stateless 실패 고찰 ✨️
 
 
 
