@@ -30,8 +30,6 @@ URL : [https://mundusfortunae-prj.onrender.com/](https://mundusfortunae-prj.onre
 | [🌟 주요 기능](#-주요-기능) |
 | [🔐 인증 및 보안](#-인증-및-보안) |
 | [🧠 설계 의사결정](#-설계-의사과정) |
-| [🛠 시스템 아키텍처](#-시스템-아키텍처) |
-| [🗂️ 데이터베이스 ERD](#erd) |
 | [🔍 테스트 도구](#-테스트-도구) |
 
 ---
@@ -52,7 +50,7 @@ WebSocket 기반 실시간 통신 경험이 없는 상태에서
 현재도 구조 개선과 리팩토링을 중심으로 지속적으로 발전 중입니다.
 
 ---
-## 🌟 주요 기능 (사용자 관점에서, 설명x)
+## 🌟 주요 기능 
 ✨️ 사용자 인증 기반 회원가입 및 로그인 ✨️ 
 
 ✨️ 인증 사용자 기반 게시물 작성 및 수정 ✨️ 
@@ -73,7 +71,8 @@ LoginFilter</a> ✨️
 3. Refresh Token DB 저장
 4. SecurityContextHolder 초기화 
    
-✨️ JWTFilter ✨️
+✨️<a href="https://github.com/mingi-Shin/MundusFortunae_prj/blob/bceff30e154377811b45f4583a1a409f2a45848d/MundusFortunae/src/main/java/com/mingisoft/mf/jwt/JwtFilter.java"> 
+JWTFilter </a>✨️
 
 0. 요청마다 Access Token 추출
 1. 토큰 검증
@@ -100,28 +99,34 @@ SecurityContextHolder에 저장된 Authentication을 기반으로
 ---
 ## 🧠 설계 의사과정
 
-(각 항목당 3~5줄이면 충분하다. 깊이는 코드와 면접에서 증명하면 된다.)
-
 #### ✨️ JWT의 Stateless 인증 설계 및 고찰 ✨️
-본 프로젝트는 JWT의 Stateless 특성을 활용한 인증 구조를 설계하였다. 
+본 프로젝트는 JWT의 Stateless 특성을 활용한 인증 구조를 설계하였다. <br>
 초기 과정에서 accessToekn을 localStorage에 저장하고 클라이언트에서 추출하는 방식은,
 SSR환경에서는 페이지 이동시 인증 정보를 활용할 수 없어 (SPA흉내를 낼수는 있겠지만..) 구조적으로 부적합함을 확인.
 <br>
-따라서 1차적으로 HTTP Header, SSR요청을 고려하여 2차저으로 HttpOnly Cookie에서 accessToken을 추출하도록 설계
-access토큰은 10~15분사이로 수명주기를 주고, refresh는 탈취를 염려해 DB에서 이중관리하며 Rotation 전략을 도입하였다. 
+이에 따라 인증 시 **1차적으로 HTTP Header**,  
+SSR 요청을 고려하여 **2차적으로 HttpOnly Cookie에서 accessToken을 추출**하도록 설계하였다.  
+<br>
+accessToken은 짧은 유효기간(10분)을 부여하고,  
+refreshToken은 탈취 위험을 고려하여 DB와 쿠키에서 이중 관리하며  
+Token Rotation 전략을 도입하였다.
 
+- JWT 검증 로직  
+  → [JwtUtil.java](src/main/java/com/mingisoft/mf/jwt/JwtUtil.java)
 
+- 인증 쿠키 생성  
+  → [CookieUtil.java](src/main/java/com/mingisoft/mf/jwt/CookieUtil.java)
 
+- refreshToken 검증 및 재발급 흐름  
+  → [JwtFilter.java](https://github.com/mingi-Shin/MundusFortunae_prj/blob/663b8a5f097781948f726a488af3f40de8ef9b13/MundusFortunae/src/main/java/com/mingisoft/mf/jwt/JwtFilter.java#L70)
 
+#### ✨️ 동시성 + 컬렉션 문제 ✨️
+Jmeter를 통해 동시에 여러개의 게임방 생성 요청을 테스트한 결과, 100개 중 4개 꼴로 ConcurrentModificationException 예외가 발생. <br>
+현재 원인 파악 중
 
----
-## 🛠 시스템 아키텍처
-
----
-<a id="erd"></a>
-## 🗂️ 데이터베이스 ERD
 
 ---
 ## 🔍 테스트 도구
-
+- Jmeter
+- Postman
 
