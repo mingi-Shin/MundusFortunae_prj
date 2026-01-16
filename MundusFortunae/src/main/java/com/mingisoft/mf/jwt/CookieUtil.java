@@ -20,7 +20,7 @@ public class CookieUtil {
   public ResponseCookie generateCookie(String type, String token, int hours) {
     return ResponseCookie.from(type, token)
         .httpOnly(true) //js에서 쿠키 접근 불가
-        .secure(false) //운영환경에서는 true! 
+        .secure(true) //운영환경에서는 true
         .sameSite("Lax") // CSRF 방어 (Lax : 크로스사이트 GET 요청만 허용, 보안성은 Strict가 더 높음)
         .path("/")
         .maxAge(hours * 3600L) // ← 정수 오버로드 사용 권장 (0이면 즉시 삭제)
