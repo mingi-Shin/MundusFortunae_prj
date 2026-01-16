@@ -3,9 +3,6 @@
 취업 이후에도 참고할 수 있는 기술·설계 자산을 목표로 개발했으며 <br>
 기능 추가와 리팩토링을 전제로 한 구조로 설계했습니다.
 
-
-(여기다 녹화본 넣기 )
-
 URL : [https://mundusfortunae-prj.onrender.com/](https://mundusfortunae-prj.onrender.com/)
 
 ## 🧩 개발 환경
