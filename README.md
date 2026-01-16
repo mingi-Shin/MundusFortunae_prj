@@ -64,7 +64,8 @@ WebSocket 기반 실시간 통신 경험이 없는 상태에서
 ---
 ## 🔐 인증 및 보안
 
-✨️ LoginFilter ✨️
+✨️ <a href="https://github.com/mingi-Shin/MundusFortunae_prj/blob/aff782ef55b9d5b30fdd720a55cf7868e55aaab8/MundusFortunae/src/main/java/com/mingisoft/mf/jwt/CustomLoginFilter.java">
+LoginFilter</a> ✨️
 
 0. UsernameAuthenticationFilter 클래스 상속
 1. 로그인 요청 처리
@@ -92,14 +93,23 @@ UI요소를 조건부로 렌더링하여 사용자 권한에 따른 화면 제�
 
 Controller레벨에서는 @PreAuthorize를 통해 
 SecurityContextHolder에 저장된 Authentication을 기반으로 
-메서드 실행 전 인가 검증을 수행합니다. 
+메서드 실행 전 인가 검증을 수행합니다. <br>
 또한 @AuthenticationPincipal을 활용하여
 인증된 사용자 정보를 받아 비즈니스 로직에 활용합니다.
 
 ---
 ## 🧠 설계 의사과정
 
-#### ✨️ JWT의 완전한 stateless 실패 고찰 ✨️
+(각 항목당 3~5줄이면 충분하다. 깊이는 코드와 면접에서 증명하면 된다.)
+
+#### ✨️ JWT의 Stateless 인증 설계 및 고찰 ✨️
+본 프로젝트는 JWT의 Stateless 특성을 활용한 인증 구조를 설계하였다. 
+초기 과정에서 accessToekn을 localStorage에 저장하고 클라이언트에서 추출하는 방식은,
+SSR환경에서는 페이지 이동시 인증 정보를 활용할 수 없어 (SPA흉내를 낼수는 있겠지만..) 구조적으로 부적합함을 확인.
+<br>
+따라서 1차적으로 HTTP Header, SSR요청을 고려하여 2차저으로 HttpOnly Cookie에서 accessToken을 추출하도록 설계
+access토큰은 10~15분사이로 수명주기를 주고, refresh는 탈취를 염려해 DB에서 이중관리하며 Rotation 전략을 도입하였다. 
+
 
 
 
