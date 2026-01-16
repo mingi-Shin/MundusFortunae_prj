@@ -49,14 +49,29 @@ WebSocket 기반 실시간 통신 경험이 없는 상태에서
 ---
 ## 🌟 주요 기능 
 ✨️ 사용자 인증 기반 회원가입 및 로그인 ✨️ 
-
-✨️ 인증 사용자 기반 게시물 작성 및 수정 ✨️ 
-
-✨️ 실시간 보드게임 방 생성 및 참여 ✨️ 
-
-✨️ 게임 참여자 상태의 실시간 동기화 ✨️
+<div>
+   <img src="https://github.com/mingi-Shin/MundusFortunae_prj/blob/9b930165382384c2fc91c68886d0a1ae88d0f44c/MundusFortunae/gifs/signUpIn.gif">
+</div>
 
 ---
+
+
+✨️ 인증 사용자 기반 게시물 작성 및 수정 ✨️ 
+<div>
+   <img src="https://github.com/mingi-Shin/MundusFortunae_prj/blob/9b930165382384c2fc91c68886d0a1ae88d0f44c/MundusFortunae/gifs/writeBoard.gif">
+</div>
+
+---
+
+
+✨️ 실시간 보드게임 생성 및 진행✨️
+<div>
+   <img src="https://github.com/mingi-Shin/MundusFortunae_prj/blob/9b930165382384c2fc91c68886d0a1ae88d0f44c/MundusFortunae/gifs/diceGame.gif">
+</div>
+
+---
+
+
 ## 🔐 인증 및 보안
 
 ✨️ <a href="https://github.com/mingi-Shin/MundusFortunae_prj/blob/aff782ef55b9d5b30fdd720a55cf7868e55aaab8/MundusFortunae/src/main/java/com/mingisoft/mf/jwt/CustomLoginFilter.java">
@@ -116,10 +131,6 @@ Token Rotation 전략을 도입하였다.
 
 - refreshToken 검증 및 재발급 흐름  
   → [JwtFilter.java](https://github.com/mingi-Shin/MundusFortunae_prj/blob/663b8a5f097781948f726a488af3f40de8ef9b13/MundusFortunae/src/main/java/com/mingisoft/mf/jwt/JwtFilter.java#L70)
-
-#### ✨️ 동시성 + 컬렉션 문제 ✨️
-Jmeter를 통해 동시에 여러개의 게임방 생성 요청을 테스트한 결과, 100개 중 4개 꼴로 ConcurrentModificationException 예외가 발생. <br>
-현재 원인 파악 중
 
 
 ---
