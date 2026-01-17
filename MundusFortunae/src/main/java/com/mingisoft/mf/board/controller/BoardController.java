@@ -182,8 +182,6 @@ public class BoardController {
   @PostMapping("/api/board/delete/{boardSeq}")
   public String deleteBoard(@AuthenticationPrincipal CustomUserDetails me, @PathVariable Long boardSeq) throws AccessDeniedException {
     
-    //logger.info("me.getUserDto().getRole() : {}", me.getUserDto().getRole()); //ROLE_ADMIN
-    
     //파라미터에서 거르지만, 일단 방어적인 로직 
     if(boardSeq == null) {
       throw BoardNotFoundException.forNoBoard(boardSeq); //@ControllerAdvice -> 404
@@ -192,14 +190,20 @@ public class BoardController {
     //존재 여부 먼저 확인 
     BoardDto board = boardService.getOneBoardByBoardSeq(boardSeq);
     
+    //ADMIN 확인 (공식적인 추천방법)
+    boolean isAdmin = me.getAuthorities().stream().anyMatch( a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    logger.info("isAdmin : {}", isAdmin);
+    
     //공지사항 -> ADMIN 여부 
-    if("notice".equals(board.getCategoryName()) && !"ROLE_ADMIN".equals(me.getUserDto().getRole())) {
+    if("notice".equals(board.getCategoryName()) && !isAdmin) {
       throw new AccessDeniedException("공지사항 삭제 권한이 존재하지 않습니다.");
     }
     
     //free -> userSeq 일치여부 
-    if(board.getUserSeq() != me.getUserSeq() || !"ROLE_ADMIN".equals(me.getUserDto().getRole())) {
-      throw new AccessDeniedException("삭제 권한이 존재하지 않습니다.");
+    //logger.info("me.getAuthorities().toArray().toString() : {}" , me.getAuthorities().toArray().toString());
+    //logger.info("'ROLE_ADMIN'.equals(me.getUserDto().getRole() : {}" , "ROLE_ADMIN".equals(me.getUserDto().getRole()));
+    if(!isAdmin && board.getUserSeq() != me.getUserSeq()) {
+      throw new AccessDeniedException("게시물 삭제 권한이 존재하지 않습니다.");
     }
     
     boardService.deleteBoardByBoardSeq(boardSeq);
@@ -218,7 +222,7 @@ public class BoardController {
     BoardDto board = boardService.getOneBoardByBoardSeq(boardSeq);
     
     //isAdmin || isMine
-    boolean isAdmin = "ROLE_ADMIN".equals(me.getUserDto().getRole());
+    boolean isAdmin = me.getAuthorities().stream().anyMatch( a -> "ROLE_ADMIN".equals(a.getAuthority()));
     boolean isMine = board.getUserSeq().equals(me.getUserSeq());
     
     if (!isAdmin && !isMine) {
