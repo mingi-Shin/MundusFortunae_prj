@@ -198,7 +198,7 @@ public class BoardController {
     }
     
     //free -> userSeq 일치여부 
-    if(board.getUserSeq() != me.getUserSeq()) {
+    if(board.getUserSeq() != me.getUserSeq() || !"ROLE_ADMIN".equals(me.getUserDto().getRole())) {
       throw new AccessDeniedException("삭제 권한이 존재하지 않습니다.");
     }
     
