@@ -295,7 +295,7 @@ public class BoardController {
       Long updataBoardSeq = boardService.updateOneBoard(boardDto);
       ApiResponse<Long> res = ApiResponse.of(HttpStatus.CREATED, "게시물 수정 성공", updataBoardSeq);
       return ResponseEntity.status(HttpStatus.CREATED).body(res);
-      
+       
     } catch (Exception e) {
       logger.warn("게시물 수정 요청 오류 : {}", e.getMessage(), e);
       ErrorResponse body = ErrorResponse.of(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
